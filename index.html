@@ -899,8 +899,7 @@
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">DESCRIPCIÓN</label><textarea id="descripcion" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea></div>
                                 <button type="submit" id="btn-guardar-prod" class="w-full bg-belli-700 text-white font-bold py-3 rounded-xl hover:bg-belli-800 transition cursor-pointer">Guardar Producto</button>
                             </form>
-                            
-                        </div>
+                            </div>
 
                         <div id="modulo-categorias" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-purple-400">
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600"><i class="fas fa-tags text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Nueva Categoría</h2></div>
@@ -1079,8 +1078,8 @@
             
             const { data, error } = await db.storage.from('productos').upload(fileName, file, { cacheControl: '3600', upsert: false });
             if (error) {
-                console.error(error);
-                throw new Error("No se pudo subir la imagen a Supabase Storage.");
+                console.error("Error de Storage:", error);
+                throw new Error("storage_error");
             }
             
             const { data: publicUrlData } = db.storage.from('productos').getPublicUrl(fileName);
@@ -1589,6 +1588,7 @@
                 const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const code = '#BEL-' + Math.floor(1000 + Math.random() * 9000);
 
+                // IMPORTANTE FIX: Forzamos el estado a 'Pendiente' para ventas por la web
                 const nuevoPedido = {
                     codigo: code, 
                     cliente: nombre, 
@@ -2701,7 +2701,14 @@
                     }
                     
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo...';
-                    const imgUrl = await subirImagenSupabase(fileInput.files[0]);
+                    let imgUrl = "";
+                    try {
+                        imgUrl = await subirImagenSupabase(fileInput.files[0]);
+                    } catch (e) {
+                        showToast("⚠️ Crea el Bucket 'productos' en Supabase Storage primero.");
+                        btn.innerHTML = txtOriginal; btn.disabled = false;
+                        return;
+                    }
                     const link = document.getElementById('galeria-link').value.trim();
                     
                     const { error } = await db.from('galeria').insert([{ image_url: imgUrl, instagram_url: link }]);
@@ -2846,8 +2853,17 @@
                         return;
                     }
                     
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...';
-                    const imgUrl = await subirImagenSupabase(fileInput.files[0]);
+                    let imgUrl = "";
+                    try {
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...';
+                        imgUrl = await subirImagenSupabase(fileInput.files[0]);
+                    } catch (e) {
+                        showToast("⚠️ Crea el Bucket 'productos' en Supabase Storage primero.");
+                        btn.innerHTML = txtOriginal; btn.disabled = false;
+                        return;
+                    }
+                    
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando datos...';
                     
                     const p = {
                         name: document.getElementById('nombre').value.trim(),
@@ -2861,7 +2877,9 @@
                     const costoEl = document.getElementById('costo');
                     const barcodeEl = document.getElementById('barcode');
                     
-                    if (costoEl) p.costo = parseFloat(costoEl.value || 0);
+                    if (costoEl && costoEl.value !== '') p.costo = parseFloat(costoEl.value);
+                    else p.costo = 0;
+                    
                     if (barcodeEl) p.barcode = barcodeEl.value.trim();
 
                     const { error } = await db.from('productos').insert([p]);
@@ -2871,13 +2889,14 @@
                         delete p.barcode;
                         const retry = await db.from('productos').insert([p]);
                         if(retry.error) throw retry.error;
-                        showToast("⚠️ Producto guardado, pero faltó el costo/código en la base de datos.");
+                        showToast("⚠️ Producto guardado, pero faltó el costo/código en la BD.");
+                    } else {
+                        showToast('✅ Producto guardado correctamente');
                     }
                     
                     document.getElementById('form-producto').reset();
                     document.getElementById('prod-file-name').textContent = '';
                     await cargarTodo();
-                    showToast('✅ Producto guardado correctamente');
                 } catch(err) { 
                     showToast("⚠️ Error crítico al guardar el producto"); 
                 } finally {
@@ -2953,7 +2972,6 @@
                     showToast('✅ Empleado Autorizado');
                     await cargarTodo();
                 } catch(err) {
-                    // AQUÍ ESTÁ LA REPARACIÓN DEL ERROR CON LA ALERTA ELEGANTE
                     showToast("⚠️ Error al registrar: " + (err.message || "Verifica la seguridad (RLS) en Supabase."));
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
