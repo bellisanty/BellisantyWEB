@@ -1010,35 +1010,7 @@
         let filtroActual = 'todos';
         let html5QrcodeScanner; 
         let scanTarget = ''; 
-        let lineasWA = []; // Array local para guardar los números de WhatsApp
-
-        // --- SALVAVIDAS (DATOS DE PRUEBA) ---
-        const fallbackCategorias = [
-            { id: 'c1', name: '🌹 Arreglos Premium' }, 
-            { id: 'c2', name: '🎈 Globos & Helio' }, 
-            { id: 'c3', name: '🎁 Regalos al Detal' }
-        ];
-        
-        const fallbackTestimonios = [
-            { id: 't1', name: 'María Rodríguez', rating: 5, message: 'El arreglo de globos para el cumpleaños de mi hija fue espectacular. La calidad y los detalles superaron todas mis expectativas. ¡100% recomendado!' },
-            { id: 't2', name: 'Carlos García', rating: 5, message: 'Pedí un arreglo de flores con chocolates para mi esposa y la entrega fue puntual y perfecta. El empaque de lujo marcó la diferencia. ¡Volveré a comprar!' },
-            { id: 't3', name: 'Laura Pérez', rating: 5, message: 'Bellisanty convirtió mi idea en algo mágico. El arreglo personalizado para la graduación de mi hermana fue hermoso. Atención al cliente excepcional.' }
-        ];
-        
-        const fallbackProductos = [
-            { id: 'p1', name: "Arreglo 'Royal Rose' XL", price: 65, costo: 30, stock: 5, category: "🌹 Arreglos Premium", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600", description: "Caja de lujo con 24 rosas rojas y globos cromo." },
-            { id: 'p2', name: "Bouquet Cumpleaños Gold", price: 30, costo: 15, stock: 10, category: "🎈 Globos & Helio", image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600", description: "Arreglo de globos dorados y negros con helio." },
-            { id: 'p3', name: "Caja Sorpresa 'Choco-Amor'", price: 25, costo: 10, stock: 8, category: "🎁 Regalos al Detal", image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=600", description: "Variedad de bombones premium y oso de peluche." },
-            { id: 'p4', name: "Arreglo Tropical Sun", price: 55, costo: 20, stock: 3, category: "🌹 Arreglos Premium", image: "https://images.unsplash.com/photo-1525310238803-776e50b91fc5?w=600", description: "Flores exóticas y globos burbuja personalizados." }
-        ];
-        
-        const fallbackGaleria = [
-            { id: 'g1', emoji: '🌹', bg: 'from-pink-200 to-belli-200' }, 
-            { id: 'g2', emoji: '🎈', bg: 'from-yellow-200 to-orange-200' }, 
-            { id: 'g3', emoji: '🍫', bg: 'from-purple-200 to-pink-200' }, 
-            { id: 'g4', emoji: '💐', bg: 'from-red-200 to-pink-200' }, 
-            { id: 'g5', emoji: '🎁', bg: 'from-blue-200 to-purple-200' }
-        ];
+        let lineasWA = []; 
 
         window.addEventListener('load', () => {
             const storedCart = localStorage.getItem('belli_cart');
@@ -1059,7 +1031,6 @@
                 navbar.classList.remove('scrolled');
             }
             
-            // Botón Volver Arriba Lógica
             if (btnBackToTop) {
                 if (window.scrollY > 400) {
                     btnBackToTop.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
@@ -1071,12 +1042,63 @@
             }
         });
 
-        // --- NUEVA LÓGICA: SUBIR IMÁGENES A SUPABASE STORAGE ---
-        async function subirImagenSupabase(file) {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        // --- NUEVO COMPRESOR DE IMÁGENES INVISIBLE ---
+        async function comprimirImagen(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        // Tamaño máximo ideal para e-commerce rápido
+                        const MAX_WIDTH = 800; 
+                        const MAX_HEIGHT = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Calcular proporciones manteniendo el aspecto
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Convertir a formato ultra ligero WebP al 80% de calidad
+                        canvas.toBlob((blob) => {
+                            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+                                type: "image/webp",
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        }, 'image/webp', 0.8);
+                    };
+                };
+            });
+        }
+
+        // --- SUBIDA A SUPABASE OPTIMIZADA ---
+        async function subirImagenSupabase(fileOriginal) {
+            // 1. Pasa la foto pesada por el compresor
+            const fileCompressed = await comprimirImagen(fileOriginal);
             
-            const { data, error } = await db.storage.from('productos').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            // 2. Le pone un nombre único
+            const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.webp`;
+            
+            // 3. Sube la versión miniatura a Supabase
+            const { data, error } = await db.storage.from('productos').upload(fileName, fileCompressed, { cacheControl: '3600', upsert: false });
             if (error) {
                 console.error("Error de Storage:", error);
                 throw new Error("storage_error");
@@ -1100,13 +1122,11 @@
             document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
         }
 
-        // --- FUNCION FAQ ---
         function toggleFaq(element) {
             const item = element.closest('.faq-item');
             item.classList.toggle('active');
         }
 
-        // --- PUERTA SECRETA LOGIN ---
         let secretClickCount = 0;
         let secretTimer;
         function activarPuertaSecreta() {
@@ -1122,7 +1142,6 @@
             }
         }
 
-        // --- BCV FETCH CON TRY/CATCH SEGURO ---
         async function fetchBCV() {
             try {
                 const res = await fetch("https://ve.dolarapi.com/v1/dolares/oficial");
@@ -1157,7 +1176,6 @@
             }
         }
 
-        // --- LÓGICA DE OCULTAR DIRECCIÓN (RETIRO EN TIENDA) ---
         const selectDelivery = document.getElementById('checkout-delivery');
         const txtDireccion = document.getElementById('checkout-dir');
         
@@ -1175,7 +1193,6 @@
             toggleDireccion();
         }
 
-        // --- NUEVO: SISTEMA DE NÚMEROS DE WHATSAPP CON SUPABASE ---
         async function cargarNumerosWA() {
             try {
                 const { data, error } = await db.from('whatsapp').select('*').order('id', { ascending: true });
@@ -1209,16 +1226,13 @@
                     btn.disabled = true;
                     try {
                         const { error } = await db.from('whatsapp').insert([{ nombre: nom, numero: num }]);
-                        if(error) {
-                            showToast("⚠️ Error: Asegúrate de haber creado la tabla 'whatsapp' en Supabase.");
-                            throw error;
-                        }
+                        if(error) throw error;
                         
                         formWA.reset();
                         showToast('✅ Línea agregada correctamente');
                         await cargarNumerosWA(); 
                     } catch(err) {
-                        console.error(err);
+                        showToast("⚠️ Error: Revisa que la tabla 'whatsapp' exista.");
                     } finally {
                         btn.innerHTML = txtOriginal;
                         btn.disabled = false;
@@ -1233,7 +1247,7 @@
                 return;
             }
             if(String(id) === 'default') {
-                showToast("⚠️ Agrega un número real primero para reemplazar este");
+                showToast("⚠️ Agrega un número real primero");
                 return;
             }
             if(confirm("¿Seguro que quieres eliminar esta línea de WhatsApp?")) {
@@ -1291,7 +1305,6 @@
             document.body.style.overflow = '';
         }
 
-        // --- PESTAÑAS (TABS) DEL PANEL DE ADMINISTRADOR ---
         function cambiarPestana(pestana) {
             const btnGestion = document.getElementById('tab-gestion');
             const btnInventario = document.getElementById('tab-inventario');
@@ -1363,7 +1376,6 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
-            // Calculamos el precio en Bs de forma sutil
             const precioBsTxt = tasaBCV > 0 ? ` (Ref: ${(p.price * tasaBCV).toFixed(2)} Bs)` : '';
             document.getElementById('modal-prod-price').textContent = `$${p.price}${precioBsTxt}`;
             
@@ -1395,7 +1407,6 @@
             document.body.style.overflow = ''; 
         }
 
-        // --- SISTEMA DE CARRITO CLIENTE ---
         function abrirCarrito() { 
             document.getElementById('modal-carrito').style.display = 'flex'; 
             document.body.style.overflow = 'hidden'; 
@@ -1588,7 +1599,6 @@
                 const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const code = '#BEL-' + Math.floor(1000 + Math.random() * 9000);
 
-                // IMPORTANTE FIX: Forzamos el estado a 'Pendiente' para ventas por la web
                 const nuevoPedido = {
                     codigo: code, 
                     cliente: nombre, 
@@ -1605,7 +1615,7 @@
 
                 let txt = `¡Hola Bellisanty! 🎁\n\nNUEVO PEDIDO: *${code}*\n\n`;
                 txt += `👤 *Cliente:* ${nombre}\n📞 *Teléfono:* ${tel}\n🛵 *Entrega:* ${delivery}\n`;
-                if(dir) {
+                if(dir && delivery !== 'Retiro en tienda') {
                     txt += `📍 *Dirección:* ${dir}\n`;
                 }
                 
@@ -1640,7 +1650,6 @@
             }
         }
 
-        // --- BÚSQUEDA PÚBLICA ---
         let searchActive = false;
         function toggleSearch() {
             searchActive = !searchActive;
@@ -1668,7 +1677,6 @@
             ));
         }
 
-        // --- BÚSQUEDA EN INVENTARIO (ADMIN) ---
         function buscarInventarioAdmin(query) {
             const q = query.toLowerCase().trim();
             if (q === '') {
@@ -1683,7 +1691,6 @@
             renderAdmin(filtrados);
         }
 
-        // --- SISTEMA ESCÁNER GLOBAL (POS + INVENTARIO) ---
         function iniciarEscaner(target) {
             scanTarget = target; 
             const modal = document.getElementById('camara-modal');
@@ -1730,7 +1737,6 @@
             }
         }
 
-        // --- LÓGICA DEL PUNTO DE VENTA (POS) ---
         function escanearPOS(e) {
             if(e.key === 'Enter') {
                 if(e.preventDefault) e.preventDefault();
@@ -1868,7 +1874,7 @@
             }
         }
 
-        // --- CARGA GENERAL ---
+        // --- CARGA GENERAL CON LAZY LOADING ---
         async function cargarTodo() {
             fetchBCV();
             await cargarNumerosWA();
@@ -2120,7 +2126,7 @@
                 galeriaGlobal.forEach(g => {
                     html += `
                     <a href="${g.instagram_url}" target="_blank" class="gallery-item relative overflow-hidden rounded-2xl aspect-square cursor-pointer group bg-gray-100 flex items-center justify-center block">
-                        <img src="${g.image_url}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.style.display='none'">
+                        <img src="${g.image_url}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.style.display='none'">
                         <div class="gallery-overlay absolute inset-0 bg-black/40 opacity-0 transition-opacity flex items-center justify-center"><i class="fab fa-instagram text-white text-2xl"></i></div>
                     </a>`;
                 });
@@ -2167,11 +2173,12 @@
 
                 const precioBs = tasaBCV > 0 ? `<span class="text-[10px] text-gray-500 block -mt-1 font-normal">Ref: ${(p.price * tasaBCV).toFixed(2)} Bs</span>` : '';
 
+                // APLICANDO LAZY LOADING
                 return `
                 <div class="product-card bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-2xl relative group scroll-reveal">
                     ${stockBadge}
                     <div class="overflow-hidden h-40 sm:h-64 relative cursor-pointer product-img-wrapper" onclick="abrirModalProductoSeguro('${encodeURIComponent(JSON.stringify(p))}')">
-                        <img src="${p.image}" class="product-image w-full h-full object-cover transition-transform duration-700 relative z-10" onerror="this.src='https://via.placeholder.com/400x300?text=Bellisanty'">
+                        <img src="${p.image}" loading="lazy" class="product-image w-full h-full object-cover transition-transform duration-700 relative z-10" onerror="this.src='https://via.placeholder.com/400x300?text=Bellisanty'">
                         <div class="card-overlay absolute inset-0 bg-black/40 opacity-0 transition-opacity flex items-center justify-center z-20">
                             <span class="bg-white/90 text-gray-900 text-xs font-bold px-4 py-2 rounded-lg">Vista Rápida</span>
                         </div>
@@ -2287,7 +2294,6 @@
             `).join('');
         }
 
-        // --- NUEVA LÓGICA DE EDICIÓN DE PRODUCTOS ---
         function abrirModalEditar(id) {
             const p = inventarioGlobal.find(x => x.id == id);
             if(!p) return;
@@ -2705,7 +2711,7 @@
                     try {
                         imgUrl = await subirImagenSupabase(fileInput.files[0]);
                     } catch (e) {
-                        showToast("⚠️ Crea el Bucket 'productos' en Supabase Storage primero.");
+                        showToast("⚠️ Error al subir: Comprueba tu conexión a internet.");
                         btn.innerHTML = txtOriginal; btn.disabled = false;
                         return;
                     }
@@ -2853,12 +2859,12 @@
                         return;
                     }
                     
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...';
                     let imgUrl = "";
                     try {
-                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...';
                         imgUrl = await subirImagenSupabase(fileInput.files[0]);
-                    } catch (e) {
-                        showToast("⚠️ Crea el Bucket 'productos' en Supabase Storage primero.");
+                    } catch(err) {
+                        showToast("⚠️ Error de conexión al subir imagen.");
                         btn.innerHTML = txtOriginal; btn.disabled = false;
                         return;
                     }
@@ -3171,5 +3177,7 @@
         cargarTodo();
 
     </script>
+</body>
+</html>
 </body>
 </html>
