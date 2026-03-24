@@ -140,6 +140,14 @@
         /* Ocultar barra de scroll en las pestañas (Tabs) del panel admin */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Estilo para los inputs de archivo nuevos */
+        .file-upload-btn {
+            @apply w-full border border-dashed border-belli-300 bg-belli-50 hover:bg-belli-100 text-belli-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-sm;
+        }
+        input[type="file"] {
+            display: none;
+        }
     </style>
 </head>
 
@@ -848,7 +856,12 @@
                         <div id="modulo-galeria" style="display: none;" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-pink-400">
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center text-pink-600"><i class="fab fa-instagram text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Añadir a Galería</h2></div>
                             <form id="form-galeria" class="space-y-4">
-                                <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">URL IMAGEN</label><input type="url" id="galeria-img" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-pink-500 text-sm"></div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">FOTO PARA GALERÍA</label>
+                                    <label for="galeria-img" class="file-upload-btn block"><i class="fas fa-image mr-2"></i>Elegir Archivo</label>
+                                    <input type="file" id="galeria-img" accept="image/*" onchange="document.getElementById('gal-file-name').textContent = this.files[0] ? this.files[0].name : ''">
+                                    <p id="gal-file-name" class="text-[10px] text-gray-400 mt-1 text-center"></p>
+                                </div>
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">LINK IG</label><input type="url" id="galeria-link" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-pink-500 text-sm"></div>
                                 <button type="submit" id="btn-guardar-galeria" class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-gray-800 text-sm cursor-pointer">Agregar</button>
                             </form>
@@ -875,7 +888,14 @@
                                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CÓDIGO BARRAS</label><input type="text" id="barcode" placeholder="Opcional..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
                                 </div>
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CATEGORÍA</label><select id="form-categoria" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"></select></div>
-                                <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">URL IMAGEN</label><input type="url" id="imagen" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
+                                
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IMAGEN DEL PRODUCTO</label>
+                                    <label for="imagen" class="file-upload-btn block"><i class="fas fa-cloud-upload-alt mr-2"></i>Elegir Foto</label>
+                                    <input type="file" id="imagen" accept="image/*" onchange="document.getElementById('prod-file-name').textContent = this.files[0] ? this.files[0].name : ''">
+                                    <p id="prod-file-name" class="text-[10px] text-gray-400 mt-1 text-center"></p>
+                                </div>
+
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">DESCRIPCIÓN</label><textarea id="descripcion" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea></div>
                                 <button type="submit" id="btn-guardar-prod" class="w-full bg-belli-700 text-white font-bold py-3 rounded-xl hover:bg-belli-800 transition cursor-pointer">Guardar Producto</button>
                             </form>
@@ -954,7 +974,15 @@
                         <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CÓDIGO BARRAS</label><input type="text" id="edit-barcode" placeholder="Opcional..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
                     </div>
                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CATEGORÍA</label><select id="edit-categoria" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"></select></div>
-                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">URL IMAGEN</label><input type="url" id="edit-imagen" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CAMBIAR FOTO (Opcional)</label>
+                        <label for="edit-imagen" class="file-upload-btn block"><i class="fas fa-image mr-2"></i>Nueva Foto</label>
+                        <input type="file" id="edit-imagen" accept="image/*" onchange="document.getElementById('edit-file-name').textContent = this.files[0] ? this.files[0].name : ''">
+                        <p id="edit-file-name" class="text-[10px] text-gray-400 mt-1 text-center">Dejar vacío para mantener foto actual</p>
+                        <input type="hidden" id="edit-imagen-actual">
+                    </div>
+
                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">DESCRIPCIÓN</label><textarea id="edit-descripcion" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea></div>
                     <button type="submit" id="btn-guardar-edicion" class="w-full bg-belli-700 text-white font-bold py-3.5 rounded-xl hover:bg-belli-800 transition cursor-pointer shadow-lg">Actualizar Producto</button>
                 </form>
@@ -1031,6 +1059,21 @@
             }
         });
 
+        // --- NUEVA LÓGICA: SUBIR IMÁGENES A SUPABASE STORAGE ---
+        async function subirImagenSupabase(file) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+            
+            const { data, error } = await db.storage.from('productos').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) {
+                console.error(error);
+                throw new Error("No se pudo subir la imagen a Supabase Storage.");
+            }
+            
+            const { data: publicUrlData } = db.storage.from('productos').getPublicUrl(fileName);
+            return publicUrlData.publicUrl;
+        }
+
         // --- ANIMADOR DE SCROLL ---
         function initScrollReveal() {
             const observer = new IntersectionObserver((entries) => {
@@ -1043,12 +1086,6 @@
             }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
             
             document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
-        }
-
-        // --- FUNCION FAQ ---
-        function toggleFaq(element) {
-            const item = element.closest('.faq-item');
-            item.classList.toggle('active');
         }
 
         // --- PUERTA SECRETA LOGIN ---
@@ -1290,6 +1327,7 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
+            // Calculamos el precio en Bs de forma sutil
             const precioBsTxt = tasaBCV > 0 ? ` (Ref: ${(p.price * tasaBCV).toFixed(2)} Bs)` : '';
             document.getElementById('modal-prod-price').textContent = `$${p.price}${precioBsTxt}`;
             
@@ -1514,6 +1552,7 @@
                 const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const code = '#BEL-' + Math.floor(1000 + Math.random() * 9000);
 
+                // IMPORTANTE FIX: Forzamos el estado a 'Pendiente' para ventas por la web
                 const nuevoPedido = {
                     codigo: code, 
                     cliente: nombre, 
@@ -1551,6 +1590,7 @@
                 localStorage.removeItem('belli_cart');
                 cerrarCarrito();
                 
+                // MANDA EL PEDIDO AL PRIMER NUMERO REGISTRADO O AL DEFAULT
                 let numEnvio = whatsappNumber;
                 if(lineasWA && lineasWA.length > 0) {
                     numEnvio = lineasWA[0].numero; 
@@ -1619,6 +1659,7 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: {width: 250, height: 250} },
                 (decodedText, decodedResult) => {
+                    // Acción al escanear con éxito
                     detenerEscaner();
                     if (scanTarget === 'pos') {
                         const inputPos = document.getElementById('pos-barcode');
@@ -1634,7 +1675,9 @@
                         }
                     }
                 },
-                (errorMessage) => {}
+                (errorMessage) => {
+                    // Ignoramos los errores que da la librería mientras busca el código
+                }
             ).catch((err) => {
                 showToast("⚠️ Error al abrir la cámara. Revisa los permisos.");
                 detenerEscaner();
@@ -1764,6 +1807,7 @@
                 const totalUsd = posCarrito.reduce((s, i) => s + (i.price * i.qty), 0);
                 const code = '#CAJA-' + Math.floor(1000 + Math.random()*9000);
                 
+                // IMPORTANTE FIX: Forzamos estado a 'Entregado' para ventas físicas
                 const nPed = { 
                     codigo: code, 
                     cliente: 'Venta Local (Mostrador)', 
@@ -1776,16 +1820,19 @@
                     estado: 'Entregado' 
                 };
                 
+                // Descontar inventario
                 for(const item of posCarrito) { 
                     await db.from('productos').update({ stock: item.stock - item.qty }).eq('id', item.id); 
                 }
                 
+                // Guardar la venta en base de datos
                 await db.from('pedidos').insert([nPed]);
                 
                 posCarrito = []; 
                 renderPOS(); 
                 showToast('✅ Venta física registrada con éxito'); 
                 
+                // Actualizamos todo por debajo para que el reporte y el inventario refleje el cambio
                 cargarTodo(); 
                 
             } catch(e) {
@@ -1850,6 +1897,7 @@
             } catch (e) {
                 console.error("Error Carga BD:", e);
                 
+                // Fallbacks si la BD falla
                 inventarioGlobal = fallbackProductos; 
                 categoriasGlobal = fallbackCategorias; 
                 testimoniosGlobal = fallbackTestimonios;
@@ -2224,7 +2272,14 @@
             document.getElementById('edit-stock').value = p.stock;
             document.getElementById('edit-barcode').value = p.barcode || '';
             document.getElementById('edit-categoria').value = p.category;
-            document.getElementById('edit-imagen').value = p.image;
+            
+            document.getElementById('edit-imagen-actual').value = p.image;
+            const fileNameDisplay = document.getElementById('edit-file-name');
+            if(fileNameDisplay) fileNameDisplay.textContent = "Mantener foto actual";
+            
+            const fileInput = document.getElementById('edit-imagen');
+            if(fileInput) fileInput.value = ""; 
+            
             document.getElementById('edit-descripcion').value = p.description || '';
             
             document.getElementById('modal-editar-producto').style.display = 'flex';
@@ -2247,6 +2302,14 @@
 
                 try {
                     const id = document.getElementById('edit-id').value;
+                    let finalImgUrl = document.getElementById('edit-imagen-actual').value;
+                    const fileInput = document.getElementById('edit-imagen');
+
+                    if (fileInput.files && fileInput.files.length > 0) {
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo nueva foto...';
+                        finalImgUrl = await subirImagenSupabase(fileInput.files[0]);
+                    }
+
                     const p = {
                         name: document.getElementById('edit-nombre').value.trim(),
                         price: parseFloat(document.getElementById('edit-precio').value),
@@ -2254,7 +2317,7 @@
                         stock: parseInt(document.getElementById('edit-stock').value),
                         barcode: document.getElementById('edit-barcode').value.trim(),
                         category: document.getElementById('edit-categoria').value,
-                        image: document.getElementById('edit-imagen').value.trim(),
+                        image: finalImgUrl,
                         description: document.getElementById('edit-descripcion').value.trim()
                     };
 
@@ -2602,13 +2665,23 @@
                 if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...'; btn.disabled = true; }
                 
                 try {
-                    const img = document.getElementById('galeria-img').value.trim();
+                    const fileInput = document.getElementById('galeria-img');
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        showToast("⚠️ Por favor selecciona una foto.");
+                        btn.innerHTML = txtOriginal;
+                        btn.disabled = false;
+                        return;
+                    }
+                    
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo...';
+                    const imgUrl = await subirImagenSupabase(fileInput.files[0]);
                     const link = document.getElementById('galeria-link').value.trim();
                     
-                    const { error } = await db.from('galeria').insert([{ image_url: img, instagram_url: link }]);
+                    const { error } = await db.from('galeria').insert([{ image_url: imgUrl, instagram_url: link }]);
                     if(error) throw error;
                     
                     document.getElementById('form-galeria').reset();
+                    document.getElementById('gal-file-name').textContent = '';
                     await cargarTodo();
                     showToast('✅ Foto agregada');
                 } catch(err) {
@@ -2735,15 +2808,26 @@
                     const cat = document.getElementById('form-categoria').value;
                     if(!cat) { 
                         showToast('⚠️ Crea una categoría primero.'); 
+                        btn.innerHTML = txtOriginal; btn.disabled = false;
                         return; 
                     }
+
+                    const fileInput = document.getElementById('imagen');
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        showToast("⚠️ Por favor selecciona una imagen.");
+                        btn.innerHTML = txtOriginal; btn.disabled = false;
+                        return;
+                    }
+                    
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...';
+                    const imgUrl = await subirImagenSupabase(fileInput.files[0]);
                     
                     const p = {
                         name: document.getElementById('nombre').value.trim(),
                         price: parseFloat(document.getElementById('precio').value),
                         stock: parseInt(document.getElementById('stock').value),
                         category: cat,
-                        image: document.getElementById('imagen').value.trim(),
+                        image: imgUrl,
                         description: document.getElementById('descripcion').value.trim()
                     };
                     
@@ -2764,10 +2848,11 @@
                     }
                     
                     document.getElementById('form-producto').reset();
+                    document.getElementById('prod-file-name').textContent = '';
                     await cargarTodo();
                     showToast('✅ Producto guardado correctamente');
                 } catch(err) { 
-                    showToast("⚠️ Error crítico al guardar el producto"); 
+                    showToast("⚠️ Error al guardar el producto"); 
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2841,8 +2926,7 @@
                     showToast('✅ Empleado Autorizado');
                     await cargarTodo();
                 } catch(err) {
-                    // AQUÍ ESTÁ LA REPARACIÓN DEL ERROR CON LA ALERTA ELEGANTE
-                    showToast("⚠️ Error al registrar: " + (err.message || "Verifica la seguridad (RLS) en Supabase."));
+                    showToast("⚠️ Error al registrar: " + (err.message || "Verifica la seguridad en Supabase."));
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
