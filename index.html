@@ -1142,7 +1142,7 @@
                         }
                         
                         formWA.reset();
-                        showToast('Línea agregada correctamente');
+                        showToast('✅ Línea agregada correctamente');
                         await cargarNumerosWA(); 
                     } catch(err) {
                         console.error(err);
@@ -1168,7 +1168,7 @@
                     const { error } = await db.from('whatsapp').delete().eq('id', id);
                     if(error) throw error;
                     
-                    showToast('Línea eliminada');
+                    showToast('✅ Línea eliminada');
                     await cargarNumerosWA();
                 } catch(e) {
                     showToast("⚠️ Error al eliminar línea.");
@@ -1290,7 +1290,6 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
-            // Calculamos el precio en Bs de forma sutil
             const precioBsTxt = tasaBCV > 0 ? ` (Ref: ${(p.price * tasaBCV).toFixed(2)} Bs)` : '';
             document.getElementById('modal-prod-price').textContent = `$${p.price}${precioBsTxt}`;
             
@@ -2842,7 +2841,8 @@
                     showToast('✅ Empleado Autorizado');
                     await cargarTodo();
                 } catch(err) {
-                    showToast("⚠️ Error al registrar empleado. Recuerda configurar Supabase.");
+                    // AQUÍ ESTÁ LA REPARACIÓN DEL ERROR CON LA ALERTA ELEGANTE
+                    showToast("⚠️ Error al registrar: " + (err.message || "Verifica la seguridad (RLS) en Supabase."));
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2989,8 +2989,10 @@
         // --- CERRAR SESION TOTALMENTE BLINDADO (SIN AWAIT QUE CONGELE) ---
         function cerrarSesion() {
             try {
+                // Destruye la sesion en supabase en segundo plano sin esperar respuesta
                 db.auth.signOut();
                 
+                // Limpieza profunda y segura con Object.keys de todas las cookies locales
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('sb-')) {
                         localStorage.removeItem(key);
@@ -2998,9 +3000,11 @@
                 });
                 sessionStorage.clear();
                 
+                // Redirección forzada inmediata
                 window.location.replace(window.location.pathname + '?clear=' + Date.now());
             } catch(e) {
                 console.error(e);
+                // Si algo falla, limpieza a lo bruto
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('sb-')) {
                         localStorage.removeItem(key);
