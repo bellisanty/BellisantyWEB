@@ -183,7 +183,7 @@
             </div>
         </div>
 
-        <nav id="navbar" class="nav-glass sticky top-0 z-40 border-b border-gray-100/50">
+        <nav id="navbar" class="nav-glass sticky top-0 z-40 border-b border-gray-100/50 relative">
             <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                 <a href="#" class="flex items-center gap-2">
                     <img src="https://i.postimg.cc/WpKvZHqJ/image.png" alt="Bellisanty Logo" class="w-10 h-10 object-contain drop-shadow-md">
@@ -230,7 +230,7 @@
 
             </div>
 
-            <div id="search-bar" class="hidden border-t border-gray-100 bg-white">
+            <div id="search-bar" class="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-lg z-40">
                 <div class="max-w-2xl mx-auto px-4 py-4">
                     <div class="relative">
                         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -633,14 +633,15 @@
             </div>
         </footer>
 
-        <button id="floating-cart-btn" onclick="abrirCarrito()" class="fixed bottom-[5.5rem] right-6 z-50 bg-gray-900 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl hover:bg-belli-700 transition-all duration-300 cursor-pointer lg:hidden">
+        <button id="floating-cart-btn" onclick="abrirCarrito()" class="fixed bottom-24 right-6 z-50 bg-gray-900 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl hover:bg-belli-700 transition-all duration-300 cursor-pointer lg:hidden">
             <div class="relative"><i class="fas fa-shopping-bag text-xl"></i><span id="floating-cart-count" class="absolute -top-2 -right-3 bg-belli-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-gray-900 hidden">0</span></div>
         </button>
 
         <button onclick="abrirModalWA()" class="fixed bottom-6 right-6 z-50 group cursor-pointer" aria-label="WhatsApp">
             <div class="bg-green-500 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl shadow-green-200 hover:bg-green-600 transition-all group-hover:scale-110 duration-300"><i class="fab fa-whatsapp text-2xl"></i></div>
         </button>
-        <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 left-6 z-50 bg-white text-gray-600 p-3 rounded-full shadow-lg border border-gray-200 hover:bg-belli-700 hover:text-white hover:border-belli-700 transition-all opacity-0 translate-y-4 duration-300 cursor-pointer" aria-label="Volver arriba"><i class="fas fa-arrow-up text-sm"></i></button>
+        
+        <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 left-6 z-50 bg-white text-gray-600 p-3 rounded-full shadow-lg border border-gray-200 hover:bg-belli-700 hover:text-white hover:border-belli-700 transition-all opacity-0 translate-y-4 duration-300 cursor-pointer pointer-events-none" aria-label="Volver arriba"><i class="fas fa-arrow-up text-sm"></i></button>
     </div>
 
     <div id="modal-resena" style="display: none;" class="fixed inset-0 bg-black/70 z-[100] items-center justify-center backdrop-blur-md px-4">
@@ -705,8 +706,18 @@
                     <form id="form-checkout" class="space-y-4">
                         <div><input type="text" id="checkout-nombre" placeholder="Nombre Completo" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
                         <div><input type="tel" id="checkout-tel" required placeholder="WhatsApp (Ej: 04121234567)" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
-                        <div><select id="checkout-delivery" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"><option value="Retiro en tienda">Retiro por la Tienda</option><option value="Delivery Centro">Delivery (Centro Pueblo Llano)</option><option value="Delivery Afueras">Delivery (Afueras)</option></select></div>
-                        <div><textarea id="checkout-dir" rows="2" placeholder="Dirección Exacta..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea></div>
+                        
+                        <div>
+                            <select id="checkout-delivery" onchange="toggleDireccion()" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer">
+                                <option value="Retiro en tienda">Retiro por la Tienda</option>
+                                <option value="Delivery Centro">Delivery (Centro Pueblo Llano)</option>
+                                <option value="Delivery Afueras">Delivery (Afueras)</option>
+                            </select>
+                        </div>
+                        <div id="checkout-dir-container" style="display: none;">
+                            <textarea id="checkout-dir" rows="2" placeholder="Dirección Exacta..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea>
+                        </div>
+                        
                         <div class="pt-2"><button type="button" onclick="irPasoCarrito(1)" class="text-xs text-gray-500 font-bold hover:text-gray-900 transition cursor-pointer"><i class="fas fa-arrow-left mr-1"></i> Volver al carrito</button></div>
                     </form>
                 </div>
@@ -976,42 +987,21 @@
         let galeriaGlobal = [];
         let pedidosGlobal = [];
         let equipoGlobal = []; 
+        
+        // ESTADO GLOBAL LIMPIO
         let carrito = []; 
-        let posCarrito = []; // Carrito Independiente POS
+        let posCarrito = []; 
         let tasaBCV = 0;  
         let anuncioId = null;
         let filtroActual = 'todos';
         let html5QrcodeScanner; 
         let scanTarget = ''; 
-        let lineasWA = []; // Array local para guardar los números de WhatsApp
+        let lineasWA = []; 
 
-        // --- SALVAVIDAS (DATOS DE PRUEBA) ---
-        const fallbackCategorias = [
-            { id: 'c1', name: '🌹 Arreglos Premium' }, 
-            { id: 'c2', name: '🎈 Globos & Helio' }, 
-            { id: 'c3', name: '🎁 Regalos al Detal' }
-        ];
-        
-        const fallbackTestimonios = [
-            { id: 't1', name: 'María Rodríguez', rating: 5, message: 'El arreglo de globos para el cumpleaños de mi hija fue espectacular. La calidad y los detalles superaron todas mis expectativas. ¡100% recomendado!' },
-            { id: 't2', name: 'Carlos García', rating: 5, message: 'Pedí un arreglo de flores con chocolates para mi esposa y la entrega fue puntual y perfecta. El empaque de lujo marcó la diferencia. ¡Volveré a comprar!' },
-            { id: 't3', name: 'Laura Pérez', rating: 5, message: 'Bellisanty convirtió mi idea en algo mágico. El arreglo personalizado para la graduación de mi hermana fue hermoso. Atención al cliente excepcional.' }
-        ];
-        
-        const fallbackProductos = [
-            { id: 'p1', name: "Arreglo 'Royal Rose' XL", price: 65, costo: 30, stock: 5, category: "🌹 Arreglos Premium", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600", description: "Caja de lujo con 24 rosas rojas y globos cromo." },
-            { id: 'p2', name: "Bouquet Cumpleaños Gold", price: 30, costo: 15, stock: 10, category: "🎈 Globos & Helio", image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600", description: "Arreglo de globos dorados y negros con helio." },
-            { id: 'p3', name: "Caja Sorpresa 'Choco-Amor'", price: 25, costo: 10, stock: 8, category: "🎁 Regalos al Detal", image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=600", description: "Variedad de bombones premium y oso de peluche." },
-            { id: 'p4', name: "Arreglo Tropical Sun", price: 55, costo: 20, stock: 3, category: "🌹 Arreglos Premium", image: "https://images.unsplash.com/photo-1525310238803-776e50b91fc5?w=600", description: "Flores exóticas y globos burbuja personalizados." }
-        ];
-        
-        const fallbackGaleria = [
-            { id: 'g1', emoji: '🌹', bg: 'from-pink-200 to-belli-200' }, 
-            { id: 'g2', emoji: '🎈', bg: 'from-yellow-200 to-orange-200' }, 
-            { id: 'g3', emoji: '🍫', bg: 'from-purple-200 to-pink-200' }, 
-            { id: 'g4', emoji: '💐', bg: 'from-red-200 to-pink-200' }, 
-            { id: 'g5', emoji: '🎁', bg: 'from-blue-200 to-purple-200' }
-        ];
+        const fallbackCategorias = [];
+        const fallbackTestimonios = [];
+        const fallbackProductos = [];
+        const fallbackGaleria = [];
 
         window.addEventListener('load', () => {
             const storedCart = localStorage.getItem('belli_cart');
@@ -1028,6 +1018,18 @@
                 navbar.classList.add('scrolled');
             } else {
                 navbar.classList.remove('scrolled');
+            }
+            
+            // LOGICA BACK-TO-TOP INTEGRADA
+            const btt = document.getElementById('back-to-top');
+            if (btt) {
+                if (window.scrollY > 400) {
+                    btt.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    btt.classList.add('opacity-100', 'translate-y-0');
+                } else {
+                    btt.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    btt.classList.remove('opacity-100', 'translate-y-0');
+                }
             }
         });
 
@@ -1096,7 +1098,6 @@
             }
         }
 
-        // --- NUEVO: SISTEMA DE NÚMEROS DE WHATSAPP CON SUPABASE ---
         async function cargarNumerosWA() {
             try {
                 const { data, error } = await db.from('whatsapp').select('*').order('id', { ascending: true });
@@ -1447,7 +1448,7 @@
             } else {
                 cont.innerHTML = carrito.map(item => `
                     <div class="flex items-center gap-4 bg-white border border-gray-100 p-3 rounded-2xl shadow-sm">
-                        <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl shrink-0" onerror="this.src='https://via.placeholder.com/50'">
+                        <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl shrink-0" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100&q=80&fit=crop'">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-bold text-xs text-gray-900 truncate">${item.name}</h4>
                             <p class="text-sm font-black text-gray-900 mt-1">$${item.price}</p>
@@ -1466,6 +1467,19 @@
                 `).join('');
             }
             actualizarTotalesCarrito();
+        }
+
+        // --- LÓGICA DE DIRECCIÓN CONDICIONAL ---
+        function toggleDireccion() {
+            const val = document.getElementById('checkout-delivery').value;
+            const dirCont = document.getElementById('checkout-dir-container');
+            const inputDir = document.getElementById('checkout-dir');
+            
+            if(val === 'Retiro en tienda') {
+                dirCont.style.display = 'none';
+            } else {
+                dirCont.style.display = 'block';
+            }
         }
 
         function irPasoCarrito(paso) {
@@ -1487,6 +1501,8 @@
                 step2.style.display = 'block'; 
                 btnNext.style.display = 'none'; 
                 btnConf.style.display = 'flex';
+                // Resetear estado visual de dirCont si abren y cierran el carrito
+                toggleDireccion();
             }
         }
 
@@ -1494,11 +1510,18 @@
             const nombre = document.getElementById('checkout-nombre').value.trim();
             const tel = document.getElementById('checkout-tel').value.trim();
             const delivery = document.getElementById('checkout-delivery').value;
-            const dir = document.getElementById('checkout-dir').value.trim();
+            
+            // Lógica Condicional: validamos si es delivery
+            const dir = delivery === 'Retiro en tienda' ? '' : document.getElementById('checkout-dir').value.trim();
 
             if(!nombre || !tel) { 
                 alert("Por favor llena tu nombre y teléfono."); 
                 return; 
+            }
+            
+            if(delivery !== 'Retiro en tienda' && !dir) {
+                alert("Por favor indica tu dirección de entrega exacta."); 
+                return;
             }
 
             const btnConf = document.getElementById('btn-cart-confirm');
@@ -1509,7 +1532,6 @@
                 const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const code = '#BEL-' + Math.floor(1000 + Math.random() * 9000);
 
-                // IMPORTANTE FIX: Forzamos el estado a 'Pendiente' para ventas por la web
                 const nuevoPedido = {
                     codigo: code, 
                     cliente: nombre, 
@@ -1547,7 +1569,6 @@
                 localStorage.removeItem('belli_cart');
                 cerrarCarrito();
                 
-                // MANDA EL PEDIDO AL PRIMER NUMERO REGISTRADO O AL DEFAULT
                 let numEnvio = whatsappNumber;
                 if(lineasWA && lineasWA.length > 0) {
                     numEnvio = lineasWA[0].numero; 
@@ -1616,7 +1637,6 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: {width: 250, height: 250} },
                 (decodedText, decodedResult) => {
-                    // Acción al escanear con éxito
                     detenerEscaner();
                     if (scanTarget === 'pos') {
                         const inputPos = document.getElementById('pos-barcode');
@@ -1632,9 +1652,7 @@
                         }
                     }
                 },
-                (errorMessage) => {
-                    // Ignoramos los errores que da la librería mientras busca el código
-                }
+                (errorMessage) => { }
             ).catch((err) => {
                 alert("Error al abrir la cámara. Revisa los permisos de tu navegador o celular.");
                 detenerEscaner();
@@ -1764,7 +1782,6 @@
                 const totalUsd = posCarrito.reduce((s, i) => s + (i.price * i.qty), 0);
                 const code = '#CAJA-' + Math.floor(1000 + Math.random()*9000);
                 
-                // IMPORTANTE FIX: Forzamos estado a 'Entregado' para ventas físicas
                 const nPed = { 
                     codigo: code, 
                     cliente: 'Venta Local (Mostrador)', 
@@ -1777,19 +1794,16 @@
                     estado: 'Entregado' 
                 };
                 
-                // Descontar inventario
                 for(const item of posCarrito) { 
                     await db.from('productos').update({ stock: item.stock - item.qty }).eq('id', item.id); 
                 }
                 
-                // Guardar la venta en base de datos
                 await db.from('pedidos').insert([nPed]);
                 
                 posCarrito = []; 
                 renderPOS(); 
                 showToast('Venta física registrada con éxito'); 
                 
-                // Actualizamos todo por debajo para que el reporte y el inventario refleje el cambio
                 cargarTodo(); 
                 
             } catch(e) {
@@ -1854,7 +1868,6 @@
             } catch (e) {
                 console.error("Error Carga BD:", e);
                 
-                // Fallbacks si la BD falla
                 inventarioGlobal = fallbackProductos; 
                 categoriasGlobal = fallbackCategorias; 
                 testimoniosGlobal = fallbackTestimonios;
@@ -2101,7 +2114,7 @@
                 <div class="product-card bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-2xl relative group scroll-reveal">
                     ${stockBadge}
                     <div class="overflow-hidden h-40 sm:h-64 relative cursor-pointer product-img-wrapper" onclick="abrirModalProductoSeguro('${encodeURIComponent(JSON.stringify(p))}')">
-                        <img src="${p.image}" class="product-image w-full h-full object-cover transition-transform duration-700 relative z-10" onerror="this.src='https://via.placeholder.com/400x300?text=Bellisanty'">
+                        <img src="${p.image}" class="product-image w-full h-full object-cover transition-transform duration-700 relative z-10" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80&fit=crop'">
                         <div class="card-overlay absolute inset-0 bg-black/40 opacity-0 transition-opacity flex items-center justify-center z-20">
                             <span class="bg-white/90 text-gray-900 text-xs font-bold px-4 py-2 rounded-lg">Vista Rápida</span>
                         </div>
@@ -2217,7 +2230,6 @@
             `).join('');
         }
 
-        // --- NUEVA LÓGICA DE EDICIÓN DE PRODUCTOS ---
         function abrirModalEditar(id) {
             const p = inventarioGlobal.find(x => x.id == id);
             if(!p) return;
@@ -2290,7 +2302,7 @@
                 const isAgotado = p.stock <= 0;
                 return `
                 <div class="flex gap-4 border ${isAgotado ? 'border-red-200 bg-red-50/50' : 'border-gray-100 bg-white'} p-3 rounded-xl items-center hover:shadow-md transition">
-                    <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/50'">
+                    <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100&q=80&fit=crop'">
                     <div class="flex-1 min-w-0">
                         <h4 class="font-bold text-sm text-gray-900 truncate">${p.name}</h4>
                         <div class="flex items-center gap-2 mt-1">
@@ -2662,11 +2674,6 @@
         }
 
         async function eliminarCategoria(id) {
-            if(String(id).startsWith('c')) { 
-                alert('Esta es una categoría de prueba. Crea una nueva para sobreescribir las pruebas.'); 
-                return; 
-            }
-            
             if(confirm("¿Eliminar categoría?")) {
                 try {
                     const { error } = await db.from('categorias').delete().eq('id', id);
@@ -2710,11 +2717,6 @@
         }
 
         async function eliminarTestimonio(id) {
-            if(String(id).startsWith('t')) { 
-                alert('Reseña de prueba protegida. Añade nuevas para sobreescribir.'); 
-                return; 
-            }
-            
             if(confirm("¿Borrar esta reseña?")) {
                 try {
                     const { error } = await db.from('testimonios').delete().eq('id', id);
@@ -2728,7 +2730,6 @@
             }
         }
 
-        // --- AQUÍ ESTÁ EL BLOQUE DE CREAR PRODUCTO RESTAURADO ---
         const formProd = document.getElementById('form-producto');
         if(formProd) {
             formProd.addEventListener('submit', async (e) => {
@@ -2781,10 +2782,6 @@
         }
 
         async function descontarStock(id, currentStock) {
-            if(String(id).startsWith('p')) { 
-                alert('Producto de prueba. Añade productos reales para descontar stock.'); 
-                return; 
-            }
             if(currentStock <= 0) { 
                 alert("Este producto ya está agotado."); 
                 return; 
@@ -2803,11 +2800,6 @@
         }
 
         async function eliminarProducto(id) {
-            if(String(id).startsWith('p')) { 
-                alert('Producto de prueba protegido. Añade productos reales.'); 
-                return; 
-            }
-            
             if(confirm("¿Eliminar producto definitivamente?")) {
                 try {
                     const { error } = await db.from('productos').delete().eq('id', id);
@@ -2854,7 +2846,6 @@
             });
         }
 
-        // --- SISTEMA DE LOGEO Y ROLES (PROTEGIDO CONTRA ERRORES) ---
         db.auth.onAuthStateChange(async (event, session) => {
             try {
                 if (session) {
@@ -2899,20 +2890,18 @@
             const badge = document.getElementById('admin-role-badge');
             if(badge) badge.textContent = esAdmin ? '(Dueño)' : '(Staff)';
             
-            // Lógica de Tabs
             const tabsContainer = document.getElementById('admin-tabs');
             if(tabsContainer) tabsContainer.style.display = 'flex';
             
             const tabInventario = document.getElementById('tab-inventario');
             if(tabInventario) tabInventario.style.display = prod || esAdmin ? 'block' : 'none';
 
-            // Forzar pestaña si no hay permisos
             if(!prod && !esAdmin) {
                 if (typeof cambiarPestana === 'function') cambiarPestana('gestion');
             }
 
             const modRestringidos = document.getElementById('modulos-restringidos');
-            if(modRestringidos) modRestringidos.style.display = 'none'; // Los tabs reemplazan esto, pero por si acaso
+            if(modRestringidos) modRestringidos.style.display = 'none';
             
             const panelGestion = document.getElementById('panel-gestion');
             if(panelGestion) panelGestion.style.display = 'block';
@@ -2926,7 +2915,6 @@
             const mGal = document.getElementById('modulo-galeria');
             if(mGal) mGal.style.display = aju || esAdmin ? 'block' : 'none';
             
-            // Elementos del tab de inventario
             const mCP = document.getElementById('modulo-crear-producto');
             if(mCP) mCP.style.display = prod || esAdmin ? 'block' : 'none';
             
@@ -2941,14 +2929,12 @@
             const mLC = document.getElementById('modulo-lista-cat');
             if(mLC) mLC.style.display = prod || esAdmin ? 'block' : 'none';
 
-            // Elementos de la tab de gestión
             const mLR = document.getElementById('modulo-lista-resenas');
             if(mLR) mLR.style.display = prod || esAdmin ? 'block' : 'none';
             
             const mLG = document.getElementById('modulo-lista-galeria');
             if(mLG) mLG.style.display = aju || esAdmin ? 'block' : 'none';
             
-            // Whatsapp en gestion
             const mWA = document.getElementById('modulo-whatsapp');
             if(mWA) mWA.style.display = aju || esAdmin ? 'block' : 'none';
 
@@ -2991,13 +2977,10 @@
             });
         }
 
-        // --- CERRAR SESION TOTALMENTE BLINDADO (SIN AWAIT QUE CONGELE) ---
         function cerrarSesion() {
             try {
-                // Destruye la sesion en supabase en segundo plano sin esperar respuesta
                 db.auth.signOut();
                 
-                // Limpieza profunda y segura con Object.keys de todas las cookies locales
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('sb-')) {
                         localStorage.removeItem(key);
@@ -3005,11 +2988,9 @@
                 });
                 sessionStorage.clear();
                 
-                // Redirección forzada inmediata
                 window.location.replace(window.location.pathname + '?clear=' + Date.now());
             } catch(e) {
                 console.error(e);
-                // Si algo falla, limpieza a lo bruto
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('sb-')) {
                         localStorage.removeItem(key);
