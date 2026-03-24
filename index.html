@@ -1045,6 +1045,12 @@
             document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
         }
 
+        // --- FUNCION FAQ ---
+        function toggleFaq(element) {
+            const item = element.closest('.faq-item');
+            item.classList.toggle('active');
+        }
+
         // --- PUERTA SECRETA LOGIN ---
         let secretClickCount = 0;
         let secretTimer;
@@ -1131,7 +1137,7 @@
                     try {
                         const { error } = await db.from('whatsapp').insert([{ nombre: nom, numero: num }]);
                         if(error) {
-                            alert("⚠️ Error: Asegúrate de haber creado la tabla 'whatsapp' en Supabase. Revisa las instrucciones.");
+                            showToast("⚠️ Error: Asegúrate de haber creado la tabla 'whatsapp' en Supabase.");
                             throw error;
                         }
                         
@@ -1150,11 +1156,11 @@
 
         async function eliminarWA(id) {
             if(lineasWA.length <= 1) {
-                alert("Debe quedar al menos un número registrado para recibir ventas.");
+                showToast("⚠️ Debe quedar al menos un número registrado");
                 return;
             }
             if(String(id) === 'default') {
-                alert("Este es un número por defecto de prueba, agrega otro primero para reemplazarlo en la base de datos.");
+                showToast("⚠️ Agrega un número real primero para reemplazar este");
                 return;
             }
             if(confirm("¿Seguro que quieres eliminar esta línea de WhatsApp?")) {
@@ -1165,7 +1171,7 @@
                     showToast('Línea eliminada');
                     await cargarNumerosWA();
                 } catch(e) {
-                    alert("Error al eliminar línea. Asegúrate de tener la tabla creada en Supabase.");
+                    showToast("⚠️ Error al eliminar línea.");
                 }
             }
         }
@@ -1333,14 +1339,14 @@
             const p = inventarioGlobal.find(x => x.id == id);
             if(!p) return;
             if(p.stock <= 0) { 
-                showToast('Producto agotado'); 
+                showToast('⚠️ Producto agotado'); 
                 return; 
             }
             
             const item = carrito.find(x => x.id == id);
             if(item) {
                 if(item.qty >= p.stock) { 
-                    showToast('Stock máximo alcanzado'); 
+                    showToast('⚠️ Stock máximo alcanzado'); 
                     return; 
                 }
                 item.qty++;
@@ -1350,13 +1356,13 @@
             
             actualizarIconosCarrito();
             localStorage.setItem('belli_cart', JSON.stringify(carrito));
-            showToast('Añadido al carrito');
+            showToast('✅ Añadido al carrito');
         }
 
         function actualizarCantidadCarrito(id, qty) {
             const p = inventarioGlobal.find(x => x.id == id);
             if(qty > p.stock) { 
-                showToast('Stock máximo alcanzado'); 
+                showToast('⚠️ Stock máximo alcanzado'); 
                 return; 
             }
             
@@ -1497,7 +1503,7 @@
             const dir = document.getElementById('checkout-dir').value.trim();
 
             if(!nombre || !tel) { 
-                alert("Por favor llena tu nombre y teléfono."); 
+                showToast("⚠️ Por favor llena tu nombre y teléfono."); 
                 return; 
             }
 
@@ -1509,7 +1515,6 @@
                 const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const code = '#BEL-' + Math.floor(1000 + Math.random() * 9000);
 
-                // IMPORTANTE FIX: Forzamos el estado a 'Pendiente' para ventas por la web
                 const nuevoPedido = {
                     codigo: code, 
                     cliente: nombre, 
@@ -1547,7 +1552,6 @@
                 localStorage.removeItem('belli_cart');
                 cerrarCarrito();
                 
-                // MANDA EL PEDIDO AL PRIMER NUMERO REGISTRADO O AL DEFAULT
                 let numEnvio = whatsappNumber;
                 if(lineasWA && lineasWA.length > 0) {
                     numEnvio = lineasWA[0].numero; 
@@ -1555,7 +1559,7 @@
                 window.open(`https://wa.me/${numEnvio}?text=${encodeURIComponent(txt)}`, '_blank');
                 
             } catch(e) {
-                alert("Hubo un error al procesar el pedido. Por favor intenta de nuevo.");
+                showToast("⚠️ Hubo un error al procesar el pedido.");
             } finally {
                 btnConf.innerHTML = `<i class="fab fa-whatsapp text-lg"></i> Confirmar y Enviar Pedido`;
                 btnConf.disabled = false;
@@ -1616,7 +1620,6 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: {width: 250, height: 250} },
                 (decodedText, decodedResult) => {
-                    // Acción al escanear con éxito
                     detenerEscaner();
                     if (scanTarget === 'pos') {
                         const inputPos = document.getElementById('pos-barcode');
@@ -1632,11 +1635,9 @@
                         }
                     }
                 },
-                (errorMessage) => {
-                    // Ignoramos los errores que da la librería mientras busca el código
-                }
+                (errorMessage) => {}
             ).catch((err) => {
-                alert("Error al abrir la cámara. Revisa los permisos de tu navegador o celular.");
+                showToast("⚠️ Error al abrir la cámara. Revisa los permisos.");
                 detenerEscaner();
             });
         }
@@ -1674,7 +1675,7 @@
                 
                 if(p) {
                     if(p.stock <= 0) { 
-                        alert('Este producto está agotado en el inventario.'); 
+                        showToast('⚠️ Este producto está agotado en el inventario.'); 
                         return; 
                     }
                     
@@ -1683,14 +1684,14 @@
                         if(item.qty < p.stock) {
                             item.qty++; 
                         } else {
-                            alert('No hay más stock disponible de este producto.');
+                            showToast('⚠️ No hay más stock disponible.');
                         }
                     } else { 
                         posCarrito.push({...p, qty: 1, costo: p.costo || 0}); 
                     }
                     renderPOS();
                 } else {
-                    alert('Producto no encontrado en la base de datos: ' + cod);
+                    showToast('⚠️ Producto no encontrado: ' + cod);
                 }
             }
         }
@@ -1700,7 +1701,7 @@
             if(!p) return;
             
             if(qty > p.stock) {
-                alert('No hay más stock disponible para este producto.');
+                showToast('⚠️ No hay más stock disponible.');
                 return;
             }
             
@@ -1756,7 +1757,7 @@
         
         async function procesarVentaPOS() {
             if(posCarrito.length === 0) { 
-                alert('La caja está vacía.'); 
+                showToast('⚠️ La caja está vacía.'); 
                 return; 
             }
             
@@ -1764,7 +1765,6 @@
                 const totalUsd = posCarrito.reduce((s, i) => s + (i.price * i.qty), 0);
                 const code = '#CAJA-' + Math.floor(1000 + Math.random()*9000);
                 
-                // IMPORTANTE FIX: Forzamos estado a 'Entregado' para ventas físicas
                 const nPed = { 
                     codigo: code, 
                     cliente: 'Venta Local (Mostrador)', 
@@ -1777,23 +1777,20 @@
                     estado: 'Entregado' 
                 };
                 
-                // Descontar inventario
                 for(const item of posCarrito) { 
                     await db.from('productos').update({ stock: item.stock - item.qty }).eq('id', item.id); 
                 }
                 
-                // Guardar la venta en base de datos
                 await db.from('pedidos').insert([nPed]);
                 
                 posCarrito = []; 
                 renderPOS(); 
-                showToast('Venta física registrada con éxito'); 
+                showToast('✅ Venta física registrada con éxito'); 
                 
-                // Actualizamos todo por debajo para que el reporte y el inventario refleje el cambio
                 cargarTodo(); 
                 
             } catch(e) {
-                alert("Error crítico al procesar la venta en caja.");
+                showToast("⚠️ Error crítico al procesar la venta.");
             }
         }
 
@@ -1854,7 +1851,6 @@
             } catch (e) {
                 console.error("Error Carga BD:", e);
                 
-                // Fallbacks si la BD falla
                 inventarioGlobal = fallbackProductos; 
                 categoriasGlobal = fallbackCategorias; 
                 testimoniosGlobal = fallbackTestimonios;
@@ -1886,10 +1882,10 @@
                 pedidosGlobal = data || [];
                 renderPedidosAdmin();
                 calcularReportes();
-                showToast('Bandeja de pedidos actualizada');
+                showToast('✅ Bandeja actualizada');
                 
             } catch (e) {
-                alert('Error al intentar actualizar la bandeja de pedidos.');
+                showToast('⚠️ Error al actualizar pedidos.');
             } finally {
                 if(isBoton) {
                     btn.innerHTML = txtOriginal;
@@ -1933,10 +1929,10 @@
                     pedidosGlobal = []; 
                     renderPedidosAdmin(); 
                     calcularReportes(); 
-                    showToast('Historial de ventas y reportes reiniciados a $0'); 
+                    showToast('✅ Historial reiniciado'); 
                 } 
                 catch(e) { 
-                    alert('Hubo un error al reiniciar las ventas. Asegúrate de tener permisos suficientes.'); 
+                    showToast('⚠️ Error al reiniciar ventas.'); 
                 }
             }
         }
@@ -2268,9 +2264,9 @@
 
                     cerrarModalEditar();
                     await cargarTodo();
-                    showToast('Producto actualizado con éxito');
+                    showToast('✅ Producto actualizado');
                 } catch(err) {
-                    alert("Error crítico al actualizar el producto");
+                    showToast("⚠️ Error crítico al actualizar");
                 } finally {
                     btn.innerHTML = 'Actualizar Producto';
                     btn.disabled = false;
@@ -2408,24 +2404,24 @@
                                 p.stock = nuevoStock; 
                             }
                         }
-                        showToast('Stock descontado automáticamente');
+                        showToast('✅ Stock descontado');
                     }
                 }
 
                 const { error } = await db.from('pedidos').update({ estado: nuevoEstado }).eq('id', id);
                 if(error) throw error;
                 
-                showToast('Estado del pedido actualizado.');
+                showToast('✅ Estado actualizado.');
                 await cargarTodo();
             } catch(e) {
-                alert('Error actualizando el estado.');
+                showToast('⚠️ Error al actualizar estado.');
             }
         }
 
         function imprimirFactura(id) {
             const p = pedidosGlobal.find(x => String(x.id) === String(id));
             if(!p) {
-                alert('No se encontró la información del pedido.');
+                showToast('⚠️ Pedido no encontrado.');
                 return;
             }
 
@@ -2502,7 +2498,7 @@
                 printWindow.document.write(htmlContent);
                 printWindow.document.close();
             } else {
-                alert("⚠️ BLOQUEO DETECTADO: Por favor permite las ventanas emergentes (pop-ups) en la configuración de tu navegador para poder imprimir la factura.");
+                showToast("⚠️ Desactiva el bloqueo de pop-ups para imprimir.");
             }
         }
 
@@ -2549,10 +2545,10 @@
                 const { error } = await db.from('equipo').update({ permisos: nuevosPermisos }).eq('id', id);
                 if(error) throw error;
                 
-                showToast('Permisos actualizados');
+                showToast('✅ Permisos actualizados');
                 await cargarTodo();
             } catch(e) {
-                alert("Error al cambiar permiso");
+                showToast("⚠️ Error al cambiar permiso");
             }
         }
 
@@ -2562,10 +2558,10 @@
                     const { error } = await db.from('equipo').delete().eq('id', id);
                     if(error) throw error;
                     
-                    showToast('Empleado eliminado');
+                    showToast('✅ Empleado eliminado');
                     await cargarTodo();
                 } catch(e) {
-                    alert("Error al eliminar empleado");
+                    showToast("⚠️ Error al eliminar empleado");
                 }
             }
         }
@@ -2589,9 +2585,9 @@
                     }
                     
                     await cargarTodo();
-                    showToast('Ajustes web actualizados');
+                    showToast('✅ Ajustes web actualizados');
                 } catch(err) {
-                    alert("Error al guardar ajustes");
+                    showToast("⚠️ Error al guardar ajustes");
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2615,9 +2611,9 @@
                     
                     document.getElementById('form-galeria').reset();
                     await cargarTodo();
-                    showToast('Foto agregada');
+                    showToast('✅ Foto agregada');
                 } catch(err) {
-                    alert("Error al agregar foto");
+                    showToast("⚠️ Error al agregar foto");
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2631,9 +2627,9 @@
                     if(error) throw error;
                     
                     await cargarTodo();
-                    showToast('Foto eliminada');
+                    showToast('✅ Foto eliminada');
                 } catch(e) {
-                    alert("Error al eliminar la foto");
+                    showToast("⚠️ Error al eliminar la foto");
                 }
             }
         }
@@ -2652,9 +2648,9 @@
                     
                     document.getElementById('form-categoria-add').reset();
                     await cargarTodo();
-                    showToast('Categoría creada');
+                    showToast('✅ Categoría creada');
                 } catch(err) {
-                    alert("Error al crear categoría");
+                    showToast("⚠️ Error al crear categoría");
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2663,7 +2659,7 @@
 
         async function eliminarCategoria(id) {
             if(String(id).startsWith('c')) { 
-                alert('Esta es una categoría de prueba. Crea una nueva para sobreescribir las pruebas.'); 
+                showToast('⚠️ Esta es una categoría de prueba. Crea una nueva para sobreescribir.'); 
                 return; 
             }
             
@@ -2673,9 +2669,9 @@
                     if(error) throw error;
                     
                     await cargarTodo();
-                    showToast('Categoría eliminada');
+                    showToast('✅ Categoría eliminada');
                 } catch(e) {
-                    alert("Error al eliminar categoría");
+                    showToast("⚠️ Error al eliminar categoría");
                 }
             }
         }
@@ -2700,9 +2696,9 @@
                     
                     cerrarModalResena();
                     await cargarTodo();
-                    showToast('¡Gracias por tu reseña!');
+                    showToast('✅ ¡Gracias por tu reseña!');
                 } catch(err) {
-                    alert('Error al enviar reseña.');
+                    showToast('⚠️ Error al enviar reseña.');
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2711,7 +2707,7 @@
 
         async function eliminarTestimonio(id) {
             if(String(id).startsWith('t')) { 
-                alert('Reseña de prueba protegida. Añade nuevas para sobreescribir.'); 
+                showToast('⚠️ Reseña de prueba protegida. Añade nuevas para sobreescribir.'); 
                 return; 
             }
             
@@ -2721,14 +2717,13 @@
                     if(error) throw error;
                     
                     await cargarTodo();
-                    showToast('Reseña borrada');
+                    showToast('✅ Reseña borrada');
                 } catch(e) {
-                    alert("Error al borrar reseña");
+                    showToast("⚠️ Error al borrar reseña");
                 }
             }
         }
 
-        // --- AQUÍ ESTÁ EL BLOQUE DE CREAR PRODUCTO RESTAURADO ---
         const formProd = document.getElementById('form-producto');
         if(formProd) {
             formProd.addEventListener('submit', async (e) => {
@@ -2740,7 +2735,7 @@
                 try {
                     const cat = document.getElementById('form-categoria').value;
                     if(!cat) { 
-                        alert('Crea una categoría primero.'); 
+                        showToast('⚠️ Crea una categoría primero.'); 
                         return; 
                     }
                     
@@ -2766,14 +2761,14 @@
                         delete p.barcode;
                         const retry = await db.from('productos').insert([p]);
                         if(retry.error) throw retry.error;
-                        alert("Se guardó el producto, pero no los datos de Costo/Barras por falta de tabla SQL.");
+                        showToast("⚠️ Producto guardado, pero faltó el costo/código en la base de datos.");
                     }
                     
                     document.getElementById('form-producto').reset();
                     await cargarTodo();
-                    showToast('Producto guardado correctamente');
+                    showToast('✅ Producto guardado correctamente');
                 } catch(err) { 
-                    alert("Error crítico al guardar el producto"); 
+                    showToast("⚠️ Error crítico al guardar el producto"); 
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2782,11 +2777,11 @@
 
         async function descontarStock(id, currentStock) {
             if(String(id).startsWith('p')) { 
-                alert('Producto de prueba. Añade productos reales para descontar stock.'); 
+                showToast('⚠️ Producto de prueba protegido.'); 
                 return; 
             }
             if(currentStock <= 0) { 
-                alert("Este producto ya está agotado."); 
+                showToast("⚠️ Este producto ya está agotado."); 
                 return; 
             }
             
@@ -2798,13 +2793,13 @@
                 await cargarTodo();
                 showToast(`✅ Venta registrada. Nuevo Stock: ${nuevoStock}`);
             } catch(e) {
-                alert("Error al descontar el stock de la base de datos.");
+                showToast("⚠️ Error al descontar el stock.");
             }
         }
 
         async function eliminarProducto(id) {
             if(String(id).startsWith('p')) { 
-                alert('Producto de prueba protegido. Añade productos reales.'); 
+                showToast('⚠️ Producto de prueba protegido.'); 
                 return; 
             }
             
@@ -2814,9 +2809,9 @@
                     if(error) throw error;
                     
                     await cargarTodo();
-                    showToast('Producto eliminado');
+                    showToast('✅ Producto eliminado');
                 } catch(e) {
-                    alert("Error al eliminar el producto");
+                    showToast("⚠️ Error al eliminar el producto");
                 }
             }
         }
@@ -2844,10 +2839,10 @@
                     if(r.error) throw r.error;
                     
                     document.getElementById('form-equipo').reset();
-                    showToast('Empleado Autorizado');
+                    showToast('✅ Empleado Autorizado');
                     await cargarTodo();
                 } catch(err) {
-                    alert("Error al registrar empleado: " + err.message);
+                    showToast("⚠️ Error al registrar empleado. Recuerda configurar Supabase.");
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2875,7 +2870,7 @@
                             aplicarPermisos(true, true, true);
                         } else {
                             cerrarSesion(); 
-                            alert('Usuario sin rol asignado o fue eliminado del sistema.');
+                            showToast('⚠️ Usuario sin rol asignado.');
                         }
                     } else {
                         const esAdmin = perfil.rol === 'admin';
@@ -2981,7 +2976,7 @@
                     } else { 
                         cerrarModalLogin(); 
                         document.getElementById('form-login').reset(); 
-                        showToast('Acceso autorizado'); 
+                        showToast('✅ Acceso autorizado'); 
                     }
                 } catch(err) {
                     if(errLog) errLog.style.display = 'flex';
@@ -2994,10 +2989,8 @@
         // --- CERRAR SESION TOTALMENTE BLINDADO (SIN AWAIT QUE CONGELE) ---
         function cerrarSesion() {
             try {
-                // Destruye la sesion en supabase en segundo plano sin esperar respuesta
                 db.auth.signOut();
                 
-                // Limpieza profunda y segura con Object.keys de todas las cookies locales
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('sb-')) {
                         localStorage.removeItem(key);
@@ -3005,11 +2998,9 @@
                 });
                 sessionStorage.clear();
                 
-                // Redirección forzada inmediata
                 window.location.replace(window.location.pathname + '?clear=' + Date.now());
             } catch(e) {
                 console.error(e);
-                // Si algo falla, limpieza a lo bruto
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('sb-')) {
                         localStorage.removeItem(key);
