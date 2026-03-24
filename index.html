@@ -1010,7 +1010,35 @@
         let filtroActual = 'todos';
         let html5QrcodeScanner; 
         let scanTarget = ''; 
-        let lineasWA = []; 
+        let lineasWA = []; // Array local para guardar los números de WhatsApp
+
+        // --- SALVAVIDAS (DATOS DE PRUEBA) ---
+        const fallbackCategorias = [
+            { id: 'c1', name: '🌹 Arreglos Premium' }, 
+            { id: 'c2', name: '🎈 Globos & Helio' }, 
+            { id: 'c3', name: '🎁 Regalos al Detal' }
+        ];
+        
+        const fallbackTestimonios = [
+            { id: 't1', name: 'María Rodríguez', rating: 5, message: 'El arreglo de globos para el cumpleaños de mi hija fue espectacular. La calidad y los detalles superaron todas mis expectativas. ¡100% recomendado!' },
+            { id: 't2', name: 'Carlos García', rating: 5, message: 'Pedí un arreglo de flores con chocolates para mi esposa y la entrega fue puntual y perfecta. El empaque de lujo marcó la diferencia. ¡Volveré a comprar!' },
+            { id: 't3', name: 'Laura Pérez', rating: 5, message: 'Bellisanty convirtió mi idea en algo mágico. El arreglo personalizado para la graduación de mi hermana fue hermoso. Atención al cliente excepcional.' }
+        ];
+        
+        const fallbackProductos = [
+            { id: 'p1', name: "Arreglo 'Royal Rose' XL", price: 65, costo: 30, stock: 5, category: "🌹 Arreglos Premium", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600", description: "Caja de lujo con 24 rosas rojas y globos cromo." },
+            { id: 'p2', name: "Bouquet Cumpleaños Gold", price: 30, costo: 15, stock: 10, category: "🎈 Globos & Helio", image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600", description: "Arreglo de globos dorados y negros con helio." },
+            { id: 'p3', name: "Caja Sorpresa 'Choco-Amor'", price: 25, costo: 10, stock: 8, category: "🎁 Regalos al Detal", image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=600", description: "Variedad de bombones premium y oso de peluche." },
+            { id: 'p4', name: "Arreglo Tropical Sun", price: 55, costo: 20, stock: 3, category: "🌹 Arreglos Premium", image: "https://images.unsplash.com/photo-1525310238803-776e50b91fc5?w=600", description: "Flores exóticas y globos burbuja personalizados." }
+        ];
+        
+        const fallbackGaleria = [
+            { id: 'g1', emoji: '🌹', bg: 'from-pink-200 to-belli-200' }, 
+            { id: 'g2', emoji: '🎈', bg: 'from-yellow-200 to-orange-200' }, 
+            { id: 'g3', emoji: '🍫', bg: 'from-purple-200 to-pink-200' }, 
+            { id: 'g4', emoji: '💐', bg: 'from-red-200 to-pink-200' }, 
+            { id: 'g5', emoji: '🎁', bg: 'from-blue-200 to-purple-200' }
+        ];
 
         window.addEventListener('load', () => {
             const storedCart = localStorage.getItem('belli_cart');
@@ -1031,6 +1059,7 @@
                 navbar.classList.remove('scrolled');
             }
             
+            // Botón Volver Arriba Lógica
             if (btnBackToTop) {
                 if (window.scrollY > 400) {
                     btnBackToTop.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
@@ -2301,12 +2330,18 @@
             document.getElementById('edit-id').value = p.id;
             document.getElementById('edit-nombre').value = p.name;
             document.getElementById('edit-precio').value = p.price;
-            document.getElementById('edit-costo').value = p.costo || 0;
-            document.getElementById('edit-stock').value = p.stock;
-            document.getElementById('edit-barcode').value = p.barcode || '';
-            document.getElementById('edit-categoria').value = p.category;
             
+            const costoEl = document.getElementById('edit-costo');
+            if (costoEl) costoEl.value = p.costo || 0;
+            
+            document.getElementById('edit-stock').value = p.stock;
+            
+            const barcodeEl = document.getElementById('edit-barcode');
+            if (barcodeEl) barcodeEl.value = p.barcode || '';
+            
+            document.getElementById('edit-categoria').value = p.category;
             document.getElementById('edit-imagen-actual').value = p.image;
+            
             const fileNameDisplay = document.getElementById('edit-file-name');
             if(fileNameDisplay) fileNameDisplay.textContent = "Mantener foto actual";
             
@@ -2346,13 +2381,18 @@
                     const p = {
                         name: document.getElementById('edit-nombre').value.trim(),
                         price: parseFloat(document.getElementById('edit-precio').value),
-                        costo: parseFloat(document.getElementById('edit-costo').value || 0),
                         stock: parseInt(document.getElementById('edit-stock').value),
-                        barcode: document.getElementById('edit-barcode').value.trim(),
                         category: document.getElementById('edit-categoria').value,
                         image: finalImgUrl,
                         description: document.getElementById('edit-descripcion').value.trim()
                     };
+
+                    const costoEl = document.getElementById('edit-costo');
+                    if (costoEl && costoEl.value !== '') p.costo = parseFloat(costoEl.value);
+                    else p.costo = 0;
+
+                    const barcodeEl = document.getElementById('edit-barcode');
+                    if (barcodeEl) p.barcode = barcodeEl.value.trim();
 
                     const { error } = await db.from('productos').update(p).eq('id', id);
                     if (error) throw error;
@@ -2859,9 +2899,9 @@
                         return;
                     }
                     
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...';
                     let imgUrl = "";
                     try {
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...';
                         imgUrl = await subirImagenSupabase(fileInput.files[0]);
                     } catch(err) {
                         showToast("⚠️ Error de conexión al subir imagen.");
@@ -3177,7 +3217,5 @@
         cargarTodo();
 
     </script>
-</body>
-</html>
 </body>
 </html>
