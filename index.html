@@ -1132,7 +1132,7 @@
                     try {
                         const { error } = await db.from('whatsapp').insert([{ nombre: nom, numero: num }]);
                         if(error) {
-                            alert("⚠️ Error: Asegúrate de haber creado la tabla 'whatsapp' en Supabase. Revisa las instrucciones.");
+                            showToast("⚠️ Error: Asegúrate de haber creado la tabla 'whatsapp' en Supabase.");
                             throw error;
                         }
                         
@@ -1473,7 +1473,6 @@
         function toggleDireccion() {
             const val = document.getElementById('checkout-delivery').value;
             const dirCont = document.getElementById('checkout-dir-container');
-            const inputDir = document.getElementById('checkout-dir');
             
             if(val === 'Retiro en tienda') {
                 dirCont.style.display = 'none';
@@ -1501,7 +1500,7 @@
                 step2.style.display = 'block'; 
                 btnNext.style.display = 'none'; 
                 btnConf.style.display = 'flex';
-                // Resetear estado visual de dirCont si abren y cierran el carrito
+                // Resetear estado visual de dirCont
                 toggleDireccion();
             }
         }
@@ -2282,7 +2281,8 @@
                     await cargarTodo();
                     showToast('Producto actualizado con éxito');
                 } catch(err) {
-                    alert("Error crítico al actualizar el producto");
+                    console.error(err);
+                    showToast("❌ Error al actualizar producto.");
                 } finally {
                     btn.innerHTML = 'Actualizar Producto';
                     btn.disabled = false;
@@ -2430,7 +2430,8 @@
                 showToast('Estado del pedido actualizado.');
                 await cargarTodo();
             } catch(e) {
-                alert('Error actualizando el estado.');
+                console.error(e);
+                showToast('❌ Error actualizando el estado.');
             }
         }
 
@@ -2514,7 +2515,7 @@
                 printWindow.document.write(htmlContent);
                 printWindow.document.close();
             } else {
-                alert("⚠️ BLOQUEO DETECTADO: Por favor permite las ventanas emergentes (pop-ups) en la configuración de tu navegador para poder imprimir la factura.");
+                showToast("⚠️ BLOQUEO: Por favor permite las ventanas emergentes (pop-ups).");
             }
         }
 
@@ -2564,7 +2565,8 @@
                 showToast('Permisos actualizados');
                 await cargarTodo();
             } catch(e) {
-                alert("Error al cambiar permiso");
+                console.error(e);
+                showToast("❌ Error al cambiar permiso");
             }
         }
 
@@ -2577,7 +2579,8 @@
                     showToast('Empleado eliminado');
                     await cargarTodo();
                 } catch(e) {
-                    alert("Error al eliminar empleado");
+                    console.error(e);
+                    showToast("❌ Error al eliminar empleado");
                 }
             }
         }
@@ -2595,15 +2598,18 @@
                     const linkNuevo = document.getElementById('link-comunidad').value.trim();
                     
                     if(anuncioId) {
-                        await db.from('anuncios').update({ texto: textoNuevo, link_comunidad: linkNuevo }).eq('id', anuncioId);
+                        const { error } = await db.from('anuncios').update({ texto: textoNuevo, link_comunidad: linkNuevo }).eq('id', anuncioId);
+                        if (error) throw error;
                     } else {
-                        await db.from('anuncios').insert([{ texto: textoNuevo, link_comunidad: linkNuevo }]);
+                        const { error } = await db.from('anuncios').insert([{ texto: textoNuevo, link_comunidad: linkNuevo }]);
+                        if (error) throw error;
                     }
                     
                     await cargarTodo();
                     showToast('Ajustes web actualizados');
                 } catch(err) {
-                    alert("Error al guardar ajustes");
+                    console.error(err);
+                    showToast("❌ Error al guardar ajustes");
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2627,9 +2633,10 @@
                     
                     document.getElementById('form-galeria').reset();
                     await cargarTodo();
-                    showToast('Foto agregada');
+                    showToast('Foto agregada a la galería');
                 } catch(err) {
-                    alert("Error al agregar foto");
+                    console.error("Error BD:", err);
+                    showToast("❌ Fallo de Base de Datos. Verifica la tabla.");
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2645,7 +2652,8 @@
                     await cargarTodo();
                     showToast('Foto eliminada');
                 } catch(e) {
-                    alert("Error al eliminar la foto");
+                    console.error(e);
+                    showToast("❌ Error al eliminar la foto");
                 }
             }
         }
@@ -2666,7 +2674,8 @@
                     await cargarTodo();
                     showToast('Categoría creada');
                 } catch(err) {
-                    alert("Error al crear categoría");
+                    console.error(err);
+                    showToast("❌ Error al crear categoría");
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2682,7 +2691,8 @@
                     await cargarTodo();
                     showToast('Categoría eliminada');
                 } catch(e) {
-                    alert("Error al eliminar categoría");
+                    console.error(e);
+                    showToast("❌ Error al eliminar categoría");
                 }
             }
         }
@@ -2709,7 +2719,8 @@
                     await cargarTodo();
                     showToast('¡Gracias por tu reseña!');
                 } catch(err) {
-                    alert('Error al enviar reseña.');
+                    console.error(err);
+                    showToast('❌ Error al enviar reseña.');
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2725,7 +2736,8 @@
                     await cargarTodo();
                     showToast('Reseña borrada');
                 } catch(e) {
-                    alert("Error al borrar reseña");
+                    console.error(e);
+                    showToast("❌ Error al borrar reseña");
                 }
             }
         }
@@ -2741,7 +2753,7 @@
                 try {
                     const cat = document.getElementById('form-categoria').value;
                     if(!cat) { 
-                        alert('Crea una categoría primero.'); 
+                        showToast('❌ Crea una categoría primero.'); 
                         return; 
                     }
                     
@@ -2767,14 +2779,16 @@
                         delete p.barcode;
                         const retry = await db.from('productos').insert([p]);
                         if(retry.error) throw retry.error;
-                        alert("Se guardó el producto, pero no los datos de Costo/Barras por falta de tabla SQL.");
+                        showToast("⚠️ Creado, pero sin Costo/Barras (Revisa DB).");
+                    } else {
+                        showToast('Producto guardado correctamente');
                     }
                     
                     document.getElementById('form-producto').reset();
                     await cargarTodo();
-                    showToast('Producto guardado correctamente');
                 } catch(err) { 
-                    alert("Error crítico al guardar el producto"); 
+                    console.error(err);
+                    showToast("❌ Error crítico al guardar el producto"); 
                 } finally {
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
@@ -2783,249 +2797,5 @@
 
         async function descontarStock(id, currentStock) {
             if(currentStock <= 0) { 
-                alert("Este producto ya está agotado."); 
-                return; 
-            }
-            
-            try {
-                const nuevoStock = currentStock - 1;
-                const { error } = await db.from('productos').update({ stock: nuevoStock }).eq('id', id);
-                if(error) throw error;
-                
-                await cargarTodo();
-                showToast(`✅ Venta registrada. Nuevo Stock: ${nuevoStock}`);
-            } catch(e) {
-                alert("Error al descontar el stock de la base de datos.");
-            }
-        }
-
-        async function eliminarProducto(id) {
-            if(confirm("¿Eliminar producto definitivamente?")) {
-                try {
-                    const { error } = await db.from('productos').delete().eq('id', id);
-                    if(error) throw error;
-                    
-                    await cargarTodo();
-                    showToast('Producto eliminado');
-                } catch(e) {
-                    alert("Error al eliminar el producto");
-                }
-            }
-        }
-
-        const formEq = document.getElementById('form-equipo');
-        if(formEq) {
-            formEq.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = e.target.querySelector('button[type="submit"]');
-                const txtOriginal = btn ? btn.innerHTML : '';
-                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Procesando...'; btn.disabled = true; }
-                
-                try {
-                    const em = document.getElementById('equipo-email').value.trim();
-                    const pa = document.getElementById('equipo-pass').value;
-                    const p1 = document.getElementById('perm-prod').checked;
-                    const p2 = document.getElementById('perm-aju').checked;
-
-                    const authClient = supabase.createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false }});
-                    const { data, error } = await authClient.auth.signUp({ email: em, password: pa });
-                    
-                    if(error) throw error;
-                    
-                    const r = await db.from('equipo').insert([{ email: em, rol: 'empleado', permisos: { productos: p1, ajustes: p2 } }]);
-                    if(r.error) throw r.error;
-                    
-                    document.getElementById('form-equipo').reset();
-                    showToast('Empleado Autorizado');
-                    await cargarTodo();
-                } catch(err) {
-                    alert("Error al registrar empleado: " + err.message);
-                } finally {
-                    if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
-                }
-            });
-        }
-
-        db.auth.onAuthStateChange(async (event, session) => {
-            try {
-                if (session) {
-                    const vistaTienda = document.getElementById('vista-tienda');
-                    const vistaAdmin = document.getElementById('vista-admin');
-                    const userEmail = document.getElementById('admin-user-email');
-                    
-                    if(vistaTienda) vistaTienda.style.display = 'none';
-                    if(vistaAdmin) vistaAdmin.style.display = 'block';
-                    if(userEmail) userEmail.textContent = session.user.email;
-                    
-                    const { data: perfil } = await db.from('equipo').select('*').eq('email', session.user.email).maybeSingle();
-                    
-                    if(!perfil) {
-                        const { data: all } = await db.from('equipo').select('id');
-                        if(!all || all.length === 0) {
-                            await db.from('equipo').insert([{ email: session.user.email, rol: 'admin', permisos: {productos:true, ajustes:true} }]);
-                            aplicarPermisos(true, true, true);
-                        } else {
-                            cerrarSesion(); 
-                            alert('Usuario sin rol asignado o fue eliminado del sistema.');
-                        }
-                    } else {
-                        const esAdmin = perfil.rol === 'admin';
-                        aplicarPermisos(esAdmin, perfil.permisos?.productos, perfil.permisos?.ajustes);
-                    }
-                } else {
-                    const vistaTienda = document.getElementById('vista-tienda');
-                    const vistaAdmin = document.getElementById('vista-admin');
-                    const modRes = document.getElementById('modulos-restringidos');
-                    
-                    if(vistaAdmin) vistaAdmin.style.display = 'none';
-                    if(vistaTienda) vistaTienda.style.display = 'block';
-                    if(modRes) modRes.style.display = 'none';
-                }
-            } catch(e) {
-                console.error("Error en auth state:", e);
-            }
-        });
-
-        function aplicarPermisos(esAdmin, prod, aju) {
-            const badge = document.getElementById('admin-role-badge');
-            if(badge) badge.textContent = esAdmin ? '(Dueño)' : '(Staff)';
-            
-            const tabsContainer = document.getElementById('admin-tabs');
-            if(tabsContainer) tabsContainer.style.display = 'flex';
-            
-            const tabInventario = document.getElementById('tab-inventario');
-            if(tabInventario) tabInventario.style.display = prod || esAdmin ? 'block' : 'none';
-
-            if(!prod && !esAdmin) {
-                if (typeof cambiarPestana === 'function') cambiarPestana('gestion');
-            }
-
-            const modRestringidos = document.getElementById('modulos-restringidos');
-            if(modRestringidos) modRestringidos.style.display = 'none';
-            
-            const panelGestion = document.getElementById('panel-gestion');
-            if(panelGestion) panelGestion.style.display = 'block';
-
-            const mEq = document.getElementById('modulo-equipo');
-            if(mEq) mEq.style.display = esAdmin ? 'block' : 'none';
-            
-            const mAj = document.getElementById('modulo-ajustes');
-            if(mAj) mAj.style.display = aju || esAdmin ? 'block' : 'none';
-            
-            const mGal = document.getElementById('modulo-galeria');
-            if(mGal) mGal.style.display = aju || esAdmin ? 'block' : 'none';
-            
-            const mCP = document.getElementById('modulo-crear-producto');
-            if(mCP) mCP.style.display = prod || esAdmin ? 'block' : 'none';
-            
-            const mCat = document.getElementById('modulo-categorias');
-            if(mCat) mCat.style.display = prod || esAdmin ? 'block' : 'none';
-            
-            const mInv = document.getElementById('modulo-inventario');
-            if(mInv && mInv.parentElement) {
-                mInv.parentElement.style.display = prod || esAdmin ? 'block' : 'none';
-            }
-            
-            const mLC = document.getElementById('modulo-lista-cat');
-            if(mLC) mLC.style.display = prod || esAdmin ? 'block' : 'none';
-
-            const mLR = document.getElementById('modulo-lista-resenas');
-            if(mLR) mLR.style.display = prod || esAdmin ? 'block' : 'none';
-            
-            const mLG = document.getElementById('modulo-lista-galeria');
-            if(mLG) mLG.style.display = aju || esAdmin ? 'block' : 'none';
-            
-            const mWA = document.getElementById('modulo-whatsapp');
-            if(mWA) mWA.style.display = aju || esAdmin ? 'block' : 'none';
-
-            const mRep = document.getElementById('modulo-reportes');
-            if(mRep) mRep.style.display = esAdmin ? 'block' : 'none';
-
-            const mPos = document.getElementById('modulo-pos');
-            if(mPos) mPos.style.display = 'block'; 
-        }
-
-        const formLogin = document.getElementById('form-login');
-        if(formLogin) {
-            formLogin.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = e.target.querySelector('button[type="submit"]');
-                const txtOriginal = btn ? btn.innerHTML : '';
-                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verificando...'; btn.disabled = true; }
-                
-                const errLog = document.getElementById('error-login');
-                if(errLog) errLog.style.display = 'none';
-
-                try {
-                    const email = document.getElementById('email-acceso').value.trim();
-                    const password = document.getElementById('clave-acceso').value;
-
-                    const { data, error } = await db.auth.signInWithPassword({ email: email, password: password });
-                    
-                    if (error) { 
-                        if(errLog) errLog.style.display = 'flex'; 
-                    } else { 
-                        cerrarModalLogin(); 
-                        document.getElementById('form-login').reset(); 
-                        showToast('Acceso autorizado'); 
-                    }
-                } catch(err) {
-                    if(errLog) errLog.style.display = 'flex';
-                } finally {
-                    if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
-                }
-            });
-        }
-
-        function cerrarSesion() {
-            try {
-                db.auth.signOut();
-                
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith('sb-')) {
-                        localStorage.removeItem(key);
-                    }
-                });
-                sessionStorage.clear();
-                
-                window.location.replace(window.location.pathname + '?clear=' + Date.now());
-            } catch(e) {
-                console.error(e);
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith('sb-')) {
-                        localStorage.removeItem(key);
-                    }
-                });
-                window.location.reload(true);
-            }
-        }
-
-        // TOAST NOTIFICATIONS
-        function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = `fixed top-20 right-4 z-[200] bg-gray-900 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2 animate-slide-right`;
-            toast.innerHTML = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => { 
-                toast.style.opacity = '0'; 
-                setTimeout(() => toast.remove(), 300); 
-            }, 3000);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                cerrarModalLogin();
-                cerrarModalResena();
-                cerrarModalProducto();
-                cerrarCarrito();
-                cerrarModalWA();
-                cerrarModalEditar();
-            }
-        });
-
-        // INICIALIZAR EL SISTEMA
-        cargarTodo();
-
-    </script>
-</body>
-</html>
+                showToast("❌ Este producto ya está agotado."); 
+                return;
