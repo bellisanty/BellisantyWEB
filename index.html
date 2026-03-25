@@ -1151,11 +1151,13 @@
             document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
         }
 
+        // --- FUNCION FAQ ---
         function toggleFaq(element) {
             const item = element.closest('.faq-item');
             item.classList.toggle('active');
         }
 
+        // --- PUERTA SECRETA LOGIN ---
         let secretClickCount = 0;
         let secretTimer;
         function activarPuertaSecreta() {
@@ -1171,6 +1173,7 @@
             }
         }
 
+        // --- BCV FETCH CON TRY/CATCH SEGURO ---
         async function fetchBCV() {
             try {
                 const res = await fetch("https://ve.dolarapi.com/v1/dolares/oficial");
@@ -1205,6 +1208,7 @@
             }
         }
 
+        // --- LÓGICA DE OCULTAR DIRECCIÓN (RETIRO EN TIENDA) ---
         const selectDelivery = document.getElementById('checkout-delivery');
         const txtDireccion = document.getElementById('checkout-dir');
         
@@ -1222,6 +1226,7 @@
             toggleDireccion();
         }
 
+        // --- NUEVO: SISTEMA DE NÚMEROS DE WHATSAPP CON SUPABASE ---
         async function cargarNumerosWA() {
             try {
                 const { data, error } = await db.from('whatsapp').select('*').order('id', { ascending: true });
@@ -1255,13 +1260,16 @@
                     btn.disabled = true;
                     try {
                         const { error } = await db.from('whatsapp').insert([{ nombre: nom, numero: num }]);
-                        if(error) throw error;
+                        if(error) {
+                            showToast("⚠️ Error: Asegúrate de haber creado la tabla 'whatsapp' en Supabase.");
+                            throw error;
+                        }
                         
                         formWA.reset();
                         showToast('✅ Línea agregada correctamente');
                         await cargarNumerosWA(); 
                     } catch(err) {
-                        showToast("⚠️ Error: Revisa que la tabla 'whatsapp' exista.");
+                        console.error(err);
                     } finally {
                         btn.innerHTML = txtOriginal;
                         btn.disabled = false;
@@ -1276,7 +1284,7 @@
                 return;
             }
             if(String(id) === 'default') {
-                showToast("⚠️ Agrega un número real primero");
+                showToast("⚠️ Agrega un número real primero para reemplazar este");
                 return;
             }
             if(confirm("¿Seguro que quieres eliminar esta línea de WhatsApp?")) {
@@ -1334,6 +1342,7 @@
             document.body.style.overflow = '';
         }
 
+        // --- PESTAÑAS (TABS) DEL PANEL DE ADMINISTRADOR ---
         function cambiarPestana(pestana) {
             const btnGestion = document.getElementById('tab-gestion');
             const btnInventario = document.getElementById('tab-inventario');
@@ -1405,6 +1414,7 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
+            // Calculamos el precio en Bs de forma sutil
             const precioBsTxt = tasaBCV > 0 ? ` (Ref: ${(p.price * tasaBCV).toFixed(2)} Bs)` : '';
             document.getElementById('modal-prod-price').textContent = `$${p.price}${precioBsTxt}`;
             
@@ -1436,6 +1446,7 @@
             document.body.style.overflow = ''; 
         }
 
+        // --- SISTEMA DE CARRITO CLIENTE ---
         function abrirCarrito() { 
             document.getElementById('modal-carrito').style.display = 'flex'; 
             document.body.style.overflow = 'hidden'; 
@@ -2323,6 +2334,7 @@
             `).join('');
         }
 
+        // --- NUEVA LÓGICA DE EDICIÓN DE PRODUCTOS ---
         function abrirModalEditar(id) {
             const p = inventarioGlobal.find(x => x.id == id);
             if(!p) return;
