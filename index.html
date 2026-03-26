@@ -137,11 +137,9 @@
         .star-rating i:hover ~ i { color: #e5e7eb !important; }
         .star-rating i:hover, .star-rating i.hover-active { color: #fbbf24 !important; }
         
-        /* Ocultar barra de scroll en las pestañas (Tabs) del panel admin */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Estilo para los inputs de archivo nuevos */
         .file-upload-btn {
             @apply w-full border border-dashed border-belli-300 bg-belli-50 hover:bg-belli-100 text-belli-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-sm;
         }
@@ -849,6 +847,13 @@
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-belli-50 rounded-lg flex items-center justify-center text-belli-600"><i class="fas fa-plus text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Nuevo Producto</h2></div>
                             
                             <form id="form-producto" class="space-y-4">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CÓDIGO DE BARRAS</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="barcode" placeholder="Escanea o escribe..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" onchange="chequearBarcode(this.value)">
+                                        <button type="button" onclick="iniciarEscaner('nuevo-prod')" class="bg-gray-100 text-gray-600 px-4 rounded-xl hover:bg-gray-200 transition"><i class="fas fa-camera"></i></button>
+                                    </div>
+                                </div>
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">NOMBRE</label><input type="text" id="nombre" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">PRECIO VENTA ($)</label><input type="number" id="precio" step="0.01" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
@@ -856,9 +861,8 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">STOCK</label><input type="number" id="stock" min="0" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" value="10"></div>
-                                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CÓDIGO BARRAS</label><input type="text" id="barcode" placeholder="Opcional..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
+                                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CATEGORÍA</label><select id="form-categoria" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"></select></div>
                                 </div>
-                                <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CATEGORÍA</label><select id="form-categoria" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"></select></div>
                                 
                                 <div>
                                     <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IMAGEN DEL PRODUCTO</label>
@@ -938,19 +942,23 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center shadow-inner">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Ventas Brutas</p>
-                            <p id="rep-ventas" class="text-3xl font-black text-gray-900">$0.00</p>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Ventas Brutas</p>
+                            <p id="rep-ventas" class="text-2xl font-black text-gray-900">$0.00</p>
                         </div>
                         <div class="bg-red-50 p-6 rounded-2xl border border-red-100 text-center shadow-inner">
-                            <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Costos Inv.</p>
-                            <p id="rep-costos" class="text-3xl font-black text-red-600">$0.00</p>
+                            <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2">Costos Inv.</p>
+                            <p id="rep-costos" class="text-2xl font-black text-red-600">$0.00</p>
                         </div>
                         <div class="bg-emerald-50 p-6 rounded-2xl border border-emerald-200 text-center shadow-lg shadow-emerald-100 transform md:scale-105 z-10 relative">
-                            <div class="absolute -top-3 -right-3 bg-emerald-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md"><i class="fas fa-check"></i></div>
-                            <p class="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-2">Ganancia Neta</p>
-                            <p id="rep-ganancia" class="text-4xl font-black text-emerald-600">$0.00</p>
+                            <div class="absolute -top-3 -right-3 bg-emerald-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md"><i class="fas fa-check text-[10px]"></i></div>
+                            <p class="text-[10px] font-bold text-emerald-800 uppercase tracking-widest mb-2">Ganancia USD</p>
+                            <p id="rep-ganancia" class="text-3xl font-black text-emerald-600">$0.00</p>
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-200 text-center shadow-inner">
+                            <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-2">Total Exacto Bs</p>
+                            <p id="rep-ganancia-bs" class="text-xl font-black text-blue-600">0.00 Bs</p>
                         </div>
                     </div>
                     
@@ -965,7 +973,7 @@
                                     <tr>
                                         <th class="px-4 py-2 font-bold text-gray-900">Fecha</th>
                                         <th class="px-4 py-2 font-bold text-gray-900">Código</th>
-                                        <th class="px-4 py-2 font-bold text-gray-900">Cliente/Origen</th>
+                                        <th class="px-4 py-2 font-bold text-gray-900">Cliente/Vendedor</th>
                                         <th class="px-4 py-2 font-bold text-gray-900">Método de Pago</th>
                                         <th class="px-4 py-2 font-bold text-gray-900 text-right">Monto ($)</th>
                                     </tr>
@@ -1672,6 +1680,12 @@
                             inputInv.value = decodedText;
                             buscarInventarioAdmin(decodedText);
                         }
+                    } else if (scanTarget === 'nuevo-prod') {
+                        const inputN = document.getElementById('barcode');
+                        if(inputN) {
+                            inputN.value = decodedText;
+                            chequearBarcode(decodedText);
+                        }
                     }
                 },
                 (errorMessage) => {}
@@ -1694,6 +1708,40 @@
             }
         }
 
+        // --- SISTEMA INTELIGENTE DE CÓDIGO DE BARRAS ---
+        function chequearBarcode(cod) {
+            if(!cod) return;
+            const existeInv = inventarioGlobal.find(p => p.barcode === cod);
+            if(existeInv) {
+                showToast('⚠️ Este producto ya está actualmente en el inventario.');
+                return;
+            }
+            let encontrado = false;
+            for(let ped of pedidosGlobal) {
+                if(ped.items && Array.isArray(ped.items)) {
+                    const viejo = ped.items.find(i => i.barcode === cod);
+                    if(viejo) {
+                        document.getElementById('nombre').value = viejo.name || '';
+                        document.getElementById('precio').value = viejo.price || '';
+                        document.getElementById('costo').value = viejo.costo || 0;
+                        document.getElementById('form-categoria').value = viejo.category || '';
+                        showToast('💡 Producto recuperado del historial.');
+                        encontrado = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // --- LÓGICA CLOUD POS ---
+        async function guardarPOSCloud() {
+            if(currentUserEmail && currentUserEmail !== 'admin') {
+                try {
+                    await db.from('equipo').update({ pos_cart: posCarrito }).eq('email', currentUserEmail);
+                } catch(e) { console.error("Error guardando caja:", e); }
+            }
+        }
+
         function escanearPOS(e) {
             if(e.key === 'Enter') {
                 if(e.preventDefault) e.preventDefault();
@@ -1713,6 +1761,7 @@
                         posCarrito.push({...p, qty: 1, costo: p.costo || 0}); 
                     }
                     renderPOS();
+                    guardarPOSCloud();
                 } else {
                     showToast('⚠️ Producto no encontrado: ' + cod);
                 }
@@ -1726,9 +1775,14 @@
             if(qty <= 0) { posCarrito = posCarrito.filter(x => x.id != id); } 
             else { const item = posCarrito.find(x => x.id == id); if(item) item.qty = qty; }
             renderPOS();
+            guardarPOSCloud();
         }
         
-        function eliminarDelPOS(id) { posCarrito = posCarrito.filter(x => x.id != id); renderPOS(); }
+        function eliminarDelPOS(id) { 
+            posCarrito = posCarrito.filter(x => x.id != id); 
+            renderPOS(); 
+            guardarPOSCloud();
+        }
         
         function renderPOS() {
             const list = document.getElementById('pos-cart-list');
@@ -1859,6 +1913,7 @@
                 document.getElementById('pos-tipo-precio').value = 'divisa';
                 document.getElementById('pos-metodo').value = 'Divisa';
                 renderPOS(); 
+                guardarPOSCloud();
                 showToast('✅ Venta de Caja registrada y cobrada con éxito'); 
                 
                 cargarTodo(); 
@@ -2004,11 +2059,15 @@
             
             let vBrutas = 0; 
             let vCostos = 0;
+            let vBsExactos = 0;
             
             const entregados = filtrados.filter(p => p.estado === 'Entregado');
             
             entregados.forEach(ped => {
+                const pedTasa = ped.tasa_bcv || tasaBCV;
                 vBrutas += parseFloat(ped.total_usd);
+                vBsExactos += (parseFloat(ped.total_usd) * pedTasa);
+                
                 if(ped.items && Array.isArray(ped.items)) {
                     ped.items.forEach(it => {
                         const cos = it.costo ? parseFloat(it.costo) : 0;
@@ -2022,10 +2081,12 @@
             const eB = document.getElementById('rep-ventas');
             const eC = document.getElementById('rep-costos');
             const eG = document.getElementById('rep-ganancia');
+            const eGBs = document.getElementById('rep-ganancia-bs');
             
             if(eB) eB.textContent = `$${vBrutas.toFixed(2)}`;
             if(eC) eC.textContent = `$${vCostos.toFixed(2)}`;
             if(eG) eG.textContent = `$${ganancia.toFixed(2)}`;
+            if(eGBs) eGBs.textContent = `${vBsExactos.toFixed(2)} Bs`;
 
             renderListaDetalladaReportes(filtrados);
         }
@@ -2048,10 +2109,10 @@
                 const icon = p.estado === 'Entregado' ? '<i class="fas fa-check-circle text-green-500" title="Entregado"></i>' : '<i class="fas fa-clock text-yellow-500" title="Pendiente/Proceso"></i>';
 
                 return `
-                <tr class="hover:bg-gray-50 transition cursor-default">
+                <tr class="hover:bg-gray-50 transition cursor-default border-b border-gray-100 last:border-0">
                     <td class="px-4 py-3 whitespace-nowrap">${date}</td>
                     <td class="px-4 py-3 font-bold text-gray-900">${p.codigo} ${icon}</td>
-                    <td class="px-4 py-3 truncate max-w-[150px]">${cl}</td>
+                    <td class="px-4 py-3 truncate max-w-[150px]" title="${cl}">${cl}</td>
                     <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${p.metodo_pago || 'Por definir'}</span></td>
                     <td class="px-4 py-3 text-right font-black text-gray-900">$${parseFloat(p.total_usd).toFixed(2)}</td>
                 </tr>
@@ -2066,12 +2127,15 @@
             }
 
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "FECHA,CODIGO,CLIENTE,ORIGEN,VENDEDOR,METODO_PAGO,ESTADO,TOTAL_USD,TASA_BCV\r\n";
+            csvContent += "FECHA,CODIGO,CLIENTE,ORIGEN,VENDEDOR,METODO_PAGO,ESTADO,TOTAL_USD,TASA_BCV,TOTAL_BS\r\n";
 
             pedidosReportesFiltrados.forEach(p => {
                 const fecha = new Date(p.created_at).toLocaleDateString('es-VE');
                 const cliente = p.cliente ? p.cliente.replace(/,/g, ' ') : '';
-                const row = `${fecha},${p.codigo},${cliente},${p.origen || 'web'},${p.vendedor || 'cliente'},${p.metodo_pago || 'Por definir'},${p.estado},${p.total_usd},${p.tasa_bcv}`;
+                const pedTasa = p.tasa_bcv || tasaBCV;
+                const totalBs = parseFloat(p.total_usd) * pedTasa;
+                
+                const row = `${fecha},${p.codigo},${cliente},${p.origen || 'web'},${p.vendedor || 'cliente'},${p.metodo_pago || 'Por definir'},${p.estado},${parseFloat(p.total_usd).toFixed(2)},${pedTasa},${totalBs.toFixed(2)}`;
                 csvContent += row + "\r\n";
             });
 
@@ -2708,7 +2772,7 @@
                     const { data, error } = await authClient.auth.signUp({ email: em, password: pa });
                     if(error) throw error;
                     
-                    const r = await db.from('equipo').insert([{ email: em, rol: 'empleado', permisos: { pedidos: pPed, pos: pPos, inventario: pInv, reportes: pRep, configuracion: pCfg } }]);
+                    const r = await db.from('equipo').insert([{ email: em, rol: 'empleado', pos_cart: [], permisos: { pedidos: pPed, pos: pPos, inventario: pInv, reportes: pRep, configuracion: pCfg } }]);
                     if(r.error) throw r.error;
                     
                     document.getElementById('form-equipo').reset(); showToast('✅ Empleado Autorizado'); await cargarTodo();
@@ -2733,7 +2797,7 @@
                     if(!perfil) {
                         const { data: all } = await db.from('equipo').select('id');
                         if(!all || all.length === 0) {
-                            await db.from('equipo').insert([{ email: session.user.email, rol: 'admin', permisos: {pedidos:true, pos:true, inventario:true, reportes:true, configuracion:true} }]);
+                            await db.from('equipo').insert([{ email: session.user.email, rol: 'admin', pos_cart: [], permisos: {pedidos:true, pos:true, inventario:true, reportes:true, configuracion:true} }]);
                             aplicarPermisos(true, {pedidos:true, pos:true, inventario:true, reportes:true, configuracion:true});
                         } else {
                             cerrarSesion(); showToast('⚠️ Usuario sin rol asignado.');
@@ -2741,6 +2805,10 @@
                     } else {
                         const esAdmin = perfil.rol === 'admin';
                         const p = perfil.permisos || {};
+                        if (perfil.pos_cart && Array.isArray(perfil.pos_cart) && perfil.pos_cart.length > 0) {
+                            posCarrito = perfil.pos_cart;
+                            renderPOS();
+                        }
                         aplicarPermisos(esAdmin, p);
                     }
                 } else {
