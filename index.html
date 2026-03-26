@@ -1144,7 +1144,7 @@
         let testimoniosGlobal = [];
         let galeriaGlobal = [];
         let pedidosGlobal = [];
-        let pedidosReportesFiltrados = []; // Para el CSV / PDF
+        let pedidosReportesFiltrados = []; 
         let equipoGlobal = []; 
         let carrito = []; 
         let posCarrito = []; 
@@ -1441,7 +1441,7 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
-            // Catálogo solo en $ (Ocultamos Ref en Bs)
+            // Catálogo solo en $
             document.getElementById('modal-prod-price').textContent = `$${p.price}`;
             
             const btnCart = document.getElementById('modal-btn-cart');
@@ -1738,7 +1738,6 @@
             }
         }
 
-        // --- ACTUALIZAR SELECTS DE MÉTODOS DE PAGO EN EL POS ---
         function actualizarMetodosPago() {
             const tipoPrecio = document.getElementById('pos-tipo-precio').value;
             const selectMetodo = document.getElementById('pos-metodo');
@@ -1836,13 +1835,17 @@
                 const precioBsItem = (i.price * tasaBCV) * (1 + (tipoPrecio === 'bs' ? (configRecargoBs/100) : 0));
                 totalBsConRecargo += (precioBsItem * i.qty);
                 
+                const unitUsd = finalPriceBaseUsd.toFixed(2);
+                const unitBs = ((i.price * tasaBCV) * (1 + (tipoPrecio === 'bs' ? (configRecargoBs/100) : 0))).toFixed(2);
+
                 return `
                 <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
                     <div class="flex-1 min-w-0">
                         <span class="text-xs font-bold text-gray-800 block truncate">${i.name}</span>
-                        <span class="text-xs text-blue-600 font-black">$${finalPriceBaseUsd.toFixed(2)}</span>
+                        <span class="text-[10px] text-gray-400 font-medium block mt-0.5">Unit: $${unitUsd} | ${unitBs} Bs</span>
                     </div>
                     <div class="flex items-center gap-3">
+                        <span class="text-sm text-blue-600 font-black mr-2">$${(finalPriceBaseUsd * i.qty).toFixed(2)}</span>
                         <div class="flex items-center bg-gray-50 rounded-lg border border-gray-200">
                             <button onclick="actualizarCantidadPOS('${i.id}', ${i.qty - 1})" class="px-2.5 py-1 text-gray-500 hover:text-gray-900 cursor-pointer font-bold">-</button>
                             <span class="text-xs font-bold w-6 text-center">${i.qty}</span>
@@ -1896,7 +1899,6 @@
                     cartList = p.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
                 }
 
-                // Extraer la nota de la dirección con seguridad
                 const notaObj = p.direccion || '';
                 const notaHTML = notaObj.startsWith('Nota:') ? `<p class="text-[10px] text-gray-500 mt-1 italic">${notaObj}</p>` : '';
 
@@ -1977,7 +1979,6 @@
             }
         }
 
-        // --- CARGA GENERAL ---
         async function cargarTodo() {
             fetchBCV();
             await cargarNumerosWA();
@@ -2362,7 +2363,6 @@
                     ? `<button onclick="event.stopPropagation(); agregarAlCarrito('${p.id}')" class="bg-gray-900 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-xl hover:bg-belli-700 transition cursor-pointer z-30 relative shadow-md flex items-center justify-center"><i class="fas fa-shopping-bag"></i></button>`
                     : `<button disabled class="bg-gray-200 text-gray-400 w-8 h-8 sm:w-10 sm:h-10 rounded-xl cursor-not-allowed z-30 relative flex items-center justify-center"><i class="fas fa-ban"></i></button>`;
                 
-                // Catálogo solo en $
                 const precioBs = ''; 
 
                 return `
@@ -2652,10 +2652,17 @@
                 itemsHtml = p.items.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px;"><span style="flex:1;">${i.qty}x ${i.name}</span><span style="font-weight:bold;">$${(i.price * i.qty).toFixed(2)}</span></div>`).join('');
             }
 
-            const notaObj = p.direccion || '';
-            const notaHtml = notaObj.startsWith('Nota:') ? `<div style="margin: 10px 0; padding: 5px; border: 1px dashed #000; font-size: 11px;"><b>NOTA:</b> ${notaObj.replace('Nota:', '')}</div>` : '';
+            // Identificar si es venta en Bs
+            const esVentaBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(p.metodo_pago);
+            
+            let totalesHtml = '';
+            if(esVentaBs) {
+                totalesHtml = `<div style="display:flex; justify-content:space-between; font-size:16px; margin-top:4px;" class="font-bold"><span>TOTAL A PAGAR:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div>`;
+            } else {
+                totalesHtml = `<div style="display:flex; justify-content:space-between; font-size:16px;" class="font-bold"><span>TOTAL USD:</span><span>$${parseFloat(p.total_usd).toFixed(2)}</span></div><div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px;"><span>TASA BCV:</span><span>${p.tasa_bcv} Bs</span></div><div style="display:flex; justify-content:space-between; font-size:14px; margin-top:4px;" class="font-bold"><span>TOTAL BS:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div>`;
+            }
 
-            const htmlContent = `<html><head><title>Factura ${p.codigo}</title><style>@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'); body { font-family: 'Courier Prime', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; background: #fff; } .text-center { text-align: center; } .border-b { border-bottom: 1px dashed #000; padding-bottom: 12px; margin-bottom: 12px; } .font-bold { font-weight: bold; } .title { font-size: 22px; font-weight: bold; margin-bottom: 5px; } p { margin: 4px 0; font-size: 13px; }</style></head><body onload="window.print(); setTimeout(() => window.close(), 500);"><div class="text-center border-b"><div class="title">BELLISANTY</div><p>LUXURY GIFTING</p><p>Pueblo Llano, Mérida</p><p>WhatsApp: +58 412-6480799</p></div><div class="border-b"><p><b>ORDEN:</b> ${p.codigo}</p><p><b>FECHA:</b> ${new Date(p.created_at).toLocaleString('es-VE')}</p><p><b>CLIENTE:</b> ${p.cliente.toUpperCase()}</p><p><b>TELÉFONO:</b> ${p.telefono}</p><p><b>MÉTODO PAGO:</b> ${p.metodo_pago}</p><p><b>CAJERO:</b> ${p.vendedor === 'cliente' ? 'Web' : p.vendedor}</p></div>${notaHtml}<div class="border-b"><p class="font-bold" style="margin-bottom:10px; display:flex; justify-content:space-between;"><span>CANT DESCRIPCIÓN</span><span>TOTAL</span></p>${itemsHtml}</div><div class="border-b"><div style="display:flex; justify-content:space-between; font-size:16px;" class="font-bold"><span>TOTAL USD:</span><span>$${parseFloat(p.total_usd).toFixed(2)}</span></div><div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px;"><span>TASA BCV:</span><span>${p.tasa_bcv} Bs</span></div><div style="display:flex; justify-content:space-between; font-size:14px; margin-top:4px;" class="font-bold"><span>TOTAL BS:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div></div><div class="text-center" style="margin-top: 20px;"><p>¡Gracias por tu compra!</p><p>@bellisanty</p></div></body></html>`;
+            const htmlContent = `<html><head><title>Factura ${p.codigo}</title><style>@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'); body { font-family: 'Courier Prime', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; background: #fff; } .text-center { text-align: center; } .border-b { border-bottom: 1px dashed #000; padding-bottom: 12px; margin-bottom: 12px; } .font-bold { font-weight: bold; } .title { font-size: 22px; font-weight: bold; margin-bottom: 5px; } p { margin: 4px 0; font-size: 13px; }</style></head><body onload="window.print(); setTimeout(() => window.close(), 500);"><div class="text-center border-b"><div class="title">BELLISANTY</div><p>LUXURY GIFTING</p><p>Pueblo Llano, Mérida</p><p>WhatsApp: +58 412-6480799</p></div><div class="border-b"><p><b>ORDEN:</b> ${p.codigo}</p><p><b>FECHA:</b> ${new Date(p.created_at).toLocaleString('es-VE')}</p><p><b>CLIENTE:</b> ${p.cliente.toUpperCase()}</p><p><b>TELÉFONO:</b> ${p.telefono}</p><p><b>MÉTODO PAGO:</b> ${p.metodo_pago}</p><p><b>CAJERO:</b> ${p.vendedor === 'cliente' ? 'Web' : p.vendedor}</p></div><div class="border-b"><p class="font-bold" style="margin-bottom:10px; display:flex; justify-content:space-between;"><span>CANT DESCRIPCIÓN</span><span>TOTAL</span></p>${itemsHtml}</div><div class="border-b">${totalesHtml}</div><div class="text-center" style="margin-top: 20px;"><p>¡Gracias por tu compra!</p><p>@bellisanty</p></div></body></html>`;
             
             const printWindow = window.open('', '_blank', 'width=400,height=600');
             if(printWindow) { printWindow.document.write(htmlContent); printWindow.document.close(); } 
