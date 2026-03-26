@@ -137,9 +137,11 @@
         .star-rating i:hover ~ i { color: #e5e7eb !important; }
         .star-rating i:hover, .star-rating i.hover-active { color: #fbbf24 !important; }
         
+        /* Ocultar barra de scroll en las pestañas (Tabs) del panel admin */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Estilo para los inputs de archivo nuevos */
         .file-upload-btn {
             @apply w-full border border-dashed border-belli-300 bg-belli-50 hover:bg-belli-100 text-belli-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-sm;
         }
@@ -831,6 +833,11 @@
                     <button onclick="procesarVentaPOS()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition cursor-pointer text-lg shadow-xl shadow-blue-200 flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle"></i> Procesar Venta Local
                     </button>
+
+                    <div class="mt-8 pt-6 border-t border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-900 mb-3"><i class="fas fa-history text-blue-400 mr-1"></i> Tus Ventas de Hoy</h3>
+                        <div id="mis-ventas-hoy" class="space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
+                    </div>
                 </div>
             </div>
 
@@ -906,14 +913,28 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-gray-100 gap-4">
                         <div class="flex items-center gap-3"><div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600"><i class="fas fa-chart-line text-lg"></i></div><h2 class="text-xl font-bold text-gray-900">Reporte Financiero Global</h2></div>
                         
-                        <div class="flex flex-wrap gap-3">
-                            <select id="filtro-rep-origen" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-4 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
-                                <option value="todos">Todos los Orígenes</option>
-                                <option value="web">Pedidos Web (Catálogo)</option>
-                                <option value="mostrador">Ventas Mostrador (POS)</option>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="filtro-rep-origen" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
+                                <option value="todos">🌐 Todos los Orígenes</option>
+                                <option value="web">🛒 Pedidos Web (Catálogo)</option>
+                                <option value="mostrador">🏪 Ventas Mostrador (POS)</option>
                             </select>
-                            <select id="filtro-rep-vendedor" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-4 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
+                            
+                            <select id="filtro-rep-metodo" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
+                                <option value="todos">💳 Todos los Métodos</option>
+                                <option value="Divisa">💵 Efectivo (Divisa)</option>
+                                <option value="Efectivo Bs">💵 Efectivo (Bs)</option>
+                                <option value="Pago Movil">📱 Pago Móvil</option>
+                                <option value="Punto de Venta">💳 Punto de Venta</option>
+                                <option value="Por definir">⏳ Por definir (Web)</option>
+                            </select>
+
+                            <select id="filtro-rep-vendedor" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
                                 </select>
+                            
+                            <button onclick="descargarCSV()" class="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-600 transition cursor-pointer text-xs shadow-md inline-flex items-center gap-2">
+                                <i class="fas fa-download"></i> Descargar Excel/CSV
+                            </button>
                         </div>
                     </div>
 
@@ -932,8 +953,30 @@
                             <p id="rep-ganancia" class="text-4xl font-black text-emerald-600">$0.00</p>
                         </div>
                     </div>
+                    
+                    <div class="border border-gray-100 rounded-2xl overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Lista de Transacciones Filtradas</h3>
+                            <span id="rep-cantidad-transacciones" class="text-xs text-gray-500 font-bold bg-gray-200 px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-[300px]">
+                            <table class="w-full text-left text-xs text-gray-600">
+                                <thead class="bg-white sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th class="px-4 py-2 font-bold text-gray-900">Fecha</th>
+                                        <th class="px-4 py-2 font-bold text-gray-900">Código</th>
+                                        <th class="px-4 py-2 font-bold text-gray-900">Cliente/Origen</th>
+                                        <th class="px-4 py-2 font-bold text-gray-900">Método de Pago</th>
+                                        <th class="px-4 py-2 font-bold text-gray-900 text-right">Monto ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-detallada-reportes" class="divide-y divide-gray-50">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                    <div class="text-right">
+                    <div class="text-right border-t border-gray-100 pt-4">
                         <button onclick="reiniciarVentas()" class="border border-red-200 bg-red-50 text-red-600 font-bold py-2.5 px-6 rounded-xl hover:bg-red-100 transition text-xs cursor-pointer inline-flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Resetear Toda la Base de Datos</button>
                     </div>
                 </div>
@@ -1090,6 +1133,7 @@
         let testimoniosGlobal = [];
         let galeriaGlobal = [];
         let pedidosGlobal = [];
+        let pedidosReportesFiltrados = []; // Para el CSV
         let equipoGlobal = []; 
         let carrito = []; 
         let posCarrito = []; 
@@ -1100,7 +1144,6 @@
         let scanTarget = ''; 
         let lineasWA = []; 
 
-        // VARIABLES GLOBALES NUEVAS PARA EL ERP
         let currentUserEmail = 'admin'; 
         let configRecargoBs = 50; 
         let configAjusteMayor = 0;
@@ -1199,10 +1242,8 @@
         async function subirImagenSupabase(fileOriginal) {
             const fileCompressed = await comprimirImagen(fileOriginal);
             const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.webp`;
-            
             const { data, error } = await db.storage.from('productos').upload(fileName, fileCompressed, { cacheControl: '3600', upsert: false });
             if (error) throw new Error("storage_error");
-            
             const { data: publicUrlData } = db.storage.from('productos').getPublicUrl(fileName);
             return publicUrlData.publicUrl;
         }
@@ -1216,7 +1257,6 @@
                     }
                 });
             }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-            
             document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
         }
 
@@ -1230,14 +1270,8 @@
         function activarPuertaSecreta() {
             secretClickCount++;
             clearTimeout(secretTimer);
-            secretTimer = setTimeout(() => {
-                secretClickCount = 0;
-            }, 1000);
-            
-            if(secretClickCount === 3) {
-                abrirModalLogin();
-                secretClickCount = 0;
-            }
+            secretTimer = setTimeout(() => { secretClickCount = 0; }, 1000);
+            if(secretClickCount === 3) { abrirModalLogin(); secretClickCount = 0; }
         }
 
         async function fetchBCV() {
@@ -1255,7 +1289,6 @@
                 actualizarTotalesCarrito();
                 if (inventarioGlobal.length > 0) filtrarProductos(filtroActual);
             } catch(e) {
-                console.error("BCV Error:", e);
                 const navDisplay = document.getElementById('bcv-rate-display');
                 if(navDisplay) navDisplay.innerHTML = `🇻🇪 BCV: <span class="font-bold text-red-300">N/D</span>`;
                 const cartDisplay = document.getElementById('cart-bcv-rate');
@@ -1268,11 +1301,8 @@
         if (selectDelivery && txtDireccion) {
             const toggleDireccion = () => {
                 if (selectDelivery.value === 'Retiro en tienda') {
-                    txtDireccion.parentElement.classList.add('hidden');
-                    txtDireccion.value = ''; 
-                } else {
-                    txtDireccion.parentElement.classList.remove('hidden');
-                }
+                    txtDireccion.parentElement.classList.add('hidden'); txtDireccion.value = ''; 
+                } else { txtDireccion.parentElement.classList.remove('hidden'); }
             };
             selectDelivery.addEventListener('change', toggleDireccion);
             toggleDireccion();
@@ -1297,12 +1327,10 @@
                 e.preventDefault();
                 const nom = document.getElementById('wa-nombre').value.trim();
                 const num = document.getElementById('wa-numero').value.trim().replace(/\D/g,''); 
-                
                 if(nom && num) {
                     const btn = e.target.querySelector('button[type="submit"]');
                     const txtOriginal = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
-                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...'; btn.disabled = true;
                     try {
                         const { error } = await db.from('whatsapp').insert([{ nombre: nom, numero: num }]);
                         if(error) { showToast("⚠️ Error guardando número en BD."); throw error; }
@@ -1370,6 +1398,7 @@
                     }
                 }
             });
+            if(pestana === 'pos') renderMisVentasHoy();
         }
 
         let mobileMenuOpen = false;
@@ -1423,7 +1452,6 @@
 
         function cerrarModalProducto() { document.getElementById('modal-producto').style.display = 'none'; document.body.style.overflow = ''; }
 
-        // --- SISTEMA DE CARRITO CLIENTE ---
         function abrirCarrito() { document.getElementById('modal-carrito').style.display = 'flex'; document.body.style.overflow = 'hidden'; irPasoCarrito(1); renderItemsCarrito(); }
         function cerrarCarrito() { document.getElementById('modal-carrito').style.display = 'none'; document.body.style.overflow = ''; }
 
@@ -1438,27 +1466,20 @@
             } else {
                 carrito.push({...p, qty: 1, costo: p.costo || 0});
             }
-            actualizarIconosCarrito();
-            localStorage.setItem('belli_cart', JSON.stringify(carrito));
-            showToast('✅ Añadido al carrito');
+            actualizarIconosCarrito(); localStorage.setItem('belli_cart', JSON.stringify(carrito)); showToast('✅ Añadido al carrito');
         }
 
         function actualizarCantidadCarrito(id, qty) {
             const p = inventarioGlobal.find(x => x.id == id);
             if(qty > p.stock) { showToast('⚠️ Stock máximo'); return; }
             if(qty <= 0) { carrito = carrito.filter(x => x.id != id); } 
-            else {
-                const item = carrito.find(x => x.id == id);
-                if(item) item.qty = qty;
-            }
-            actualizarIconosCarrito(); renderItemsCarrito();
-            localStorage.setItem('belli_cart', JSON.stringify(carrito));
+            else { const item = carrito.find(x => x.id == id); if(item) item.qty = qty; }
+            actualizarIconosCarrito(); renderItemsCarrito(); localStorage.setItem('belli_cart', JSON.stringify(carrito));
         }
 
         function eliminarDelCarrito(id) {
             carrito = carrito.filter(x => x.id != id);
-            actualizarIconosCarrito(); renderItemsCarrito();
-            localStorage.setItem('belli_cart', JSON.stringify(carrito));
+            actualizarIconosCarrito(); renderItemsCarrito(); localStorage.setItem('belli_cart', JSON.stringify(carrito));
         }
 
         function actualizarIconosCarrito() {
@@ -1519,9 +1540,8 @@
             const btnConf = document.getElementById('btn-cart-confirm');
             if(!step1 || !step2 || !btnNext || !btnConf) return;
 
-            if(paso === 1) {
-                step1.style.display = 'block'; step2.style.display = 'none'; btnNext.style.display = 'flex'; btnConf.style.display = 'none';
-            } else if(paso === 2) {
+            if(paso === 1) { step1.style.display = 'block'; step2.style.display = 'none'; btnNext.style.display = 'flex'; btnConf.style.display = 'none'; } 
+            else if(paso === 2) {
                 if(carrito.length === 0) return;
                 step1.style.display = 'none'; step2.style.display = 'block'; btnNext.style.display = 'none'; btnConf.style.display = 'flex';
             }
@@ -1760,6 +1780,41 @@
                 totalBcvE.textContent = `0.00 Bs`;
             }
         }
+
+        function renderMisVentasHoy() {
+            const cont = document.getElementById('mis-ventas-hoy');
+            if(!cont) return;
+
+            const hoy = new Date().toISOString().split('T')[0];
+            const misVentas = pedidosGlobal.filter(p => {
+                if(!p.created_at) return false;
+                const esHoy = p.created_at.split('T')[0] === hoy;
+                const esMia = p.vendedor === currentUserEmail;
+                const esPOS = p.origen === 'mostrador';
+                return esHoy && esMia && esPOS;
+            });
+
+            if(misVentas.length === 0) {
+                cont.innerHTML = '<p class="text-xs text-gray-400 py-2">No has realizado ventas en caja hoy.</p>';
+                return;
+            }
+
+            cont.innerHTML = misVentas.map(p => {
+                const hora = new Date(p.created_at).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+                return `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                    <div>
+                        <span class="text-xs font-bold text-gray-900 block">${p.codigo}</span>
+                        <span class="text-[10px] text-gray-500">${hora} • ${p.metodo_pago}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-black text-green-600">$${parseFloat(p.total_usd).toFixed(2)}</span>
+                        <button onclick="imprimirFactura('${p.id}')" class="text-blue-500 hover:text-blue-700 transition cursor-pointer" title="Reimprimir Ticket"><i class="fas fa-print text-sm"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
         
         async function procesarVentaPOS() {
             if(posCarrito.length === 0) { showToast('⚠️ La caja está vacía.'); return; }
@@ -1812,7 +1867,7 @@
             }
         }
 
-        // --- CARGA GENERAL CON LAZY LOADING ---
+        // --- CARGA GENERAL ---
         async function cargarTodo() {
             fetchBCV();
             await cargarNumerosWA();
@@ -1874,15 +1929,14 @@
                 renderTestimoniosAdmin();
                 renderGaleriaAdmin();
                 
-                // Renderizar Select de Vendedores antes de reportes
                 renderSelectVendedores();
                 
-                // Pedidos Web por defecto
                 const webOrders = pedidosGlobal.filter(p => p.origen === 'web' || !p.origen);
                 renderPedidosAdmin(webOrders); 
                 
                 renderEquipoAdmin();
                 actualizarReportes();
+                renderMisVentasHoy();
 
                 setTimeout(initScrollReveal, 100);
 
@@ -1891,7 +1945,6 @@
                 inventarioGlobal = fallbackProductos; 
                 categoriasGlobal = fallbackCategorias; 
                 testimoniosGlobal = fallbackTestimonios;
-                
                 renderCategoriasFiltros(); 
                 renderTienda(inventarioGlobal); 
                 renderTestimoniosPublicos(); 
@@ -1913,6 +1966,7 @@
                 const webOrders = pedidosGlobal.filter(p => p.origen === 'web' || !p.origen);
                 renderPedidosAdmin(webOrders);
                 actualizarReportes();
+                renderMisVentasHoy();
                 showToast('✅ Información actualizada');
             } catch (e) { showToast('⚠️ Error al actualizar pedidos.'); } 
             finally { if(isBoton) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
@@ -1921,15 +1975,16 @@
         function renderSelectVendedores() {
             const sel = document.getElementById('filtro-rep-vendedor');
             if(!sel) return;
-            let html = '<option value="todos">Todos los Cajeros/Vendedores</option>';
-            html += '<option value="cliente">Pedidos Web Automáticos (Cliente)</option>';
-            equipoGlobal.forEach(e => { html += `<option value="${e.email}">${e.email}</option>`; });
+            let html = '<option value="todos">👤 Todos los Cajeros/Vendedores</option>';
+            html += '<option value="cliente">👤 Web Auto (Cliente)</option>';
+            equipoGlobal.forEach(e => { html += `<option value="${e.email}">👤 ${e.email}</option>`; });
             sel.innerHTML = html;
         }
 
         function actualizarReportes() {
             const origenSelect = document.getElementById('filtro-rep-origen');
             const vendedorSelect = document.getElementById('filtro-rep-vendedor');
+            const metodoSelect = document.getElementById('filtro-rep-metodo');
             
             let filtrados = pedidosGlobal;
             
@@ -1940,6 +1995,12 @@
             if(vendedorSelect && vendedorSelect.value !== 'todos') {
                 filtrados = filtrados.filter(p => (p.vendedor || 'cliente') === vendedorSelect.value);
             }
+
+            if(metodoSelect && metodoSelect.value !== 'todos') {
+                filtrados = filtrados.filter(p => (p.metodo_pago || 'Por definir') === metodoSelect.value);
+            }
+
+            pedidosReportesFiltrados = filtrados;
             
             let vBrutas = 0; 
             let vCostos = 0;
@@ -1965,6 +2026,63 @@
             if(eB) eB.textContent = `$${vBrutas.toFixed(2)}`;
             if(eC) eC.textContent = `$${vCostos.toFixed(2)}`;
             if(eG) eG.textContent = `$${ganancia.toFixed(2)}`;
+
+            renderListaDetalladaReportes(filtrados);
+        }
+
+        function renderListaDetalladaReportes(filtrados) {
+            const tbody = document.getElementById('lista-detallada-reportes');
+            const count = document.getElementById('rep-cantidad-transacciones');
+            if(!tbody) return;
+
+            if(count) count.textContent = filtrados.length;
+
+            if(filtrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">No hay transacciones con estos filtros.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtrados.map(p => {
+                const date = new Date(p.created_at).toLocaleDateString('es-VE', { day:'2-digit', month:'2-digit', year:'numeric' });
+                const cl = p.origen === 'mostrador' ? 'POS - ' + p.vendedor : p.cliente;
+                const icon = p.estado === 'Entregado' ? '<i class="fas fa-check-circle text-green-500" title="Entregado"></i>' : '<i class="fas fa-clock text-yellow-500" title="Pendiente/Proceso"></i>';
+
+                return `
+                <tr class="hover:bg-gray-50 transition cursor-default">
+                    <td class="px-4 py-3 whitespace-nowrap">${date}</td>
+                    <td class="px-4 py-3 font-bold text-gray-900">${p.codigo} ${icon}</td>
+                    <td class="px-4 py-3 truncate max-w-[150px]">${cl}</td>
+                    <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${p.metodo_pago || 'Por definir'}</span></td>
+                    <td class="px-4 py-3 text-right font-black text-gray-900">$${parseFloat(p.total_usd).toFixed(2)}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function descargarCSV() {
+            if(pedidosReportesFiltrados.length === 0) {
+                showToast("⚠️ No hay datos para descargar");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "FECHA,CODIGO,CLIENTE,ORIGEN,VENDEDOR,METODO_PAGO,ESTADO,TOTAL_USD,TASA_BCV\r\n";
+
+            pedidosReportesFiltrados.forEach(p => {
+                const fecha = new Date(p.created_at).toLocaleDateString('es-VE');
+                const cliente = p.cliente ? p.cliente.replace(/,/g, ' ') : '';
+                const row = `${fecha},${p.codigo},${cliente},${p.origen || 'web'},${p.vendedor || 'cliente'},${p.metodo_pago || 'Por definir'},${p.estado},${p.total_usd},${p.tasa_bcv}`;
+                csvContent += row + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Reporte_Bellisanty_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("✅ Descarga iniciada");
         }
 
         async function reiniciarVentas() {
@@ -1975,6 +2093,7 @@
                     const webOrders = pedidosGlobal.filter(p => p.origen === 'web' || !p.origen);
                     renderPedidosAdmin(webOrders); 
                     actualizarReportes(); 
+                    renderMisVentasHoy();
                     showToast('✅ Base de datos reseteada'); 
                 } 
                 catch(e) { showToast('⚠️ Error al reiniciar ventas.'); }
@@ -2381,11 +2500,11 @@
                     </div>
                     ${!isDueño ? `
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'pedidos', this.checked)" ${pPed ? 'checked' : ''} class="rounded text-indigo-600"> Pedidos Web</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'pos', this.checked)" ${pPos ? 'checked' : ''} class="rounded text-indigo-600"> Caja (POS)</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'inventario', this.checked)" ${pInv ? 'checked' : ''} class="rounded text-indigo-600"> Inventario</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'reportes', this.checked)" ${pRep ? 'checked' : ''} class="rounded text-indigo-600"> Reportes</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'configuracion', this.checked)" ${pCfg ? 'checked' : ''} class="rounded text-indigo-600"> Ajustes</label>
+                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'pedidos', this.checked)" ${pPed ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Pedidos Web</label>
+                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'pos', this.checked)" ${pPos ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Caja (POS)</label>
+                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'inventario', this.checked)" ${pInv ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Inventario</label>
+                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'reportes', this.checked)" ${pRep ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Reportes</label>
+                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer col-span-2 border-t border-gray-200 pt-2 mt-1"><input type="checkbox" id="perm-cfg" class="rounded text-indigo-600 w-4 h-4"> <span>Ajustes Totales</span></label>
                     </div>
                     ` : '<span class="text-[10px] text-gray-400 text-center block pb-1">Acceso total maestro y permisos absolutos</span>'}
                 </div>
@@ -2643,7 +2762,6 @@
             const tabRep = document.getElementById('tab-reportes'); if(tabRep) tabRep.style.display = p.reportes || esAdmin ? 'block' : 'none';
             const tabCfg = document.getElementById('tab-configuracion'); if(tabCfg) tabCfg.style.display = p.configuracion || esAdmin ? 'block' : 'none';
 
-            // Auto-seleccionar primer tab disponible
             if(p.pedidos !== false || esAdmin) cambiarPestana('gestion');
             else if(p.pos !== false || esAdmin) cambiarPestana('pos');
             else if(p.inventario || esAdmin) cambiarPestana('inventario');
