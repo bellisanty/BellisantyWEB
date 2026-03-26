@@ -1441,7 +1441,7 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
-            // Catálogo solo en $ (Ocultamos Ref en Bs a petición tuya)
+            // Catálogo solo en $ (Ocultamos Ref en Bs)
             document.getElementById('modal-prod-price').textContent = `$${p.price}`;
             
             const btnCart = document.getElementById('modal-btn-cart');
@@ -1714,7 +1714,6 @@
             }
         }
 
-        // --- SISTEMA INTELIGENTE DE CÓDIGO DE BARRAS ---
         function chequearBarcode(cod) {
             if(!cod) return;
             const existeInv = inventarioGlobal.find(p => p.barcode === cod);
@@ -1739,7 +1738,7 @@
             }
         }
 
-        // --- NUEVA FUNCIÓN PARA ACTUALIZAR SELECTS DE MÉTODOS DE PAGO EN EL POS ---
+        // --- ACTUALIZAR SELECTS DE MÉTODOS DE PAGO EN EL POS ---
         function actualizarMetodosPago() {
             const tipoPrecio = document.getElementById('pos-tipo-precio').value;
             const selectMetodo = document.getElementById('pos-metodo');
@@ -1762,7 +1761,6 @@
             selectMetodo.innerHTML = opciones;
         }
 
-        // --- LÓGICA CLOUD POS ---
         async function guardarPOSCloud() {
             if(currentUserEmail && currentUserEmail !== 'admin') {
                 try {
@@ -1898,8 +1896,8 @@
                     cartList = p.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
                 }
 
-                // La nota la guardamos en la BD bajo el campo direccion o un nuevo atributo, la extraemos aquí
-                const notaObj = p.direccion || p.nota || '';
+                // Extraer la nota de la dirección con seguridad
+                const notaObj = p.direccion || '';
                 const notaHTML = notaObj.startsWith('Nota:') ? `<p class="text-[10px] text-gray-500 mt-1 italic">${notaObj}</p>` : '';
 
                 return `
@@ -1956,8 +1954,7 @@
                     estado: 'Entregado',
                     origen: 'mostrador',
                     vendedor: currentUserEmail,
-                    metodo_pago: metodo,
-                    nota: notaPOS
+                    metodo_pago: metodo
                 };
                 
                 for(const item of posCarrito) { 
@@ -2147,7 +2144,6 @@
             if(eG) eG.textContent = `$${ganancia.toFixed(2)}`;
             if(eGBs) eGBs.textContent = `${vBsExactos.toFixed(2)} Bs`;
 
-            // Ocultar caja en Bs si se está filtrando por divisas
             const boxBs = document.getElementById('rep-ganancia-bs') ? document.getElementById('rep-ganancia-bs').parentElement : null;
             if(boxBs) {
                 if(metodoSelect && (metodoSelect.value === 'Divisa' || metodoSelect.value === 'Zelle' || metodoSelect.value === 'Binance')) {
@@ -2646,86 +2642,24 @@
             } catch(e) { showToast('⚠️ Error al actualizar estado.'); }
         }
 
-        // --- SISTEMA DE IMPRESIÓN PROFESIONAL CON HTML2PDF ---
+        // --- SISTEMA DE IMPRESIÓN PARA TICKERA (80MM / 58MM) ---
         function imprimirFactura(id) {
             const p = pedidosGlobal.find(x => String(x.id) === String(id));
             if(!p) { showToast('⚠️ Pedido no encontrado.'); return; }
             
             let itemsHtml = '';
             if(p.items && Array.isArray(p.items)) {
-                itemsHtml = p.items.map(i => `
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px;">${i.qty}</td>
-                        <td style="padding: 10px; font-weight: bold;">${i.name}</td>
-                        <td style="padding: 10px; text-align: right;">$${parseFloat(i.price).toFixed(2)}</td>
-                        <td style="padding: 10px; text-align: right; color: #16a34a; font-weight: bold;">$${(i.price * i.qty).toFixed(2)}</td>
-                    </tr>
-                `).join('');
+                itemsHtml = p.items.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px;"><span style="flex:1;">${i.qty}x ${i.name}</span><span style="font-weight:bold;">$${(i.price * i.qty).toFixed(2)}</span></div>`).join('');
             }
 
-            const notaObj = p.direccion || p.nota || '';
-            const notaHtml = notaObj.startsWith('Nota:') ? `<div style="background: #f9fafb; padding: 10px; border-left: 4px solid #c084fc; margin-bottom: 20px; font-size: 13px;"><strong>Nota del Vendedor:</strong> ${notaObj.replace('Nota:', '')}</div>` : '';
+            const notaObj = p.direccion || '';
+            const notaHtml = notaObj.startsWith('Nota:') ? `<div style="margin: 10px 0; padding: 5px; border: 1px dashed #000; font-size: 11px;"><b>NOTA:</b> ${notaObj.replace('Nota:', '')}</div>` : '';
 
-            const element = document.createElement('div');
-            element.innerHTML = `
-                <div style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 800px; margin: 0 auto;">
-                    <div style="text-align: center; border-bottom: 2px solid #a855f7; padding-bottom: 20px; margin-bottom: 20px;">
-                        <h1 style="margin: 0; color: #7e22ce; font-size: 28px; font-weight: 900;">BELLISANTY</h1>
-                        <p style="margin: 5px 0; color: #666; letter-spacing: 3px; font-size: 12px; font-weight: bold;">LUXURY GIFTING</p>
-                        <p style="margin: 5px 0; font-size: 14px; color: #999;">Pueblo Llano, Mérida | WhatsApp: +58 412-6480799</p>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 14px; background: #faf5ff; padding: 20px; border-radius: 12px;">
-                        <div>
-                            <p style="margin: 5px 0;"><strong>N° ORDEN:</strong> <span style="color: #7e22ce;">${p.codigo}</span></p>
-                            <p style="margin: 5px 0;"><strong>CLIENTE:</strong> ${p.cliente.toUpperCase()}</p>
-                            <p style="margin: 5px 0;"><strong>MÉTODO DE PAGO:</strong> ${p.metodo_pago}</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <p style="margin: 5px 0;"><strong>FECHA:</strong> ${new Date(p.created_at).toLocaleString('es-VE')}</p>
-                            <p style="margin: 5px 0;"><strong>TIPO DE ENTREGA:</strong> ${p.metodo_entrega.toUpperCase()}</p>
-                            <p style="margin: 5px 0;"><strong>ATENDIDO POR:</strong> ${p.vendedor === 'cliente' ? 'Auto-Servicio Web' : p.vendedor}</p>
-                        </div>
-                    </div>
-                    
-                    ${notaHtml}
-
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
-                        <thead>
-                            <tr style="background: #f3e8ff; color: #6b21a8;">
-                                <th style="padding: 12px 10px; text-align: left; border-radius: 8px 0 0 8px;">Cant.</th>
-                                <th style="padding: 12px 10px; text-align: left;">Descripción del Producto</th>
-                                <th style="padding: 12px 10px; text-align: right;">Precio Unit.</th>
-                                <th style="padding: 12px 10px; text-align: right; border-radius: 0 8px 8px 0;">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHtml}
-                        </tbody>
-                    </table>
-                    <div style="display: flex; justify-content: flex-end;">
-                        <div style="width: 300px; background: #f9fafb; padding: 20px; border-radius: 12px; text-align: right; font-size: 16px; border: 1px solid #eee;">
-                            <p style="margin: 0 0 10px 0;"><strong>TOTAL A PAGAR (USD): <span style="color: #16a34a; font-size: 24px; display: block; margin-top: 5px;">$${parseFloat(p.total_usd).toFixed(2)}</span></strong></p>
-                            <div style="border-top: 1px dashed #ccc; margin: 15px 0;"></div>
-                            <p style="font-size: 12px; color: #666; margin: 0 0 5px 0;">Tasa BCV Aplicada: ${p.tasa_bcv} Bs</p>
-                            <p style="margin: 0; font-size: 18px;"><strong>TOTAL (Bs): ${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</strong></p>
-                        </div>
-                    </div>
-                    <div style="text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
-                        <p style="margin: 0;">¡Gracias por preferir a Bellisanty!</p>
-                        <p style="margin: 5px 0;">Síguenos en Instagram <strong>@bellisanty</strong></p>
-                    </div>
-                </div>
-            `;
+            const htmlContent = `<html><head><title>Factura ${p.codigo}</title><style>@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'); body { font-family: 'Courier Prime', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; background: #fff; } .text-center { text-align: center; } .border-b { border-bottom: 1px dashed #000; padding-bottom: 12px; margin-bottom: 12px; } .font-bold { font-weight: bold; } .title { font-size: 22px; font-weight: bold; margin-bottom: 5px; } p { margin: 4px 0; font-size: 13px; }</style></head><body onload="window.print(); setTimeout(() => window.close(), 500);"><div class="text-center border-b"><div class="title">BELLISANTY</div><p>LUXURY GIFTING</p><p>Pueblo Llano, Mérida</p><p>WhatsApp: +58 412-6480799</p></div><div class="border-b"><p><b>ORDEN:</b> ${p.codigo}</p><p><b>FECHA:</b> ${new Date(p.created_at).toLocaleString('es-VE')}</p><p><b>CLIENTE:</b> ${p.cliente.toUpperCase()}</p><p><b>TELÉFONO:</b> ${p.telefono}</p><p><b>MÉTODO PAGO:</b> ${p.metodo_pago}</p><p><b>CAJERO:</b> ${p.vendedor === 'cliente' ? 'Web' : p.vendedor}</p></div>${notaHtml}<div class="border-b"><p class="font-bold" style="margin-bottom:10px; display:flex; justify-content:space-between;"><span>CANT DESCRIPCIÓN</span><span>TOTAL</span></p>${itemsHtml}</div><div class="border-b"><div style="display:flex; justify-content:space-between; font-size:16px;" class="font-bold"><span>TOTAL USD:</span><span>$${parseFloat(p.total_usd).toFixed(2)}</span></div><div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px;"><span>TASA BCV:</span><span>${p.tasa_bcv} Bs</span></div><div style="display:flex; justify-content:space-between; font-size:14px; margin-top:4px;" class="font-bold"><span>TOTAL BS:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div></div><div class="text-center" style="margin-top: 20px;"><p>¡Gracias por tu compra!</p><p>@bellisanty</p></div></body></html>`;
             
-            showToast("⏳ Generando Factura PDF...");
-            const opt = {
-                margin:       0,
-                filename:     `Factura_${p.codigo}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save().then(() => showToast("✅ Factura descargada en PDF"));
+            const printWindow = window.open('', '_blank', 'width=400,height=600');
+            if(printWindow) { printWindow.document.write(htmlContent); printWindow.document.close(); } 
+            else { showToast("⚠️ Desactiva el bloqueo de pop-ups para imprimir."); }
         }
 
         function renderEquipoAdmin() {
