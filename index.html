@@ -2267,40 +2267,128 @@
             sel.innerHTML = html;
         }
 
-        function actualizarGraficoVentas(entregados) {
+function actualizarGraficoVentas(entregados) {
             const ctx = document.getElementById('ventasChart');
             if(!ctx) return;
             
             const agrupado = {};
             entregados.forEach(p => {
                 const fecha = p.created_at.split('T')[0];
-                if(!agrupado[fecha]) agrupado[fecha] = 0;
-                agrupado[fecha] += parseFloat(p.total_usd);
+                if(!agrupado[fecha]) agrupado[fecha] = { usd: 0, bs: 0 };
+                
+                const met = p.metodo_pago || '';
+                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                    agrupado[fecha].bs += (parseFloat(p.total_usd) * (p.tasa_bcv || tasaBCV));
+                } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
+                    agrupado[fecha].usd += parseFloat(p.total_usd);
+                }
             });
 
             const labels = Object.keys(agrupado).sort();
-            const data = labels.map(l => agrupado[l]);
+            
+            // Formatear fechas para el gráfico (Ej: "15 Oct") para más elegancia
+            const labelsFormateados = labels.map(l => {
+                const [y, m, d] = l.split('-');
+                const f = new Date(y, m - 1, d);
+                return f.toLocaleDateString('es-VE', { day: '2-digit', month: 'short' });
+            });
+
+            const dataUsd = labels.map(l => agrupado[l].usd);
+            const dataBs = labels.map(l => agrupado[l].bs);
 
             if(ventasChart) { ventasChart.destroy(); }
+
+            // Crear gradientes premium para las barras
+            const ctxCanvas = ctx.getContext('2d');
+            const gradientUsd = ctxCanvas.createLinearGradient(0, 0, 0, 300);
+            gradientUsd.addColorStop(0, 'rgba(16, 185, 129, 0.85)'); // Emerald 500
+            gradientUsd.addColorStop(1, 'rgba(16, 185, 129, 0.1)');
+
+            const gradientBs = ctxCanvas.createLinearGradient(0, 0, 0, 300);
+            gradientBs.addColorStop(0, 'rgba(59, 130, 246, 0.85)'); // Blue 500
+            gradientBs.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
 
             ventasChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Ventas Diarias (USD)',
-                        data: data,
-                        backgroundColor: '#10b981',
-                        borderRadius: 6
-                    }]
+                    labels: labelsFormateados,
+                    datasets: [
+                        { 
+                            label: 'Divisas ($)', 
+                            data: dataUsd, 
+                            backgroundColor: gradientUsd, 
+                            borderColor: '#10b981',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            maxBarThickness: 40 // CLAVE: Evita barras gigantescas
+                        },
+                        { 
+                            label: 'Bolívares (Bs)', 
+                            data: dataBs, 
+                            backgroundColor: gradientBs, 
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            maxBarThickness: 40 // CLAVE: Evita barras gigantescas
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: { 
+                        legend: { 
+                            display: true, 
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: { family: "'Inter', sans-serif", size: 12, weight: '600' },
+                                color: '#4b5563'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)', // Dark premium
+                            titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
+                            bodyFont: { family: "'Inter', sans-serif", size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            boxPadding: 6,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label = label.split(' ')[0] + ': '; } // Cortar el label
+                                    if (context.parsed.y !== null) {
+                                        if(context.datasetIndex === 0) {
+                                            label += '$' + context.parsed.y.toFixed(2);
+                                        } else {
+                                            label += context.parsed.y.toFixed(2) + ' Bs';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-                        x: { grid: { display: false } }
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] }, // Grid punteado sutil
+                            ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9ca3af', padding: 10 }
+                        },
+                        x: { 
+                            grid: { display: false, drawBorder: false }, // Sin grid vertical
+                            ticks: { font: { family: "'Inter', sans-serif", size: 11, weight: '600' }, color: '#6b7280', padding: 10 }
+                        }
+                    },
+                    animation: {
+                        y: { duration: 1000, easing: 'easeOutQuart' } // Animación de subida fluida
                     }
                 }
             });
@@ -2315,7 +2403,6 @@
             
             let filtrados = pedidosGlobal;
 
-            // Filtros de fecha
             if(desde) filtrados = filtrados.filter(p => p.created_at.split('T')[0] >= desde);
             if(hasta) filtrados = filtrados.filter(p => p.created_at.split('T')[0] <= hasta);
             
@@ -2342,11 +2429,11 @@
             entregados.forEach(ped => {
                 const pedTasa = ped.tasa_bcv || tasaBCV;
                 const met = ped.metodo_pago || '';
-                const isBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met);
                 
-                if(isBs) {
+                // SEPARACIÓN ESTRICTA DE CAJAS
+                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
                     vBs += (parseFloat(ped.total_usd) * pedTasa);
-                } else {
+                } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
                     vDivisas += parseFloat(ped.total_usd);
                 }
                 
@@ -2367,6 +2454,7 @@
             if(eBs) eBs.textContent = `${vBs.toFixed(2)} Bs`;
             if(eC) eC.textContent = `$${vCostos.toFixed(2)}`;
             
+            // La ganancia neta se mantiene como un estimado global en USD para saber la rentabilidad real
             let totalRevUsd = 0;
             entregados.forEach(ped => { totalRevUsd += parseFloat(ped.total_usd); });
             const ganancia = totalRevUsd - vCostos;
@@ -2401,13 +2489,22 @@
                 }
                 detallesHtml += '</ul>';
 
+                // FORMATO DINÁMICO DE MONEDA EN TABLA
+                const met = p.metodo_pago || '';
+                let montoDisplay = `<span class="text-gray-400">Por definir</span>`;
+                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                    montoDisplay = `<span class="text-blue-600 font-black">${(parseFloat(p.total_usd) * (p.tasa_bcv || 1)).toFixed(2)} Bs</span>`;
+                } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
+                    montoDisplay = `<span class="text-green-600 font-black">$${parseFloat(p.total_usd).toFixed(2)}</span>`;
+                }
+
                 return `
                 <tr class="hover:bg-gray-50 transition cursor-pointer border-b border-gray-100 last:border-0" onclick="document.getElementById('det-${p.id}').classList.toggle('hidden')">
                     <td class="px-4 py-3 whitespace-nowrap">${date}</td>
                     <td class="px-4 py-3 font-bold text-gray-900">${p.codigo} ${icon}</td>
                     <td class="px-4 py-3 truncate max-w-[150px]" title="${cl}">${cl}</td>
-                    <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${p.metodo_pago || 'Por definir'}</span></td>
-                    <td class="px-4 py-3 text-right font-black text-gray-900">$${parseFloat(p.total_usd).toFixed(2)}</td>
+                    <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${met || 'Por definir'}</span></td>
+                    <td class="px-4 py-3 text-right">${montoDisplay}</td>
                 </tr>
                 <tr id="det-${p.id}" class="hidden bg-gray-50 border-b border-gray-100">
                     <td colspan="5" class="px-4 py-3">
@@ -2464,19 +2561,28 @@
                                 <th style="padding: 10px; border-bottom: 2px solid #e5e7eb;">Código</th>
                                 <th style="padding: 10px; border-bottom: 2px solid #e5e7eb;">Origen/Vendedor</th>
                                 <th style="padding: 10px; border-bottom: 2px solid #e5e7eb;">Método</th>
-                                <th style="padding: 10px; border-bottom: 2px solid #e5e7eb; text-align: right;">Total USD</th>
+                                <th style="padding: 10px; border-bottom: 2px solid #e5e7eb; text-align: right;">Monto Cobrado</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${pedidosReportesFiltrados.map(p => `
+                            ${pedidosReportesFiltrados.map(p => {
+                                const met = p.metodo_pago || '';
+                                let montoStr = 'Por definir';
+                                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                                    montoStr = `${(parseFloat(p.total_usd) * (p.tasa_bcv || 1)).toFixed(2)} Bs`;
+                                } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
+                                    montoStr = `$${parseFloat(p.total_usd).toFixed(2)}`;
+                                }
+                                return `
                                 <tr>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6; color: #6b7280;">${new Date(p.created_at).toLocaleDateString('es-VE')}</td>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6; font-weight: bold;">${p.codigo}</td>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6;">${p.origen === 'mostrador' ? 'POS - ' + p.vendedor : p.cliente}</td>
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6;">${p.metodo_pago || 'N/D'}</td>
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6; text-align: right; font-weight: bold;">$${parseFloat(p.total_usd).toFixed(2)}</td>
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6;">${met || 'N/D'}</td>
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6; text-align: right; font-weight: bold;">${montoStr}</td>
                                 </tr>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -2492,7 +2598,6 @@
             };
             html2pdf().set(opt).from(element).save().then(() => showToast("✅ Reporte en PDF descargado con éxito"));
         }
-
         async function reiniciarVentas() {
             if(confirm('🚨 ¡CUIDADO EXTREMO! Esto borrará TODOS los pedidos del historial y reiniciará las ganancias a $0.\n\nEsta acción es irreversible.\n\n¿Estás completamente seguro de que quieres entregar el sistema en blanco al cliente?')) {
                 try { 
