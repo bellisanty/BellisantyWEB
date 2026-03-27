@@ -1209,12 +1209,16 @@
                 renderItemsCarrito(); 
             }
             
-            // Setear fechas por defecto en Reportes
-            const hoy = new Date().toISOString().split('T')[0];
+            // Setear fechas por defecto en Reportes (Últimos 7 días para un gráfico profesional)
+            const hoy = new Date();
+            const hace7Dias = new Date();
+            hace7Dias.setDate(hoy.getDate() - 6);
+            
             const inputDesde = document.getElementById('filtro-fecha-desde');
             const inputHasta = document.getElementById('filtro-fecha-hasta');
-            if(inputDesde) inputDesde.value = hoy;
-            if(inputHasta) inputHasta.value = hoy;
+            
+            if(inputDesde) inputDesde.value = hace7Dias.toISOString().split('T')[0];
+            if(inputHasta) inputHasta.value = hoy.toISOString().split('T')[0];
         });
 
         const navbar = document.getElementById('navbar');
@@ -2267,45 +2271,67 @@
             sel.innerHTML = html;
         }
 
-function actualizarGraficoVentas(entregados) {
+function obtenerRangoFechas(inicio, fin) {
+            const fechas = [];
+            let actual = new Date(inicio + 'T00:00:00');
+            const limite = new Date(fin + 'T00:00:00');
+            while(actual <= limite) {
+                fechas.push(actual.toISOString().split('T')[0]);
+                actual.setDate(actual.getDate() + 1);
+            }
+            return fechas;
+        }
+
+        function actualizarGraficoVentas(entregados, desdeStr, hastaStr) {
             const ctx = document.getElementById('ventasChart');
             if(!ctx) return;
+
+            let fechaInicio = desdeStr;
+            let fechaFin = hastaStr;
+
+            if (!fechaInicio || !fechaFin) {
+                const hoy = new Date();
+                const hace7Dias = new Date();
+                hace7Dias.setDate(hoy.getDate() - 6);
+                if (!fechaInicio) fechaInicio = hace7Dias.toISOString().split('T')[0];
+                if (!fechaFin) fechaFin = hoy.toISOString().split('T')[0];
+            }
+
+            const fechasRango = obtenerRangoFechas(fechaInicio, fechaFin);
             
             const agrupado = {};
+            fechasRango.forEach(f => agrupado[f] = { usd: 0, bs: 0 });
+            
             entregados.forEach(p => {
                 const fecha = p.created_at.split('T')[0];
-                if(!agrupado[fecha]) agrupado[fecha] = { usd: 0, bs: 0 };
-                
-                const met = p.metodo_pago || '';
-                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
-                    agrupado[fecha].bs += (parseFloat(p.total_usd) * (p.tasa_bcv || tasaBCV));
-                } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
-                    agrupado[fecha].usd += parseFloat(p.total_usd);
+                if(agrupado[fecha]) {
+                    const met = p.metodo_pago || '';
+                    if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                        agrupado[fecha].bs += (parseFloat(p.total_usd) * (p.tasa_bcv || tasaBCV));
+                    } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
+                        agrupado[fecha].usd += parseFloat(p.total_usd);
+                    }
                 }
             });
 
-            const labels = Object.keys(agrupado).sort();
-            
-            // Formatear fechas para el gráfico (Ej: "15 Oct")
-            const labelsFormateados = labels.map(l => {
+            const labelsFormateados = fechasRango.map(l => {
                 const [y, m, d] = l.split('-');
                 const f = new Date(y, m - 1, d);
                 return f.toLocaleDateString('es-VE', { day: '2-digit', month: 'short' });
             });
 
-            const dataUsd = labels.map(l => agrupado[l].usd);
-            const dataBs = labels.map(l => agrupado[l].bs);
+            const dataUsd = fechasRango.map(l => agrupado[l].usd);
+            const dataBs = fechasRango.map(l => agrupado[l].bs);
 
             if(ventasChart) { ventasChart.destroy(); }
 
-            // Crear gradientes premium para rellenar debajo de las líneas
             const ctxCanvas = ctx.getContext('2d');
             const gradientUsd = ctxCanvas.createLinearGradient(0, 0, 0, 300);
-            gradientUsd.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); // Emerald 500 semi-transparente
+            gradientUsd.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
             gradientUsd.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
             const gradientBs = ctxCanvas.createLinearGradient(0, 0, 0, 300);
-            gradientBs.addColorStop(0, 'rgba(59, 130, 246, 0.4)'); // Blue 500 semi-transparente
+            gradientBs.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
             gradientBs.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
             ventasChart = new Chart(ctx, {
@@ -2316,12 +2342,12 @@ function actualizarGraficoVentas(entregados) {
                         { 
                             label: 'Divisas ($)', 
                             data: dataUsd, 
-                            yAxisID: 'yUsd', // Asignado al eje izquierdo
+                            yAxisID: 'yUsd',
                             borderColor: '#10b981',
                             backgroundColor: gradientUsd,
                             borderWidth: 3,
                             fill: true,
-                            tension: 0.4, // Curvas suaves profesionales
+                            tension: 0.3,
                             pointBackgroundColor: '#ffffff',
                             pointBorderColor: '#10b981',
                             pointBorderWidth: 2,
@@ -2331,12 +2357,12 @@ function actualizarGraficoVentas(entregados) {
                         { 
                             label: 'Bolívares (Bs)', 
                             data: dataBs, 
-                            yAxisID: 'yBs', // Asignado al eje derecho
+                            yAxisID: 'yBs',
                             borderColor: '#3b82f6',
                             backgroundColor: gradientBs,
                             borderWidth: 3,
                             fill: true,
-                            tension: 0.4, // Curvas suaves profesionales
+                            tension: 0.3,
                             pointBackgroundColor: '#ffffff',
                             pointBorderColor: '#3b82f6',
                             pointBorderWidth: 2,
@@ -2348,38 +2374,21 @@ function actualizarGraficoVentas(entregados) {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: { 
-                        legend: { 
-                            display: true, 
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: { family: "'Inter', sans-serif", size: 12, weight: '600' },
-                                color: '#4b5563'
-                            }
-                        },
+                        legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { family: "'Inter', sans-serif", size: 12, weight: '600' } } },
                         tooltip: {
                             backgroundColor: 'rgba(17, 24, 39, 0.95)',
                             titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
                             bodyFont: { family: "'Inter', sans-serif", size: 13 },
-                            padding: 12,
-                            cornerRadius: 8,
-                            boxPadding: 6,
+                            padding: 12, cornerRadius: 8,
                             callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label || '';
-                                    if (label) { label = label.split(' ')[0] + ': '; }
+                                    if (label) label = label.split(' ')[0] + ': ';
                                     if (context.parsed.y !== null) {
-                                        if(context.datasetIndex === 0) {
-                                            label += '$' + context.parsed.y.toFixed(2);
-                                        } else {
-                                            label += context.parsed.y.toFixed(2) + ' Bs';
-                                        }
+                                        if(context.datasetIndex === 0) label += '$' + context.parsed.y.toFixed(2);
+                                        else label += context.parsed.y.toFixed(2) + ' Bs';
                                     }
                                     return label;
                                 }
@@ -2388,38 +2397,19 @@ function actualizarGraficoVentas(entregados) {
                     },
                     scales: {
                         yUsd: { 
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            beginAtZero: true, 
-                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] },
-                            ticks: { 
-                                callback: function(value) { return '$' + value; },
-                                font: { family: "'Inter', sans-serif", size: 11, weight: '600' }, 
-                                color: '#10b981', 
-                                padding: 10 
-                            }
+                            type: 'linear', display: true, position: 'left', beginAtZero: true, 
+                            grid: { color: '#f3f4f6', borderDash: [5, 5] }, 
+                            ticks: { callback: function(value) { return '$' + value; }, color: '#10b981', font: {family: "'Inter', sans-serif", weight: '600'} } 
                         },
                         yBs: { 
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            beginAtZero: true, 
-                            grid: { drawOnChartArea: false }, // Evita cruce de líneas de cuadrícula
-                            ticks: { 
-                                callback: function(value) { return value + ' Bs'; },
-                                font: { family: "'Inter', sans-serif", size: 11, weight: '600' }, 
-                                color: '#3b82f6', 
-                                padding: 10 
-                            }
+                            type: 'linear', display: true, position: 'right', beginAtZero: true, 
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: function(value) { return value + ' Bs'; }, color: '#3b82f6', font: {family: "'Inter', sans-serif", weight: '600'} } 
                         },
                         x: { 
-                            grid: { display: false, drawBorder: false },
-                            ticks: { font: { family: "'Inter', sans-serif", size: 11, weight: '600' }, color: '#6b7280', padding: 10 }
+                            grid: { display: false }, 
+                            ticks: { color: '#6b7280', font: {family: "'Inter', sans-serif", weight: '600'} } 
                         }
-                    },
-                    animation: {
-                        y: { duration: 1000, easing: 'easeOutQuart' }
                     }
                 }
             });
@@ -2461,7 +2451,6 @@ function actualizarGraficoVentas(entregados) {
                 const pedTasa = ped.tasa_bcv || tasaBCV;
                 const met = ped.metodo_pago || '';
                 
-                // SEPARACIÓN ESTRICTA DE CAJAS
                 if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
                     vBs += (parseFloat(ped.total_usd) * pedTasa);
                 } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
@@ -2485,14 +2474,13 @@ function actualizarGraficoVentas(entregados) {
             if(eBs) eBs.textContent = `${vBs.toFixed(2)} Bs`;
             if(eC) eC.textContent = `$${vCostos.toFixed(2)}`;
             
-            // La ganancia neta se mantiene como un estimado global en USD para saber la rentabilidad real
             let totalRevUsd = 0;
             entregados.forEach(ped => { totalRevUsd += parseFloat(ped.total_usd); });
             const ganancia = totalRevUsd - vCostos;
             if(eG) eG.textContent = `$${ganancia.toFixed(2)}`;
 
             renderListaDetalladaReportes(filtrados);
-            actualizarGraficoVentas(entregados);
+            actualizarGraficoVentas(entregados, desde, hasta);
         }
 
         function renderListaDetalladaReportes(filtrados) {
@@ -2520,7 +2508,6 @@ function actualizarGraficoVentas(entregados) {
                 }
                 detallesHtml += '</ul>';
 
-                // FORMATO DINÁMICO DE MONEDA EN TABLA
                 const met = p.metodo_pago || '';
                 let montoDisplay = `<span class="text-gray-400">Por definir</span>`;
                 if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
