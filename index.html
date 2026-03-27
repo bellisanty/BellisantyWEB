@@ -149,11 +149,8 @@
             display: none;
         }
 
-        /* Estilos para el Gráfico y las filas expandibles */
         .chart-container { position: relative; height: 300px; width: 100%; }
-        .row-detalle { transition: all 0.3s ease; }
         .icon-expand { transition: transform 0.3s ease; }
-        .expanded .icon-expand { transform: rotate(180deg); }
     </style>
 </head>
 
@@ -748,113 +745,26 @@
     </div>
 
     <div id="vista-admin" style="display: none;" class="min-h-screen bg-gray-50 pb-10">
-        <nav class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
+        <nav class="bg-gray-900 text-white shadow-md sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <img src="https://i.postimg.cc/WpKvZHqJ/image.png" class="w-9 h-9">
-                    <div><h1 class="text-sm font-bold uppercase">Sistema Bellisanty <span id="admin-role-badge" class="text-belli-400"></span></h1></div>
+                    <img src="https://i.postimg.cc/WpKvZHqJ/image.png" alt="Bellisanty Admin Logo" class="w-9 h-9 object-contain drop-shadow-sm">
+                    <div><h1 class="text-sm font-bold tracking-wider uppercase">Sistema Bellisanty <span id="admin-role-badge" class="text-belli-400 font-normal ml-1"></span></h1><p class="text-[10px] text-gray-500" id="admin-user-email">Cargando usuario...</p></div>
                 </div>
-                <button onclick="cerrarSesion()" class="text-xs bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-4 py-2 rounded-lg transition font-bold">Cerrar Sesión</button>
+                <button onclick="cerrarSesion()" class="text-xs bg-gray-800 hover:bg-red-600 px-4 py-2 rounded-lg transition font-medium cursor-pointer flex items-center gap-2"><i class="fas fa-sign-out-alt"></i> <span class="hidden sm:inline">Cerrar Sesión</span></button>
             </div>
         </nav>
 
-        <main class="max-w-7xl mx-auto px-4 py-6">
-            <div id="admin-tabs" class="flex gap-2 border-b border-gray-200 pb-2 mb-6 overflow-x-auto hide-scrollbar">
-                <button onclick="cambiarPestana('gestion')" id="tab-gestion" class="px-5 py-2 font-bold text-sm whitespace-nowrap">Pedidos Web</button>
-                <button onclick="cambiarPestana('pos')" id="tab-pos" class="px-5 py-2 font-bold text-sm whitespace-nowrap">Punto de Venta</button>
-                <button onclick="cambiarPestana('inventario')" id="tab-inventario" class="px-5 py-2 font-bold text-sm whitespace-nowrap">Inventario</button>
-                <button onclick="cambiarPestana('reportes')" id="tab-reportes" class="px-5 py-2 font-bold text-sm whitespace-nowrap">Reporte Financiero</button>
-                <button onclick="cambiarPestana('configuracion')" id="tab-configuracion" class="px-5 py-2 font-bold text-sm whitespace-nowrap">Ajustes</button>
-            </div>
-
-            <div id="panel-reportes" style="display: none;" class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-emerald-600">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-900">Auditoría Financiera</h2>
-                            <p class="text-xs text-gray-500">Consulta ingresos detallados por fecha y moneda</p>
-                        </div>
-                        <div class="flex flex-wrap gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-200">
-                            <div class="flex items-center gap-2">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Desde:</label>
-                                <input type="date" id="rep-fecha-desde" class="text-xs border-0 bg-transparent font-bold text-gray-700 outline-none cursor-pointer" onchange="actualizarReportes()">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Hasta:</label>
-                                <input type="date" id="rep-fecha-hasta" class="text-xs border-0 bg-transparent font-bold text-gray-700 outline-none cursor-pointer" onchange="actualizarReportes()">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-green-50 p-5 rounded-2xl border border-green-100 text-center">
-                            <p class="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1">Cobrado en Divisas</p>
-                            <p id="rep-divisas" class="text-2xl font-black text-green-700">$0.00</p>
-                            <span class="text-[9px] text-green-500">(Efectivo $ / Zelle)</span>
-                        </div>
-                        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 text-center">
-                            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">Cobrado en Bolívares</p>
-                            <p id="rep-bs" class="text-2xl font-black text-blue-700">0.00 Bs</p>
-                            <span class="text-[9px] text-blue-500">(Punto / Pago Móvil)</span>
-                        </div>
-                        <div class="bg-red-50 p-5 rounded-2xl border border-red-100 text-center">
-                            <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-1">Inversión (Costo)</p>
-                            <p id="rep-costos" class="text-2xl font-black text-red-700">$0.00</p>
-                            <span class="text-[9px] text-red-500">(Valor mercancía USD)</span>
-                        </div>
-                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 text-center">
-                            <p class="text-[10px] font-bold text-purple-600 uppercase tracking-widest mb-1">Ganancia Neta Est.</p>
-                            <p id="rep-ganancia" class="text-2xl font-black text-purple-700">$0.00</p>
-                            <span class="text-[9px] text-purple-500">(En base a USD)</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-8">
-                        <h3 class="text-xs font-bold text-gray-600 uppercase mb-4 ml-2">Tendencia de Ventas (Rango Seleccionado)</h3>
-                        <div class="chart-container">
-                            <canvas id="ventasChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex gap-2">
-                            <select id="filtro-rep-origen" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
-                                <option value="todos">🌐 Todos los Orígenes</option>
-                                <option value="web">🛒 Pedidos Web</option>
-                                <option value="mostrador">🏪 Ventas POS</option>
-                            </select>
-                            <select id="filtro-rep-metodo" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
-                                <option value="todos">💳 Todos los Métodos</option>
-                                <option value="Pago Movil">📱 Pago Móvil</option>
-                                <option value="Punto de Venta">💳 Punto de Venta</option>
-                                <option value="Efectivo Bs">💵 Efectivo (Bs)</option>
-                                <option value="Divisa">💵 Efectivo (Divisa)</option>
-                                <option value="Zelle">🟩 Zelle</option>
-                                <option value="Binance">🟨 Binance</option>
-                            </select>
-                            <select id="filtro-rep-vendedor" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50"></select>
-                        </div>
-                        <button onclick="descargarPDFReporte()" class="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-600 transition cursor-pointer text-xs shadow-md inline-flex items-center gap-2">
-                            <i class="fas fa-file-pdf"></i> Imprimir Reporte
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto border border-gray-100 rounded-xl">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-gray-900 text-white">
-                                <tr>
-                                    <th class="px-4 py-3">Fecha</th>
-                                    <th class="px-4 py-3">Código</th>
-                                    <th class="px-4 py-3">Método</th>
-                                    <th class="px-4 py-3 text-right">Monto</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lista-detallada-reportes" class="divide-y divide-gray-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
             
+            <div id="admin-tabs" style="display: none;" class="flex gap-2 border-b border-gray-200 pb-2 overflow-x-auto hide-scrollbar">
+                <button onclick="cambiarPestana('gestion')" id="tab-gestion" class="px-5 py-2 font-bold text-sm rounded-t-lg border-b-2 border-gray-900 text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-globe mr-1"></i> Pedidos Web</button>
+                <button onclick="cambiarPestana('pos')" id="tab-pos" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-cash-register mr-1"></i> Punto de Venta</button>
+                <button onclick="cambiarPestana('inventario')" id="tab-inventario" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-box mr-1"></i> Inventario</button>
+                <button onclick="cambiarPestana('reportes')" id="tab-reportes" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-chart-line mr-1"></i> Reportes</button>
+                <button onclick="cambiarPestana('configuracion')" id="tab-configuracion" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-cog mr-1"></i> Configuración</button>
+            </div>
+
             <div id="panel-gestion" class="space-y-8">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-green-500">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 pb-4 border-b border-gray-100 gap-4">
@@ -1004,6 +914,94 @@
                             <h2 class="text-lg font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100"><i class="fas fa-layer-group text-purple-400 mr-2"></i> Categorías</h2>
                             <div id="lista-categorias-admin" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-reportes" style="display: none;" class="space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-emerald-600">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Auditoría Financiera</h2>
+                            <p class="text-xs text-gray-500">Consulta ingresos detallados por fecha y moneda</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-200">
+                            <div class="flex items-center gap-2">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Desde:</label>
+                                <input type="date" id="rep-fecha-desde" class="text-xs border-0 bg-transparent font-bold text-gray-700 outline-none cursor-pointer" onchange="actualizarReportes()">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Hasta:</label>
+                                <input type="date" id="rep-fecha-hasta" class="text-xs border-0 bg-transparent font-bold text-gray-700 outline-none cursor-pointer" onchange="actualizarReportes()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-green-50 p-5 rounded-2xl border border-green-100 text-center">
+                            <p class="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1">Cobrado en Divisas</p>
+                            <p id="rep-divisas" class="text-2xl font-black text-green-700">$0.00</p>
+                            <span class="text-[9px] text-green-500">(Efectivo $ / Zelle)</span>
+                        </div>
+                        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 text-center">
+                            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">Cobrado en Bolívares</p>
+                            <p id="rep-bs" class="text-2xl font-black text-blue-700">0.00 Bs</p>
+                            <span class="text-[9px] text-blue-500">(Punto / Pago Móvil)</span>
+                        </div>
+                        <div class="bg-red-50 p-5 rounded-2xl border border-red-100 text-center">
+                            <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-1">Inversión (Costo)</p>
+                            <p id="rep-costos" class="text-2xl font-black text-red-700">$0.00</p>
+                            <span class="text-[9px] text-red-500">(Valor mercancía USD)</span>
+                        </div>
+                        <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 text-center">
+                            <p class="text-[10px] font-bold text-purple-600 uppercase tracking-widest mb-1">Ganancia Neta Est.</p>
+                            <p id="rep-ganancia" class="text-2xl font-black text-purple-700">$0.00</p>
+                            <span class="text-[9px] text-purple-500">(En base a USD)</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-8">
+                        <h3 class="text-xs font-bold text-gray-600 uppercase mb-4 ml-2">Tendencia de Ventas (Rango Seleccionado)</h3>
+                        <div class="chart-container">
+                            <canvas id="ventasChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex gap-2">
+                            <select id="filtro-rep-origen" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
+                                <option value="todos">🌐 Todos los Orígenes</option>
+                                <option value="web">🛒 Pedidos Web</option>
+                                <option value="mostrador">🏪 Ventas POS</option>
+                            </select>
+                            <select id="filtro-rep-metodo" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
+                                <option value="todos">💳 Todos los Métodos</option>
+                                <option value="Pago Movil">📱 Pago Móvil</option>
+                                <option value="Punto de Venta">💳 Punto de Venta</option>
+                                <option value="Efectivo Bs">💵 Efectivo (Bs)</option>
+                                <option value="Divisa">💵 Efectivo (Divisa)</option>
+                                <option value="Zelle">🟩 Zelle</option>
+                                <option value="Binance">🟨 Binance</option>
+                            </select>
+                            <select id="filtro-rep-vendedor" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50"></select>
+                        </div>
+                        <button onclick="descargarPDFReporte()" class="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-600 transition cursor-pointer text-xs shadow-md inline-flex items-center gap-2">
+                            <i class="fas fa-file-pdf"></i> Imprimir Reporte
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-gray-100 rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-900 text-white">
+                                <tr>
+                                    <th class="px-4 py-3">Fecha</th>
+                                    <th class="px-4 py-3">Código</th>
+                                    <th class="px-4 py-3">Método</th>
+                                    <th class="px-4 py-3 text-right">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-detallada-reportes" class="divide-y divide-gray-100"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1172,7 +1170,7 @@
         let currentUserEmail = 'admin'; 
         let configRecargoBs = 50; 
         let configAjusteMayor = 0;
-        let chartVentas = null;
+        let chartVentas = null; // Variable para el gráfico
 
         const fallbackCategorias = [
             { id: 'c1', name: '🌹 Arreglos Premium' }, 
@@ -1209,7 +1207,7 @@
                 renderItemsCarrito(); 
             }
 
-            // Inicializar fechas del reporte en HOY
+            // Inicializar las fechas del reporte con el día de hoy
             const hoy = new Date().toISOString().split('T')[0];
             const inpDesde = document.getElementById('rep-fecha-desde');
             const inpHasta = document.getElementById('rep-fecha-hasta');
@@ -1599,16 +1597,17 @@
             }
         }
 
-        // --- BLINDAJE ATÓMICO (Función General) ---
+        // --- BLINDAJE ATÓMICO (Verificación de Stock en Tiempo Real) ---
         async function verificarYActualizarStock(itemsParaVender) {
+            // Verificamos primero que de todos haya stock
             for (const item of itemsParaVender) {
                 const { data: prod, error } = await db.from('productos').select('stock, name').eq('id', item.id).single();
                 if (error || !prod) throw new Error(`No se pudo verificar el producto ${item.name}`);
                 if (prod.stock < item.qty) {
-                    throw new Error(`Stock Insuficiente. Solo quedan ${prod.stock} de ${prod.name}`);
+                    throw new Error(`Stock Insuficiente. Alguien compró "${prod.name}". Solo quedan ${prod.stock}`);
                 }
             }
-            // Si todos pasan, se descuentan de una vez
+            // Si todo está bien, los descontamos
             for (const item of itemsParaVender) {
                 const { data: p } = await db.from('productos').select('stock').eq('id', item.id).single();
                 await db.from('productos').update({ stock: p.stock - item.qty }).eq('id', item.id);
@@ -1625,15 +1624,15 @@
 
             const btnConf = document.getElementById('btn-cart-confirm');
             const txtOriginalConf = btnConf.innerHTML;
-            btnConf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando Stock...';
+            btnConf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando Stock...';
             btnConf.disabled = true;
 
             try {
-                // Validamos stock en tiempo real
+                // BLINDAJE ATÓMICO EN WEB
                 for (const item of carrito) {
                     const { data: realProd, error } = await db.from('productos').select('stock').eq('id', item.id).single();
                     if (error || !realProd || realProd.stock < item.qty) {
-                        showToast(`⚠️ Lo sentimos, alguien acaba de comprar "${item.name}". Stock disponible: ${realProd ? realProd.stock : 0}`);
+                        showToast(`⚠️ Alguien acaba de comprar "${item.name}". Stock disponible: ${realProd ? realProd.stock : 0}`);
                         if (realProd) {
                             const idx = inventarioGlobal.findIndex(p => p.id === item.id);
                             if(idx !== -1) inventarioGlobal[idx].stock = realProd.stock;
@@ -1641,7 +1640,7 @@
                         }
                         btnConf.innerHTML = txtOriginalConf;
                         btnConf.disabled = false;
-                        return; 
+                        return; // Cancelamos orden
                     }
                 }
 
@@ -2025,11 +2024,11 @@
             
             const btnPOS = document.querySelector('button[onclick="procesarVentaPOS()"]');
             const txtOriginal = btnPOS.innerHTML;
-            btnPOS.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            btnPOS.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando Stock...';
             btnPOS.disabled = true;
 
             try {
-                // Validación Atómica Final
+                // BLINDAJE ATÓMICO POS
                 await verificarYActualizarStock(posCarrito);
 
                 const tipoPrecio = document.getElementById('pos-tipo-precio').value;
@@ -2076,33 +2075,33 @@
                 if(document.getElementById('pos-nota')) document.getElementById('pos-nota').value = '';
                 renderPOS(); 
                 guardarPOSCloud();
-                showToast('✅ Venta registrada'); 
+                showToast('✅ Venta registrada y cobrada con éxito'); 
                 
                 imprimirFacturaPOS(nPed);
                 
             } catch(e) {
                 showToast(`❌ Error: ${e.message}`);
-                // Si falló el stock, recargamos para que el vendedor vea el stock real
-                cargarTodoOculto();
+                // Si alguien más lo vendió, recargamos la info para que el cajero vea el stock actual
+                cargarDatosEnSegundoPlano();
             } finally {
                 btnPOS.innerHTML = txtOriginal;
                 btnPOS.disabled = false;
             }
         }
 
-        // --- SISTEMA REAL-TIME (Sincronización Silenciosa) ---
+        // --- SISTEMA DE TIEMPO REAL (WebSockets) ---
         function iniciarSuscripcionesRealTime() {
-            db.channel('custom-all-channel')
+            db.channel('actualizaciones-bellisanty')
               .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, payload => {
-                  cargarTodoOculto(); 
+                  cargarDatosEnSegundoPlano(); 
               })
               .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, payload => {
-                  cargarTodoOculto(); 
+                  cargarDatosEnSegundoPlano(); 
               })
               .subscribe();
         }
 
-        async function cargarTodoOculto() {
+        async function cargarDatosEnSegundoPlano() {
             try {
                 const [resProd, resPed] = await Promise.all([
                     db.from('productos').select('*').order('id', { ascending: false }),
@@ -2116,8 +2115,10 @@
                 if(adminMode) {
                     const searchInv = document.getElementById('admin-search-inventario') ? document.getElementById('admin-search-inventario').value : '';
                     buscarInventarioAdmin(searchInv);
+                    
                     const searchPed = document.getElementById('admin-search-pedidos') ? document.getElementById('admin-search-pedidos').value : '';
                     buscarPedidosAdmin(searchPed);
+                    
                     actualizarReportes();
                     renderMisVentasHoy();
                 } else {
@@ -2126,17 +2127,132 @@
             } catch(e) { console.error("Realtime fetch error:", e); }
         }
 
-        // --- FUNCIONES EXTRA (Reportes, Gráficos y PDF) ---
+        async function cargarTodo() {
+            fetchBCV();
+            await cargarNumerosWA();
+
+            try {
+                const [resProd, resCat, resTest, resAnun, resGaleria, resPed, resEq] = await Promise.all([
+                    db.from('productos').select('*').order('id', { ascending: false }),
+                    db.from('categorias').select('*').order('id', { ascending: true }),
+                    db.from('testimonios').select('*').order('id', { ascending: false }),
+                    db.from('anuncios').select('*').limit(1),
+                    db.from('galeria').select('*').order('id', { ascending: false }).limit(5),
+                    db.from('pedidos').select('*').order('created_at', { ascending: false }),
+                    db.from('equipo').select('*').order('email', { ascending: true })
+                ]);
+
+                inventarioGlobal = (resProd.data && resProd.data.length > 0) ? resProd.data : fallbackProductos;
+                categoriasGlobal = (resCat.data && resCat.data.length > 0) ? resCat.data : fallbackCategorias;
+                testimoniosGlobal = (resTest.data && resTest.data.length > 0) ? resTest.data : fallbackTestimonios;
+                galeriaGlobal = resGaleria.data || [];
+                if(resPed && resPed.data) pedidosGlobal = resPed.data;
+                if(resEq && resEq.data) equipoGlobal = resEq.data;
+                
+                if(resAnun.data && resAnun.data.length > 0) {
+                    anuncioId = resAnun.data[0].id;
+                    renderAnuncio(resAnun.data[0].texto);
+                    
+                    const linkVIP = resAnun.data[0].link_comunidad || `https://wa.me/${whatsappNumber}`;
+                    const horarioDB = resAnun.data[0].horario || 'Lun - Sáb: 9:00 AM - 6:00 PM';
+                    
+                    configRecargoBs = resAnun.data[0].recargo_bs !== null ? parseFloat(resAnun.data[0].recargo_bs) : 50;
+                    configAjusteMayor = resAnun.data[0].ajuste_mayor !== null ? parseFloat(resAnun.data[0].ajuste_mayor) : 0;
+                    
+                    const btnVip = document.getElementById('btn-comunidad-vip');
+                    const linkInput = document.getElementById('link-comunidad');
+                    const horarioInput = document.getElementById('horario-tienda');
+                    const displayHorario = document.getElementById('display-horario');
+                    const inputRec = document.getElementById('ajuste-recargo');
+                    const inputMay = document.getElementById('ajuste-mayor');
+                    
+                    if(btnVip) btnVip.href = linkVIP;
+                    if(linkInput) linkInput.value = linkVIP;
+                    if(horarioInput) horarioInput.value = horarioDB;
+                    if(displayHorario) displayHorario.textContent = horarioDB;
+                    if(inputRec) inputRec.value = configRecargoBs;
+                    if(inputMay) inputMay.value = configAjusteMayor;
+                } else {
+                    const btnVip = document.getElementById('btn-comunidad-vip');
+                    if(btnVip) btnVip.href = `https://wa.me/${whatsappNumber}`;
+                }
+
+                renderCategoriasFiltros();
+                renderTienda(inventarioGlobal);
+                renderTestimoniosPublicos();
+                renderGaleriaPublica();
+
+                renderCategoriasAdmin();
+                renderSelectCategorias();
+                renderAdmin(inventarioGlobal);
+                renderTestimoniosAdmin();
+                renderGaleriaAdmin();
+                
+                renderSelectVendedores();
+                
+                const webOrders = pedidosGlobal.filter(p => p.origen === 'web' || !p.origen);
+                renderPedidosAdmin(webOrders); 
+                
+                renderEquipoAdmin();
+                actualizarReportes();
+                actualizarMetodosPago();
+                renderMisVentasHoy();
+                
+                iniciarSuscripcionesRealTime();
+
+                setTimeout(initScrollReveal, 100);
+
+            } catch (e) {
+                console.error("Error Carga BD:", e);
+                inventarioGlobal = fallbackProductos; 
+                categoriasGlobal = fallbackCategorias; 
+                testimoniosGlobal = fallbackTestimonios;
+                renderCategoriasFiltros(); 
+                renderTienda(inventarioGlobal); 
+                renderTestimoniosPublicos(); 
+                renderGaleriaPublica();
+                setTimeout(initScrollReveal, 100);
+            }
+        }
+
+        async function actualizarPedidosAdmin(btn) {
+            let txtOriginal = ''; let isBoton = false;
+            if(btn && btn.innerHTML) {
+                isBoton = true; txtOriginal = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+            }
+            try {
+                const { data, error } = await db.from('pedidos').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                pedidosGlobal = data || [];
+                const webOrders = pedidosGlobal.filter(p => p.origen === 'web' || !p.origen);
+                renderPedidosAdmin(webOrders);
+                actualizarReportes();
+                renderMisVentasHoy();
+                showToast('✅ Información actualizada');
+            } catch (e) { showToast('⚠️ Error al actualizar pedidos.'); } 
+            finally { if(isBoton) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
+        }
+
+        function renderSelectVendedores() {
+            const sel = document.getElementById('filtro-rep-vendedor');
+            if(!sel) return;
+            let html = '<option value="todos">👤 Todos los Cajeros/Vendedores</option>';
+            html += '<option value="cliente">👤 Web Auto (Cliente)</option>';
+            equipoGlobal.forEach(e => { html += `<option value="${e.email}">👤 ${e.email}</option>`; });
+            sel.innerHTML = html;
+        }
 
         function toggleDetalleReporte(id) {
             const tr = document.getElementById('detalle-' + id);
             const icon = document.getElementById('icon-' + id);
+            const parentRow = icon.closest('tr');
             if(tr.style.display === 'none') {
                 tr.style.display = 'table-row';
-                icon.style.transform = 'rotate(180deg)';
+                parentRow.classList.add('expanded');
             } else {
                 tr.style.display = 'none';
-                icon.style.transform = 'rotate(0deg)';
+                parentRow.classList.remove('expanded');
             }
         }
 
@@ -2191,13 +2307,11 @@
                 }
             });
             
-            // Para la ganancia neta, estandarizamos a USD 
-            // (Si hubo ventas en Bs, las pasamos a USD a la tasa del día que se vendió)
             let gananciaGeneradaBsAUsd = 0;
             filtrados.forEach(ped => {
                 const esBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(ped.metodo_pago);
-                if (esBs) {
-                     gananciaGeneradaBsAUsd += (parseFloat(ped.total_usd) * ped.tasa_bcv) / ped.tasa_bcv; 
+                if (esBs && ped.tasa_bcv > 0) {
+                     gananciaGeneradaBsAUsd += ((parseFloat(ped.total_usd) * ped.tasa_bcv) / ped.tasa_bcv); 
                 }
             });
 
@@ -2247,10 +2361,7 @@
 
         function renderListaDetalladaReportes(filtrados) {
             const tbody = document.getElementById('lista-detallada-reportes');
-            const count = document.getElementById('rep-cantidad-transacciones');
             if(!tbody) return;
-
-            if(count) count.textContent = filtrados.length;
 
             if(filtrados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">No hay transacciones con estos filtros.</td></tr>';
@@ -2270,18 +2381,18 @@
                 const montoMostrar = esVentaBs ? `<span class="text-blue-600">${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span>` : `<span class="text-green-600">$${parseFloat(p.total_usd).toFixed(2)}</span>`;
 
                 return `
-                <tr class="hover:bg-gray-50 transition cursor-pointer border-b border-gray-100 last:border-0" onclick="toggleDetalleReporte('${p.id}')">
+                <tr class="hover:bg-gray-50 transition cursor-pointer border-b border-gray-100 last:border-0 row-detalle" onclick="toggleDetalleReporte('${p.id}')">
                     <td class="px-4 py-3 whitespace-nowrap">${date}</td>
-                    <td class="px-4 py-3 font-bold text-gray-900">${p.codigo} <i id="icon-${p.id}" class="fas fa-chevron-down text-gray-300 text-[10px] ml-1 icon-expand transition-transform"></i></td>
+                    <td class="px-4 py-3 font-bold text-gray-900">${p.codigo} <i id="icon-${p.id}" class="fas fa-chevron-down text-gray-400 text-[10px] ml-1 icon-expand inline-block"></i></td>
                     <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${p.metodo_pago || 'N/D'}</span></td>
                     <td class="px-4 py-3 text-right font-black">${montoMostrar}</td>
                 </tr>
-                <tr id="detalle-${p.id}" style="display: none;" class="bg-gray-50/50">
+                <tr id="detalle-${p.id}" style="display: none;" class="bg-gray-50/50 border-b border-gray-200">
                     <td colspan="4" class="px-4 py-3">
                         <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
                             <p class="text-[10px] font-bold text-gray-800 mb-2 border-b border-gray-100 pb-1 flex justify-between">
                                 <span>CLIENTE: ${cl.toUpperCase()}</span>
-                                <span>TASA: ${p.tasa_bcv} Bs</span>
+                                <span>TASA APLICADA: ${p.tasa_bcv} Bs</span>
                             </p>
                             ${itemListHtml}
                         </div>
@@ -2456,9 +2567,6 @@
                         }
                         aplicarPermisos(esAdmin, p);
                     }
-                    
-                    // Iniciamos el Realtime Solo cuando es Admin y entró
-                    iniciarSuscripcionesRealTime();
                 } else {
                     const vistaTienda = document.getElementById('vista-tienda');
                     const vistaAdmin = document.getElementById('vista-admin');
