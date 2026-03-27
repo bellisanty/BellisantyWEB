@@ -17,6 +17,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         tailwind.config = {
@@ -776,7 +777,6 @@
                     <div id="lista-pedidos-admin" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-2"></div>
                 </div>
             </div>
-
             <div id="panel-pos" style="display: none;" class="space-y-8">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-blue-500 max-w-4xl mx-auto">
                     <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
@@ -916,7 +916,7 @@
 
             <div id="panel-reportes" style="display: none;" class="space-y-8">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-emerald-600">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-gray-100 gap-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 pb-4 border-b border-gray-100 gap-4">
                         <div class="flex items-center gap-3"><div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600"><i class="fas fa-chart-line text-lg"></i></div><h2 class="text-xl font-bold text-gray-900">Reporte Financiero Global</h2></div>
                         
                         <div class="flex flex-wrap gap-2">
@@ -941,37 +941,51 @@
                                 </select>
                             
                             <button onclick="descargarPDFReporte()" class="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-600 transition cursor-pointer text-xs shadow-md inline-flex items-center gap-2">
-                                <i class="fas fa-file-pdf"></i> Descargar PDF Profesional
+                                <i class="fas fa-file-pdf"></i> Descargar PDF
                             </button>
                         </div>
                     </div>
 
+                    <div class="flex flex-wrap gap-2 items-center mb-6 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <span class="text-xs font-bold text-gray-500 uppercase"><i class="fas fa-calendar-alt"></i> Rango Histórico:</span>
+                        <input type="date" id="filtro-fecha-desde" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500">
+                        <span class="text-xs font-bold text-gray-500">-</span>
+                        <input type="date" id="filtro-fecha-hasta" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500">
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center shadow-inner">
-                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Ventas Brutas USD</p>
-                            <p id="rep-ventas" class="text-2xl font-black text-gray-900">$0.00</p>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Cobrado Divisas</p>
+                            <p id="rep-divisas" class="text-2xl font-black text-gray-900">$0.00</p>
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-200 text-center shadow-inner">
+                            <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-2">Total Cobrado Bolívares</p>
+                            <p id="rep-bolivares" class="text-xl font-black text-blue-600">0.00 Bs</p>
                         </div>
                         <div class="bg-red-50 p-6 rounded-2xl border border-red-100 text-center shadow-inner">
-                            <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2">Costos Inv. USD</p>
+                            <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2">Costo de Inversión</p>
                             <p id="rep-costos" class="text-2xl font-black text-red-600">$0.00</p>
                         </div>
                         <div class="bg-emerald-50 p-6 rounded-2xl border border-emerald-200 text-center shadow-lg shadow-emerald-100 transform md:scale-105 z-10 relative">
                             <div class="absolute -top-3 -right-3 bg-emerald-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md"><i class="fas fa-check text-[10px]"></i></div>
-                            <p class="text-[10px] font-bold text-emerald-800 uppercase tracking-widest mb-2">Ganancia Neta USD</p>
+                            <p class="text-[10px] font-bold text-emerald-800 uppercase tracking-widest mb-2">Ganancia Neta Est. (USD)</p>
                             <p id="rep-ganancia" class="text-3xl font-black text-emerald-600">$0.00</p>
-                        </div>
-                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-200 text-center shadow-inner">
-                            <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-2">Total Ingresos Bs</p>
-                            <p id="rep-ganancia-bs" class="text-xl font-black text-blue-600">0.00 Bs</p>
                         </div>
                     </div>
                     
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 mb-6 shadow-sm">
+                        <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4"><i class="fas fa-chart-bar text-emerald-500 mr-2"></i> Tendencia de Ventas (Rango Seleccionado)</h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="ventasChart"></canvas>
+                        </div>
+                    </div>
+
                     <div class="border border-gray-100 rounded-2xl overflow-hidden mb-6">
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                             <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Lista de Transacciones Filtradas</h3>
                             <span id="rep-cantidad-transacciones" class="text-xs text-gray-500 font-bold bg-gray-200 px-2 py-0.5 rounded-full">0</span>
                         </div>
-                        <div class="overflow-x-auto max-h-[300px]">
+                        <div class="overflow-x-auto max-h-[350px]">
                             <table class="w-full text-left text-xs text-gray-600">
                                 <thead class="bg-white sticky top-0 z-10 shadow-sm">
                                     <tr>
@@ -979,7 +993,7 @@
                                         <th class="px-4 py-2 font-bold text-gray-900">Código</th>
                                         <th class="px-4 py-2 font-bold text-gray-900">Cliente/Vendedor</th>
                                         <th class="px-4 py-2 font-bold text-gray-900">Método de Pago</th>
-                                        <th class="px-4 py-2 font-bold text-gray-900 text-right">Monto ($)</th>
+                                        <th class="px-4 py-2 font-bold text-gray-900 text-right">Monto</th>
                                     </tr>
                                 </thead>
                                 <tbody id="lista-detallada-reportes" class="divide-y divide-gray-50">
@@ -1131,7 +1145,6 @@
             </div>
         </div>
     </div>
-
     <script>
         const whatsappNumber = "584126480799";
         
@@ -1155,6 +1168,7 @@
         let html5QrcodeScanner; 
         let scanTarget = ''; 
         let lineasWA = []; 
+        let ventasChart = null; // Variable para el gráfico Chart.js
 
         let currentUserEmail = 'admin'; 
         let configRecargoBs = 50; 
@@ -1194,6 +1208,13 @@
                 actualizarIconosCarrito(); 
                 renderItemsCarrito(); 
             }
+            
+            // Setear fechas por defecto en Reportes
+            const hoy = new Date().toISOString().split('T')[0];
+            const inputDesde = document.getElementById('filtro-fecha-desde');
+            const inputHasta = document.getElementById('filtro-fecha-hasta');
+            if(inputDesde) inputDesde.value = hoy;
+            if(inputHasta) inputHasta.value = hoy;
         });
 
         const navbar = document.getElementById('navbar');
@@ -1588,6 +1609,36 @@
             btnConf.disabled = true;
 
             try {
+                // BLINDAJE ATÓMICO DE STOCK (Checkout Web)
+                const ids = carrito.map(i => i.id);
+                const { data: dbStock } = await db.from('productos').select('id, stock').in('id', ids);
+                
+                let stockInsuficiente = false;
+                for(let item of carrito) {
+                    const dbItem = dbStock.find(x => x.id == item.id);
+                    if(!dbItem || dbItem.stock < item.qty) {
+                        stockInsuficiente = true;
+                        // Actualizar el inventario local para reflejar la realidad
+                        const localItem = inventarioGlobal.find(x => x.id == item.id);
+                        if(localItem && dbItem) localItem.stock = dbItem.stock;
+                    }
+                }
+                
+                if(stockInsuficiente) {
+                    showToast("⚠️ Alguien más acaba de comprar un producto de tu carrito. Stock insuficiente.");
+                    // Ajustar el carrito al stock máximo real
+                    carrito = carrito.filter(item => {
+                        const localItem = inventarioGlobal.find(x => x.id == item.id);
+                        if(localItem && localItem.stock >= item.qty) return true;
+                        if(localItem && localItem.stock > 0) { item.qty = localItem.stock; return true; }
+                        return false;
+                    });
+                    actualizarIconosCarrito(); renderItemsCarrito(); renderTienda(inventarioGlobal);
+                    btnConf.innerHTML = '<i class="fab fa-whatsapp text-lg"></i> Confirmar Pedido';
+                    btnConf.disabled = false;
+                    return;
+                }
+
                 const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const code = '#WEB-' + Math.floor(1000 + Math.random() * 9000);
                 
@@ -1631,7 +1682,7 @@
             } catch(e) {
                 showToast("⚠️ Hubo un error al procesar el pedido.");
             } finally {
-                btnConf.innerHTML = `<i class="fab fa-whatsapp text-lg"></i> Confirmar y Enviar Pedido`;
+                btnConf.innerHTML = `<i class="fab fa-whatsapp text-lg"></i> Confirmar Pedido`;
                 btnConf.disabled = false;
             }
         }
@@ -1759,9 +1810,21 @@
             const selectMetodo = document.getElementById('pos-metodo');
             if(!selectMetodo) return;
 
+            // Conservar la opción actual si es posible
+            const valorActual = selectMetodo.value;
+
             let opciones = '';
             if(tipoPrecio === 'bs') {
                 opciones = `
+                    <option value="Pago Movil">📱 Pago Móvil</option>
+                    <option value="Punto de Venta">💳 Punto de Venta</option>
+                    <option value="Efectivo Bs">💵 Efectivo (Bs)</option>
+                `;
+            } else if (tipoPrecio === 'mayor') {
+                opciones = `
+                    <option value="Divisa">💵 Efectivo (Divisa)</option>
+                    <option value="Zelle">🟩 Zelle</option>
+                    <option value="Binance">🟨 Binance</option>
                     <option value="Pago Movil">📱 Pago Móvil</option>
                     <option value="Punto de Venta">💳 Punto de Venta</option>
                     <option value="Efectivo Bs">💵 Efectivo (Bs)</option>
@@ -1774,6 +1837,11 @@
                 `;
             }
             selectMetodo.innerHTML = opciones;
+            
+            // Re-asignar si existe en las nuevas opciones
+            Array.from(selectMetodo.options).forEach(opt => {
+                if(opt.value === valorActual) selectMetodo.value = valorActual;
+            });
         }
 
         async function guardarPOSCloud() {
@@ -1840,16 +1908,20 @@
             }
 
             const tipoPrecio = document.getElementById('pos-tipo-precio').value;
+            const metodo = document.getElementById('pos-metodo').value;
+            const esMetodoBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(metodo);
             
             let totalUsdBase = 0;
-            let totalBsConRecargo = 0;
+            let totalBsCalculado = 0;
             
             list.innerHTML = posCarrito.map(i => {
                 const finalPriceBaseUsd = i.price * (1 + (tipoPrecio === 'mayor' ? (configAjusteMayor/100) : 0));
                 totalUsdBase += (finalPriceBaseUsd * i.qty);
                 
-                const precioBsItem = (i.price * tasaBCV) * (1 + (tipoPrecio === 'bs' ? (configRecargoBs/100) : 0));
-                totalBsConRecargo += (precioBsItem * i.qty);
+                // Recargo aplica si es precio BS o si es precio MAYOR pagando en BS
+                const recargo = (tipoPrecio === 'bs' || (tipoPrecio === 'mayor' && esMetodoBs)) ? (configRecargoBs/100) : 0;
+                const precioBsItem = (finalPriceBaseUsd * tasaBCV) * (1 + recargo);
+                totalBsCalculado += (precioBsItem * i.qty);
                 
                 const unitUsd = i.price.toFixed(2);
                 const unitBsRef = (i.price * tasaBCV * (1 + configRecargoBs/100)).toFixed(2);
@@ -1878,8 +1950,8 @@
             `}).join('');
             
             totalE.textContent = `$${totalUsdBase.toFixed(2)}`;
-            if (tipoPrecio === 'bs') {
-                totalBcvE.textContent = `${totalBsConRecargo.toFixed(2)} Bs (Inc. Recargo)`;
+            if (tipoPrecio === 'bs' || (tipoPrecio === 'mayor' && esMetodoBs)) {
+                totalBcvE.textContent = `${totalBsCalculado.toFixed(2)} Bs (Inc. Recargo)`;
             } else {
                 totalBcvE.textContent = tasaBCV > 0 ? `${(totalUsdBase * tasaBCV).toFixed(2)} Bs (Tasa: ${tasaBCV})` : `0.00 Bs`;
             }
@@ -1943,7 +2015,38 @@
             if(posCarrito.length === 0) { showToast('⚠️ La caja está vacía.'); return; }
             
             try {
+                // BLINDAJE ATÓMICO DE STOCK (POS)
+                const ids = posCarrito.map(i => i.id);
+                const { data: dbStock } = await db.from('productos').select('id, stock').in('id', ids);
+                
+                let stockInsuficiente = false;
+                for(let item of posCarrito) {
+                    const dbItem = dbStock.find(x => x.id == item.id);
+                    if(!dbItem || dbItem.stock < item.qty) {
+                        stockInsuficiente = true;
+                        const localItem = inventarioGlobal.find(x => x.id == item.id);
+                        if(localItem && dbItem) localItem.stock = dbItem.stock;
+                    }
+                }
+                
+                if(stockInsuficiente) {
+                    showToast("⚠️ Alguien más compró uno de estos artículos. Stock BD insuficiente. Carrito de caja actualizado.");
+                    posCarrito = posCarrito.filter(item => {
+                        const localItem = inventarioGlobal.find(x => x.id == item.id);
+                        if(localItem && localItem.stock >= item.qty) return true;
+                        if(localItem && localItem.stock > 0) { item.qty = localItem.stock; return true; }
+                        return false;
+                    });
+                    renderPOS();
+                    renderTienda(inventarioGlobal);
+                    renderAdmin(inventarioGlobal);
+                    return;
+                }
+
+
                 const tipoPrecio = document.getElementById('pos-tipo-precio').value;
+                const metodo = document.getElementById('pos-metodo').value;
+                const esMetodoBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(metodo);
                 const notaPOS = document.getElementById('pos-nota') ? document.getElementById('pos-nota').value.trim() : '';
                 
                 let modUsd = (tipoPrecio === 'mayor') ? configAjusteMayor : 0;
@@ -1955,9 +2058,9 @@
 
                 const totalUsd = itemsAjustados.reduce((s, i) => s + (i.price * i.qty), 0);
                 const code = '#POS-' + Math.floor(1000 + Math.random()*9000);
-                const metodo = document.getElementById('pos-metodo').value;
                 
-                const tasaAplicada = (tipoPrecio === 'bs') ? (tasaBCV * (1 + (configRecargoBs/100))) : tasaBCV;
+                const recargo = (tipoPrecio === 'bs' || (tipoPrecio === 'mayor' && esMetodoBs)) ? (configRecargoBs/100) : 0;
+                const tasaAplicada = tasaBCV * (1 + recargo);
                 
                 const nPed = { 
                     codigo: code, 
@@ -1988,10 +2091,34 @@
                 guardarPOSCloud();
                 showToast('✅ Venta de Caja registrada y cobrada con éxito'); 
                 
-                cargarTodo(); 
+                // No llamamos a cargarTodo() directamente para evitar flicker masivo, dejamos que db.channel haga lo suyo
             } catch(e) {
                 showToast("⚠️ Error crítico al procesar la venta de POS.");
             }
+        }
+
+        // --- SINCRONIZACIÓN REAL-TIME SUPABASE ---
+        function setupRealtime() {
+            db.channel('public:sync-bellisanty')
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, async (payload) => {
+                  const { data } = await db.from('productos').select('*').order('id', { ascending: false });
+                  if(data) { 
+                      inventarioGlobal = data; 
+                      renderTienda(inventarioGlobal); 
+                      renderAdmin(inventarioGlobal); 
+                  }
+              })
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, async (payload) => {
+                  const { data } = await db.from('pedidos').select('*').order('created_at', { ascending: false });
+                  if(data) { 
+                      pedidosGlobal = data; 
+                      const webOrders = pedidosGlobal.filter(p => p.origen === 'web' || !p.origen);
+                      renderPedidosAdmin(webOrders); 
+                      actualizarReportes(); 
+                      renderMisVentasHoy(); 
+                  }
+              })
+              .subscribe();
         }
 
         async function cargarTodo() {
@@ -2066,6 +2193,9 @@
                 renderMisVentasHoy();
 
                 setTimeout(initScrollReveal, 100);
+                
+                // Iniciar escucha Real-Time
+                setupRealtime();
 
             } catch (e) {
                 console.error("Error Carga BD:", e);
@@ -2108,12 +2238,57 @@
             sel.innerHTML = html;
         }
 
+        function actualizarGraficoVentas(entregados) {
+            const ctx = document.getElementById('ventasChart');
+            if(!ctx) return;
+            
+            const agrupado = {};
+            entregados.forEach(p => {
+                const fecha = p.created_at.split('T')[0];
+                if(!agrupado[fecha]) agrupado[fecha] = 0;
+                agrupado[fecha] += parseFloat(p.total_usd);
+            });
+
+            const labels = Object.keys(agrupado).sort();
+            const data = labels.map(l => agrupado[l]);
+
+            if(ventasChart) { ventasChart.destroy(); }
+
+            ventasChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ventas Diarias (USD)',
+                        data: data,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
         function actualizarReportes() {
             const origenSelect = document.getElementById('filtro-rep-origen');
             const vendedorSelect = document.getElementById('filtro-rep-vendedor');
             const metodoSelect = document.getElementById('filtro-rep-metodo');
+            const desde = document.getElementById('filtro-fecha-desde').value;
+            const hasta = document.getElementById('filtro-fecha-hasta').value;
             
             let filtrados = pedidosGlobal;
+
+            // Filtros de fecha
+            if(desde) filtrados = filtrados.filter(p => p.created_at.split('T')[0] >= desde);
+            if(hasta) filtrados = filtrados.filter(p => p.created_at.split('T')[0] <= hasta);
             
             if(origenSelect && origenSelect.value !== 'todos') {
                 filtrados = filtrados.filter(p => (p.origen || 'web') === origenSelect.value);
@@ -2129,16 +2304,22 @@
 
             pedidosReportesFiltrados = filtrados;
             
-            let vBrutas = 0; 
+            let vDivisas = 0; 
+            let vBs = 0;
             let vCostos = 0;
-            let vBsExactos = 0;
             
             const entregados = filtrados.filter(p => p.estado === 'Entregado');
             
             entregados.forEach(ped => {
                 const pedTasa = ped.tasa_bcv || tasaBCV;
-                vBrutas += parseFloat(ped.total_usd);
-                vBsExactos += (parseFloat(ped.total_usd) * pedTasa);
+                const met = ped.metodo_pago || '';
+                const isBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met);
+                
+                if(isBs) {
+                    vBs += (parseFloat(ped.total_usd) * pedTasa);
+                } else {
+                    vDivisas += parseFloat(ped.total_usd);
+                }
                 
                 if(ped.items && Array.isArray(ped.items)) {
                     ped.items.forEach(it => {
@@ -2148,28 +2329,22 @@
                 }
             });
             
-            const ganancia = vBrutas - vCostos;
-            
-            const eB = document.getElementById('rep-ventas');
+            const eDiv = document.getElementById('rep-divisas');
+            const eBs = document.getElementById('rep-bolivares');
             const eC = document.getElementById('rep-costos');
             const eG = document.getElementById('rep-ganancia');
-            const eGBs = document.getElementById('rep-ganancia-bs');
             
-            if(eB) eB.textContent = `$${vBrutas.toFixed(2)}`;
+            if(eDiv) eDiv.textContent = `$${vDivisas.toFixed(2)}`;
+            if(eBs) eBs.textContent = `${vBs.toFixed(2)} Bs`;
             if(eC) eC.textContent = `$${vCostos.toFixed(2)}`;
+            
+            let totalRevUsd = 0;
+            entregados.forEach(ped => { totalRevUsd += parseFloat(ped.total_usd); });
+            const ganancia = totalRevUsd - vCostos;
             if(eG) eG.textContent = `$${ganancia.toFixed(2)}`;
-            if(eGBs) eGBs.textContent = `${vBsExactos.toFixed(2)} Bs`;
-
-            const boxBs = document.getElementById('rep-ganancia-bs') ? document.getElementById('rep-ganancia-bs').parentElement : null;
-            if(boxBs) {
-                if(metodoSelect && (metodoSelect.value === 'Divisa' || metodoSelect.value === 'Zelle' || metodoSelect.value === 'Binance')) {
-                    boxBs.style.display = 'none';
-                } else {
-                    boxBs.style.display = 'block';
-                }
-            }
 
             renderListaDetalladaReportes(filtrados);
+            actualizarGraficoVentas(entregados);
         }
 
         function renderListaDetalladaReportes(filtrados) {
@@ -2189,13 +2364,29 @@
                 const cl = p.origen === 'mostrador' ? 'POS - ' + p.vendedor : p.cliente;
                 const icon = p.estado === 'Entregado' ? '<i class="fas fa-check-circle text-green-500" title="Entregado"></i>' : '<i class="fas fa-clock text-yellow-500" title="Pendiente/Proceso"></i>';
 
+                let detallesHtml = '<ul class="list-disc pl-5 text-gray-500">';
+                if(p.items && Array.isArray(p.items)) {
+                    p.items.forEach(it => {
+                        detallesHtml += `<li><b>${it.qty}x</b> ${it.name} - $${(it.price * it.qty).toFixed(2)}</li>`;
+                    });
+                }
+                detallesHtml += '</ul>';
+
                 return `
-                <tr class="hover:bg-gray-50 transition cursor-default border-b border-gray-100 last:border-0">
+                <tr class="hover:bg-gray-50 transition cursor-pointer border-b border-gray-100 last:border-0" onclick="document.getElementById('det-${p.id}').classList.toggle('hidden')">
                     <td class="px-4 py-3 whitespace-nowrap">${date}</td>
                     <td class="px-4 py-3 font-bold text-gray-900">${p.codigo} ${icon}</td>
                     <td class="px-4 py-3 truncate max-w-[150px]" title="${cl}">${cl}</td>
                     <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${p.metodo_pago || 'Por definir'}</span></td>
                     <td class="px-4 py-3 text-right font-black text-gray-900">$${parseFloat(p.total_usd).toFixed(2)}</td>
+                </tr>
+                <tr id="det-${p.id}" class="hidden bg-gray-50 border-b border-gray-100">
+                    <td colspan="5" class="px-4 py-3">
+                        <div class="text-xs">
+                            <span class="font-bold text-gray-700 block mb-1">Detalle del Pedido:</span>
+                            ${detallesHtml}
+                        </div>
+                    </td>
                 </tr>
                 `;
             }).join('');
@@ -2218,8 +2409,12 @@
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
                         <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; width: 22%; text-align: center;">
-                            <p style="margin: 0; font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase;">Ventas Brutas USD</p>
-                            <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: bold; color: #111827;">${document.getElementById('rep-ventas').textContent}</p>
+                            <p style="margin: 0; font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase;">Total Divisas</p>
+                            <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: bold; color: #111827;">${document.getElementById('rep-divisas').textContent}</p>
+                        </div>
+                        <div style="background: #eff6ff; padding: 15px; border-radius: 8px; width: 22%; text-align: center;">
+                            <p style="margin: 0; font-size: 10px; color: #1d4ed8; font-weight: bold; text-transform: uppercase;">Total Bolívares</p>
+                            <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: bold; color: #2563eb;">${document.getElementById('rep-bolivares').textContent}</p>
                         </div>
                         <div style="background: #fef2f2; padding: 15px; border-radius: 8px; width: 22%; text-align: center;">
                             <p style="margin: 0; font-size: 10px; color: #dc2626; font-weight: bold; text-transform: uppercase;">Costos Inv. USD</p>
@@ -2228,10 +2423,6 @@
                         <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; width: 22%; text-align: center; border: 1px solid #10b981;">
                             <p style="margin: 0; font-size: 10px; color: #047857; font-weight: bold; text-transform: uppercase;">Ganancia Neta USD</p>
                             <p style="margin: 5px 0 0 0; font-size: 20px; font-weight: bold; color: #059669;">${document.getElementById('rep-ganancia').textContent}</p>
-                        </div>
-                        <div style="background: #eff6ff; padding: 15px; border-radius: 8px; width: 22%; text-align: center; display: ${document.getElementById('rep-ganancia-bs').parentElement.style.display};">
-                            <p style="margin: 0; font-size: 10px; color: #1d4ed8; font-weight: bold; text-transform: uppercase;">Total Ingresos Bs</p>
-                            <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: bold; color: #2563eb;">${document.getElementById('rep-ganancia-bs').textContent}</p>
                         </div>
                     </div>
 
@@ -2659,11 +2850,11 @@
                 const { error } = await db.from('pedidos').update({ estado: nuevoEstado }).eq('id', id);
                 if(error) throw error;
                 showToast('✅ Estado actualizado.');
-                await cargarTodo();
+                // La sincronización en tiempo real se encargará de refrescar la vista.
             } catch(e) { showToast('⚠️ Error al actualizar estado.'); }
         }
 
-        // --- SISTEMA DE IMPRESIÓN PARA TICKERA (80MM / 58MM) ---
+        // --- SISTEMA DE IMPRESIÓN INTELIGENTE (FACTURAS EN BS/DIVISAS) ---
         function imprimirFactura(id) {
             const p = pedidosGlobal.find(x => String(x.id) === String(id));
             if(!p) { showToast('⚠️ Pedido no encontrado.'); return; }
@@ -2686,7 +2877,10 @@
             if(esVentaBs) {
                 totalesHtml = `<div style="display:flex; justify-content:space-between; font-size:16px; margin-top:4px;" class="font-bold"><span>TOTAL A PAGAR:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div>`;
             } else {
-                totalesHtml = `<div style="display:flex; justify-content:space-between; font-size:16px;" class="font-bold"><span>TOTAL USD:</span><span>$${parseFloat(p.total_usd).toFixed(2)}</span></div><div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px;"><span>TASA BCV:</span><span>${p.tasa_bcv} Bs</span></div><div style="display:flex; justify-content:space-between; font-size:14px; margin-top:4px;" class="font-bold"><span>TOTAL BS:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div>`;
+                totalesHtml = `
+                    <div style="display:flex; justify-content:space-between; font-size:16px;" class="font-bold"><span>TOTAL USD:</span><span>$${parseFloat(p.total_usd).toFixed(2)}</span></div>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px;"><span>TASA BCV:</span><span>${p.tasa_bcv} Bs</span></div>
+                    <div style="display:flex; justify-content:space-between; font-size:14px; margin-top:4px;" class="font-bold"><span>TOTAL BS:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div>`;
             }
 
             const htmlContent = `<html><head><title>Factura ${p.codigo}</title><style>@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'); body { font-family: 'Courier Prime', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; background: #fff; } .text-center { text-align: center; } .border-b { border-bottom: 1px dashed #000; padding-bottom: 12px; margin-bottom: 12px; } .font-bold { font-weight: bold; } .title { font-size: 22px; font-weight: bold; margin-bottom: 5px; } p { margin: 4px 0; font-size: 13px; }</style></head><body onload="window.print(); setTimeout(() => window.close(), 500);"><div class="text-center border-b"><div class="title">BELLISANTY</div><p>LUXURY GIFTING</p><p>Pueblo Llano, Mérida</p><p>WhatsApp: +58 412-6480799</p></div><div class="border-b"><p><b>ORDEN:</b> ${p.codigo}</p><p><b>FECHA:</b> ${new Date(p.created_at).toLocaleString('es-VE')}</p><p><b>CLIENTE:</b> ${p.cliente.toUpperCase()}</p><p><b>TELÉFONO:</b> ${p.telefono}</p><p><b>MÉTODO PAGO:</b> ${p.metodo_pago}</p><p><b>CAJERO:</b> ${p.vendedor === 'cliente' ? 'Web' : p.vendedor}</p></div><div class="border-b"><p class="font-bold" style="margin-bottom:10px; display:flex; justify-content:space-between;"><span>CANT DESCRIPCIÓN</span><span>TOTAL</span></p>${itemsHtml}</div><div class="border-b">${totalesHtml}</div><div class="text-center" style="margin-top: 20px;"><p>¡Gracias por tu compra!</p><p>@bellisanty</p></div></body></html>`;
@@ -2719,7 +2913,7 @@
                         <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'pos', this.checked)" ${pPos ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Caja (POS)</label>
                         <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'inventario', this.checked)" ${pInv ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Inventario</label>
                         <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'reportes', this.checked)" ${pRep ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Reportes</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer col-span-2 border-t border-gray-200 pt-2 mt-1"><input type="checkbox" id="perm-cfg" class="rounded text-indigo-600 w-4 h-4"> <span>Ajustes Totales</span></label>
+                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer col-span-2 border-t border-gray-200 pt-2 mt-1"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'configuracion', this.checked)" ${pCfg ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> <span>Ajustes Totales</span></label>
                     </div>
                     ` : '<span class="text-[10px] text-gray-400 text-center block pb-1">Acceso total maestro y permisos absolutos</span>'}
                 </div>
