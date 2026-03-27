@@ -2014,6 +2014,12 @@
         async function procesarVentaPOS() {
             if(posCarrito.length === 0) { showToast('⚠️ La caja está vacía.'); return; }
             
+            // Bloqueo visual del botón para evitar dobles clics
+            const btnProcesar = document.querySelector('button[onclick="procesarVentaPOS()"]');
+            const txtOriginal = btnProcesar.innerHTML;
+            btnProcesar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando Venta...';
+            btnProcesar.disabled = true;
+
             try {
                 // BLINDAJE ATÓMICO DE STOCK (POS)
                 const ids = posCarrito.map(i => i.id);
@@ -2040,9 +2046,10 @@
                     renderPOS();
                     renderTienda(inventarioGlobal);
                     renderAdmin(inventarioGlobal);
+                    btnProcesar.innerHTML = txtOriginal;
+                    btnProcesar.disabled = false;
                     return;
                 }
-
 
                 const tipoPrecio = document.getElementById('pos-tipo-precio').value;
                 const metodo = document.getElementById('pos-metodo').value;
@@ -2091,9 +2098,31 @@
                 guardarPOSCloud();
                 showToast('✅ Venta de Caja registrada y cobrada con éxito'); 
                 
-                // No llamamos a cargarTodo() directamente para evitar flicker masivo, dejamos que db.channel haga lo suyo
+                // ACTUALIZACIÓN LOCAL INMEDIATA Y LIGERA
+                const [{ data: nuevosPedidos }, { data: nuevosProductos }] = await Promise.all([
+                    db.from('pedidos').select('*').order('created_at', { ascending: false }),
+                    db.from('productos').select('*').order('id', { ascending: false })
+                ]);
+
+                if(nuevosPedidos) {
+                    pedidosGlobal = nuevosPedidos;
+                    const webOrders = pedidosGlobal.filter(p => p.origen === 'web' || !p.origen);
+                    renderPedidosAdmin(webOrders);
+                    actualizarReportes();
+                    renderMisVentasHoy();
+                }
+
+                if(nuevosProductos) {
+                    inventarioGlobal = nuevosProductos;
+                    renderTienda(inventarioGlobal);
+                    renderAdmin(inventarioGlobal);
+                }
+
             } catch(e) {
                 showToast("⚠️ Error crítico al procesar la venta de POS.");
+            } finally {
+                btnProcesar.innerHTML = txtOriginal;
+                btnProcesar.disabled = false;
             }
         }
 
