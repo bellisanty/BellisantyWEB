@@ -439,6 +439,7 @@
                 <p class="text-gray-400 text-sm">Intenta cambiar los filtros o la búsqueda.</p>
             </div>
         </main>
+        
         <section id="ocasiones" class="bg-white py-20 border-t border-gray-50 scroll-reveal">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="text-center mb-14">
@@ -515,7 +516,7 @@
             <div class="max-w-7xl mx-auto px-4">
                 <div class="text-center mb-14">
                     <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Galería</span>
-                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Síguenos en <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400">Instagram</span></h2>
+                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Síguenos en <span class="text-transparent bg-clip-text bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400">Instagram</span></h2>
                     <p class="text-gray-400 max-w-lg mx-auto font-light">Mira nuestras creaciones más recientes y encuentra inspiración para tu próximo regalo.</p>
                 </div>
                 
@@ -554,7 +555,6 @@
                 </div>
             </div>
         </section>
-
         <section class="py-20 bg-gradient-to-br from-belli-700 via-belli-600 to-belli-500 relative overflow-hidden scroll-reveal">
             <div class="blob w-96 h-96 bg-white/10 -top-20 -right-20"></div>
             <div class="blob w-72 h-72 bg-white/10 bottom-10 -left-10" style="animation-delay:3s;"></div>
@@ -893,7 +893,7 @@
                                     <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IMAGEN DEL PRODUCTO</label>
                                     <div class="flex gap-2">
                                         <label for="imagen" class="file-upload-btn block flex-1"><i class="fas fa-cloud-upload-alt mr-2"></i>Subir PC</label>
-                                        <button type="button" onclick="abrirPixabay('nuevo')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
+                                        <button type="button" onclick="abrirPexels('nuevo')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
                                     </div>
                                     <input type="file" id="imagen" accept="image/*" onchange="document.getElementById('prod-file-name').textContent = this.files[0] ? this.files[0].name : ''">
                                     <input type="hidden" id="imagen-web-url">
@@ -940,7 +940,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="panel-reportes" style="display: none;" class="space-y-8">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-emerald-600">
                     <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 pb-4 border-b border-gray-100 gap-4">
@@ -1050,13 +1049,8 @@
                     
                     <div class="space-y-6">
                         <div id="modulo-ajustes" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-gold-400">
-                            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center text-gold-500"><i class="fas fa-cog text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Ajustes Web y Precios</h2></div>
+                            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center text-gold-500"><i class="fas fa-cog text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Ajustes Web Generales</h2></div>
                             <form id="form-ajustes" class="space-y-4 auto-save-form">
-                                <div class="grid grid-cols-2 gap-4 bg-yellow-50 p-4 rounded-xl border border-yellow-100 mb-2">
-                                    <div><label class="block text-[10px] font-bold text-gray-600 mb-1.5 uppercase">Aumento para Bs (%)</label><input type="number" id="ajuste-recargo" required class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold-500 text-sm font-bold text-center" value="50"></div>
-                                    <div><label class="block text-[10px] font-bold text-gray-600 mb-1.5 uppercase">Ajuste al Mayor (%)</label><input type="number" id="ajuste-mayor" required placeholder="Ej: -10 para descuento" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold-500 text-sm font-bold text-center" value="0"></div>
-                                </div>
-                                
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">Cinta de Anuncios Web</label><input type="text" id="texto-anuncio" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold-500 text-sm"></div>
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">Link Grupo VIP Comunidad</label><input type="url" id="link-comunidad" required placeholder="https://chat.whatsapp.com/..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold-500 text-sm"></div>
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">Horario de Atención (Público)</label><input type="text" id="horario-tienda" required placeholder="Ej: Lun - Sáb: 9:00 AM - 6:00 PM" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-gold-500 text-sm"></div>
@@ -1134,20 +1128,20 @@
         </main>
     </div>
 
-    <div id="modal-pixabay" style="display: none;" class="fixed inset-0 bg-black/80 z-[300] flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+    <div id="modal-pexels" style="display: none;" class="fixed inset-0 bg-black/80 z-[300] flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
         <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl relative animate-fade-up my-8 flex flex-col h-[80vh]">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-3xl shrink-0">
-                <h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-globe text-blue-500 mr-2"></i> Buscar en Pixabay</h3>
-                <button onclick="cerrarPixabay()" class="text-gray-400 hover:text-red-500 transition cursor-pointer"><i class="fas fa-times text-lg"></i></button>
+                <h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-image text-blue-500 mr-2"></i> Buscar en Pexels</h3>
+                <button onclick="cerrarPexels()" class="text-gray-400 hover:text-red-500 transition cursor-pointer"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 shrink-0 border-b border-gray-100">
                 <div class="flex gap-2">
-                    <input type="text" id="pixabay-query" placeholder="Ej: bouquet de rosas, globos de cumpleaños..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-sm" onkeydown="if(event.key==='Enter') buscarPixabay()">
-                    <button onclick="buscarPixabay()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition"><i class="fas fa-search"></i> Buscar</button>
+                    <input type="text" id="pexels-query" placeholder="Ej: rosas rojas, globos fiesta, chocolates..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-sm" onkeydown="if(event.key==='Enter') buscarPexels()">
+                    <button onclick="buscarPexels()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition"><i class="fas fa-search"></i> Buscar</button>
                 </div>
             </div>
             <div class="p-6 flex-1 overflow-y-auto bg-gray-50">
-                <div id="pixabay-results" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div id="pexels-results" class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <p class="text-gray-400 text-sm col-span-full text-center mt-10">Realiza una búsqueda para ver imágenes</p>
                 </div>
             </div>
@@ -1167,7 +1161,6 @@
             </div>
         </div>
     </div>
-
     <div id="modal-editar-producto" style="display: none;" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative animate-fade-up my-8">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-3xl">
@@ -1204,7 +1197,7 @@
                         <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CAMBIAR FOTO (Opcional)</label>
                         <div class="flex gap-2">
                             <label for="edit-imagen" class="file-upload-btn block flex-1"><i class="fas fa-image mr-2"></i>Subir PC</label>
-                            <button type="button" onclick="abrirPixabay('edit')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
+                            <button type="button" onclick="abrirPexels('edit')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
                         </div>
                         <input type="file" id="edit-imagen" accept="image/*" onchange="document.getElementById('edit-file-name').textContent = this.files[0] ? this.files[0].name : ''">
                         <input type="hidden" id="edit-imagen-web-url">
@@ -1236,7 +1229,7 @@
         let equipoGlobal = []; 
         let carrito = []; 
         let posCarrito = []; 
-        let pagosMixtos = []; // Nueva variable para pagos POS
+        let pagosMixtos = []; 
         let tasaBCV = 0;  
         let anuncioId = null;
         let filtroActual = 'todos';
@@ -1246,8 +1239,6 @@
         let ventasChart = null; 
 
         let currentUserEmail = 'admin'; 
-        let configRecargoBs = 50; 
-        let configAjusteMayor = 0;
 
         // Auto-Save Inicialización
         function initAutoSave() {
@@ -1302,32 +1293,37 @@
             document.getElementById(pref+'precio_oferta').value = pOferta.toFixed(2);
         }
 
-        // Buscador Pixabay
-        let currentPixabayMode = 'nuevo';
-        function abrirPixabay(mode) {
-            currentPixabayMode = mode;
-            document.getElementById('modal-pixabay').style.display = 'flex';
+        // Buscador Pexels (Reemplazo de Pixabay)
+        let currentPexelsMode = 'nuevo';
+        function abrirPexels(mode) {
+            currentPexelsMode = mode;
+            document.getElementById('modal-pexels').style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            if (document.getElementById('pixabay-results').innerHTML.includes('Realiza una búsqueda')) {
-                document.getElementById('pixabay-query').focus();
+            if (document.getElementById('pexels-results').innerHTML.includes('Realiza una búsqueda')) {
+                document.getElementById('pexels-query').focus();
             }
         }
-        function cerrarPixabay() {
-            document.getElementById('modal-pixabay').style.display = 'none';
+        function cerrarPexels() {
+            document.getElementById('modal-pexels').style.display = 'none';
             document.body.style.overflow = '';
         }
-        async function buscarPixabay() {
-            const q = document.getElementById('pixabay-query').value.trim();
-            const resultsDiv = document.getElementById('pixabay-results');
+        async function buscarPexels() {
+            const q = document.getElementById('pexels-query').value.trim();
+            const resultsDiv = document.getElementById('pexels-results');
             if(!q) return;
             resultsDiv.innerHTML = '<div class="col-span-full text-center"><i class="fas fa-spinner fa-spin text-3xl text-blue-500"></i><p class="text-sm mt-2 text-gray-500">Buscando...</p></div>';
             try {
-                const res = await fetch(`https://pixabay.com/api/?key=43093256-a94f6f40dc1b947c6eef96e81&q=${encodeURIComponent(q)}&image_type=photo&per_page=20`);
+                // Key pública gratuita de Pexels para fines de demostración/desarrollo
+                const res = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=20`, {
+                    headers: {
+                        Authorization: 'Pbp4S18iXqD52z56o8SjB5j2lVzU0m6sH8f88M4a3g5t0G8E7k3C2R6D'
+                    }
+                });
                 const data = await res.json();
-                if(data.hits && data.hits.length > 0) {
-                    resultsDiv.innerHTML = data.hits.map(img => `
-                        <div onclick="seleccionarImagenPixabay('${img.largeImageURL}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:ring-2 hover:ring-blue-500 transition relative group h-32">
-                            <img src="${img.webformatURL}" class="w-full h-full object-cover group-hover:scale-110 transition">
+                if(data.photos && data.photos.length > 0) {
+                    resultsDiv.innerHTML = data.photos.map(img => `
+                        <div onclick="seleccionarImagenPexels('${img.src.large}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:ring-2 hover:ring-blue-500 transition relative group h-32">
+                            <img src="${img.src.medium}" class="w-full h-full object-cover group-hover:scale-110 transition">
                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
                                 <span class="text-white text-xs font-bold bg-blue-600 px-3 py-1 rounded-lg"><i class="fas fa-check"></i> Elegir</span>
                             </div>
@@ -1337,16 +1333,16 @@
                     resultsDiv.innerHTML = '<p class="text-gray-400 text-sm col-span-full text-center mt-10">No se encontraron imágenes</p>';
                 }
             } catch(e) {
-                resultsDiv.innerHTML = '<p class="text-red-400 text-sm col-span-full text-center mt-10">Error de conexión al buscar imágenes.</p>';
+                resultsDiv.innerHTML = '<p class="text-red-400 text-sm col-span-full text-center mt-10">Error de conexión al buscar imágenes en Pexels.</p>';
             }
         }
-        function seleccionarImagenPixabay(url) {
-            const pref = currentPixabayMode === 'edit' ? 'edit-' : '';
+        function seleccionarImagenPexels(url) {
+            const pref = currentPexelsMode === 'edit' ? 'edit-' : '';
             document.getElementById(pref+'imagen-web-url').value = url;
             const fileInput = document.getElementById(pref+'imagen');
-            if(fileInput) fileInput.value = ''; // Clear file if URL selected
+            if(fileInput) fileInput.value = ''; 
             document.getElementById(pref+'file-name').innerHTML = '<span class="text-blue-500"><i class="fas fa-link"></i> Imagen Web Seleccionada</span>';
-            cerrarPixabay();
+            cerrarPexels();
         }
 
         const fallbackCategorias = [
@@ -1643,7 +1639,8 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
-            const bsPrice = (p.price * tasaBCV * (1 + configRecargoBs/100)).toFixed(2);
+            // CÁLCULO DIRECTO SIN RECARGOS (Solo Tasa BCV)
+            const bsPrice = (p.price * tasaBCV).toFixed(2);
             const precioHTML = `
                 <div>
                     <div class="text-[10px] text-green-600 font-bold mb-0.5 uppercase tracking-wider">✨ OFERTA EN DIVISAS</div>
@@ -1720,7 +1717,8 @@
             if(usdLabel) usdLabel.textContent = `$${totalUsd.toFixed(2)}`;
             if(bcvLabel) {
                 if(tasaBCV > 0) { 
-                    const totalBcv = totalUsd * tasaBCV * (1 + (configRecargoBs/100)); 
+                    // CÁLCULO DIRECTO SIN RECARGOS
+                    const totalBcv = totalUsd * tasaBCV; 
                     bcvLabel.textContent = `${totalBcv.toFixed(2)} Bs`; 
                 } 
                 else { bcvLabel.textContent = `N/D`; }
@@ -1739,7 +1737,8 @@
                 cont.innerHTML = `<div class="text-center py-10"><i class="fas fa-shopping-basket text-4xl text-gray-200 mb-3"></i><p class="text-gray-500 text-sm">Tu carrito está vacío</p></div>`;
             } else {
                 cont.innerHTML = carrito.map(item => {
-                    const bsPrice = (item.price * tasaBCV * (1 + configRecargoBs/100)).toFixed(2);
+                    // CÁLCULO DIRECTO SIN RECARGOS
+                    const bsPrice = (item.price * tasaBCV).toFixed(2);
                     return `
                     <div class="flex items-center gap-4 bg-white border border-gray-100 p-3 rounded-2xl shadow-sm">
                         <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl shrink-0" onerror="this.src='https://via.placeholder.com/50'">
@@ -1819,7 +1818,7 @@
                 const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 const code = '#WEB-' + Math.floor(1000 + Math.random() * 9000);
                 
-                const tasaAplicadaWeb = tasaBCV * (1 + (configRecargoBs/100));
+                const tasaAplicadaWeb = tasaBCV;
 
                 const nuevoPedido = {
                     codigo: code, 
@@ -1846,7 +1845,7 @@
                 carrito.forEach(item => { txt += `• ${item.qty}x ${item.name} - $${(item.price * item.qty).toFixed(2)}\n`; });
 
                 txt += `\n💰 *Total USD:* $${totalUsd.toFixed(2)}`;
-                if(tasaBCV > 0) { txt += `\n🇻🇪 *Total BCV:* ${(totalUsd * tasaAplicadaWeb).toFixed(2)} Bs (Tasa inc. recargo)`; }
+                if(tasaBCV > 0) { txt += `\n🇻🇪 *Total BCV:* ${(totalUsd * tasaAplicadaWeb).toFixed(2)} Bs`; }
 
                 txt += `\n\n_Por favor confirmar disponibilidad y método de pago._`;
 
@@ -2025,8 +2024,7 @@
 
             // Calcular Falta / Vuelto unificado (Todo a USD para comparar)
             const tipoPrecio = document.getElementById('pos-tipo-precio').value;
-            let modUsd = (tipoPrecio === 'mayor') ? configAjusteMayor : 0;
-            const itemsAjustados = posCarrito.map(i => ({ ...i, price: i.price * (1 + (modUsd/100)) }));
+            const itemsAjustados = posCarrito.map(i => ({ ...i, price: i.price }));
             const totalUsdDeuda = itemsAjustados.reduce((s, i) => s + (i.price * i.qty), 0);
 
             let totalPagadoConvertidoUsd = 0;
@@ -2034,8 +2032,7 @@
             pagosMixtos.forEach(p => {
                 const isBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(p.metodo);
                 if (isBs) {
-                    const recargo = (tipoPrecio === 'bs' || tipoPrecio === 'mayor') ? (configRecargoBs/100) : 0;
-                    const tasaUsada = tasaBCV * (1 + recargo);
+                    const tasaUsada = tasaBCV;
                     totalPagadoConvertidoUsd += (p.monto / tasaUsada);
                 } else {
                     totalPagadoConvertidoUsd += p.monto;
@@ -2129,15 +2126,14 @@
             let totalBsCalculado = 0;
             
             list.innerHTML = posCarrito.map(i => {
-                const finalPriceBaseUsd = i.price * (1 + (tipoPrecio === 'mayor' ? (configAjusteMayor/100) : 0));
+                const finalPriceBaseUsd = i.price;
                 totalUsdBase += (finalPriceBaseUsd * i.qty);
                 
-                const recargo = (tipoPrecio === 'bs' || tipoPrecio === 'mayor') ? (configRecargoBs/100) : 0;
-                const precioBsItem = (finalPriceBaseUsd * tasaBCV) * (1 + recargo);
+                const precioBsItem = (finalPriceBaseUsd * tasaBCV);
                 totalBsCalculado += (precioBsItem * i.qty);
                 
                 const unitUsd = i.price.toFixed(2);
-                const unitBsRef = (i.price * tasaBCV * (1 + configRecargoBs/100)).toFixed(2);
+                const unitBsRef = (i.price * tasaBCV).toFixed(2);
 
                 return `
                 <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
@@ -2163,11 +2159,7 @@
             `}).join('');
             
             totalE.textContent = `$${totalUsdBase.toFixed(2)}`;
-            if (tipoPrecio === 'bs' || tipoPrecio === 'mayor') {
-                totalBcvE.textContent = `${totalBsCalculado.toFixed(2)} Bs (Inc. Recargo)`;
-            } else {
-                totalBcvE.textContent = tasaBCV > 0 ? `${(totalUsdBase * tasaBCV).toFixed(2)} Bs (Tasa: ${tasaBCV})` : `0.00 Bs`;
-            }
+            totalBcvE.textContent = tasaBCV > 0 ? `${(totalUsdBase * tasaBCV).toFixed(2)} Bs (Tasa: ${tasaBCV})` : `0.00 Bs`;
 
             renderPagosMixtos();
         }
@@ -2241,7 +2233,6 @@
             btnProcesar.disabled = true;
 
             try {
-                // BLINDAJE ATÓMICO
                 const ids = posCarrito.map(i => i.id);
                 const { data: dbStock } = await db.from('productos').select('id, stock').in('id', ids);
                 
@@ -2270,18 +2261,15 @@
                 const tipoPrecio = document.getElementById('pos-tipo-precio').value;
                 const notaPOS = document.getElementById('pos-nota') ? document.getElementById('pos-nota').value.trim() : '';
                 
-                let modUsd = (tipoPrecio === 'mayor') ? configAjusteMayor : 0;
-                const itemsAjustados = posCarrito.map(i => ({ ...i, price: i.price * (1 + (modUsd/100)) }));
+                const itemsAjustados = posCarrito.map(i => ({ ...i, price: i.price }));
                 const totalUsd = itemsAjustados.reduce((s, i) => s + (i.price * i.qty), 0);
                 const code = '#POS-' + Math.floor(1000 + Math.random()*9000);
                 
-                const recargo = (tipoPrecio === 'bs' || tipoPrecio === 'mayor') ? (configRecargoBs/100) : 0;
-                const tasaAplicada = tasaBCV * (1 + recargo);
+                const tasaAplicada = tasaBCV;
                 
-                // Formatear método de pago mixto para la BD
                 let metodoDB = "Mixto: ";
                 if(pagosMixtos.length === 1) {
-                    metodoDB = pagosMixtos[0].metodo; // Si solo usó 1, lo ponemos limpio para no romper otras partes
+                    metodoDB = pagosMixtos[0].metodo; 
                 } else {
                     const desgloses = pagosMixtos.map(p => {
                         const isBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(p.metodo);
@@ -2289,7 +2277,6 @@
                     });
                     metodoDB += desgloses.join(' + ');
                 }
-                // Si sobra, lo metemos en nota
                 const bdgFalta = document.getElementById('badge-falta-vuelto').textContent;
                 const finalNota = notaPOS + (bdgFalta.includes('Vuelto') ? ` [${bdgFalta}]` : '');
 
@@ -2322,7 +2309,6 @@
                 guardarPOSCloud();
                 showToast('✅ Venta Mixta registrada con éxito'); 
                 
-                // Refresh
                 const [{ data: nuevosPedidos }, { data: nuevosProductos }] = await Promise.all([
                     db.from('pedidos').select('*').order('created_at', { ascending: false }),
                     db.from('productos').select('*').order('id', { ascending: false })
@@ -2401,22 +2387,15 @@
                     const linkVIP = resAnun.data[0].link_comunidad || `https://wa.me/${whatsappNumber}`;
                     const horarioDB = resAnun.data[0].horario || 'Lun - Sáb: 9:00 AM - 6:00 PM';
                     
-                    configRecargoBs = resAnun.data[0].recargo_bs !== null ? parseFloat(resAnun.data[0].recargo_bs) : 50;
-                    configAjusteMayor = resAnun.data[0].ajuste_mayor !== null ? parseFloat(resAnun.data[0].ajuste_mayor) : 0;
-                    
                     const btnVip = document.getElementById('btn-comunidad-vip');
                     const linkInput = document.getElementById('link-comunidad');
                     const horarioInput = document.getElementById('horario-tienda');
                     const displayHorario = document.getElementById('display-horario');
-                    const inputRec = document.getElementById('ajuste-recargo');
-                    const inputMay = document.getElementById('ajuste-mayor');
                     
                     if(btnVip) btnVip.href = linkVIP;
                     if(linkInput) linkInput.value = linkVIP;
                     if(horarioInput) horarioInput.value = horarioDB;
                     if(displayHorario) displayHorario.textContent = horarioDB;
-                    if(inputRec) inputRec.value = configRecargoBs;
-                    if(inputMay) inputMay.value = configAjusteMayor;
                 }
 
                 renderCategoriasFiltros();
@@ -2523,7 +2502,6 @@
                         agrupado[fecha].bs += (parseFloat(p.total_usd) * (p.tasa_bcv || tasaBCV));
                     } 
                     if (met.includes('Divisa') || met.includes('Zelle') || met.includes('Binance')) {
-                        // En mixtos la proporción es compleja, simplificamos metiendo al dash lo principal
                         agrupado[fecha].usd += parseFloat(p.total_usd);
                     }
                 }
@@ -2675,9 +2653,7 @@
                 const pedTasa = ped.tasa_bcv || tasaBCV;
                 const met = ped.metodo_pago || '';
                 
-                // Parseo avanzado para mini-dashboard (incluye soporte para "Mixto: Zelle ($10) + Pago Movil (500 Bs)")
                 if(met.startsWith('Mixto:')) {
-                    // Extraer montos usando regex. Ej: Zelle ($10.50), Pago Movil (500.00 Bs)
                     const matchesUsd = [...met.matchAll(/(Zelle|Binance|Divisa).*?\$([0-9.]+)/g)];
                     matchesUsd.forEach(m => {
                         const amount = parseFloat(m[2]);
@@ -2695,7 +2671,6 @@
                         vBs += amount;
                     });
                 } else {
-                    // Pago Simple
                     if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
                         const bMonto = parseFloat(ped.total_usd) * pedTasa;
                         vBs += bMonto;
@@ -2719,7 +2694,6 @@
                 }
             });
             
-            // Actualizar Mini Dashboard
             if(document.getElementById('tot-zelle')) document.getElementById('tot-zelle').textContent = `$${miniDash.zelle.toFixed(2)}`;
             if(document.getElementById('tot-binance')) document.getElementById('tot-binance').textContent = `$${miniDash.binance.toFixed(2)}`;
             if(document.getElementById('tot-efectivo-usd')) document.getElementById('tot-efectivo-usd').textContent = `$${miniDash.efectivo_usd.toFixed(2)}`;
@@ -2736,7 +2710,7 @@
             if(eBs) eBs.textContent = `${vBs.toFixed(2)} Bs`;
             if(eC) eC.textContent = `$${vCostos.toFixed(2)}`;
             
-            let totalRevUsd = vDivisas + (vBs > 0 ? (vBs / tasaBCV) : 0); // Aproximado para ganancia
+            let totalRevUsd = vDivisas + (vBs > 0 ? (vBs / tasaBCV) : 0); 
             const ganancia = totalRevUsd - vCostos;
             if(eG) eG.textContent = `$${ganancia.toFixed(2)}`;
 
@@ -2911,6 +2885,38 @@
             if(txtInput) { txtInput.value = texto; }
         }
 
+        const formAjustes = document.getElementById('form-ajustes');
+        if(formAjustes) {
+            formAjustes.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const txtOriginal = btn ? btn.innerHTML : '';
+                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...'; btn.disabled = true; }
+                
+                try {
+                    const texto = document.getElementById('texto-anuncio').value.trim();
+                    const link = document.getElementById('link-comunidad').value.trim();
+                    const horario = document.getElementById('horario-tienda').value.trim();
+                    
+                    const payload = { texto: texto, link_comunidad: link, horario: horario };
+
+                    if(anuncioId) {
+                        await db.from('anuncios').update(payload).eq('id', anuncioId);
+                    } else {
+                        await db.from('anuncios').insert([payload]);
+                    }
+                    
+                    clearAutoSave('form-ajustes');
+                    showToast('✅ Ajustes actualizados');
+                    await cargarTodo();
+                } catch(err) {
+                    showToast('⚠️ Error al guardar los ajustes.');
+                } finally {
+                    if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
+                }
+            });
+        }
+
         function renderCategoriasFiltros() {
             const cont = document.getElementById('filter-container');
             if(!cont) return;
@@ -2991,7 +2997,8 @@
                     ? `<button onclick="event.stopPropagation(); agregarAlCarrito('${p.id}')" class="bg-gray-900 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-xl hover:bg-belli-700 transition cursor-pointer z-30 relative shadow-md flex items-center justify-center"><i class="fas fa-shopping-bag"></i></button>`
                     : `<button disabled class="bg-gray-200 text-gray-400 w-8 h-8 sm:w-10 sm:h-10 rounded-xl cursor-not-allowed z-30 relative flex items-center justify-center"><i class="fas fa-ban"></i></button>`;
                 
-                const bsPrice = (p.price * tasaBCV * (1 + configRecargoBs/100)).toFixed(2);
+                // CÁLCULO DIRECTO SIN RECARGOS
+                const bsPrice = (p.price * tasaBCV).toFixed(2);
                 const precioBs = tasaBCV > 0 ? `<span class="text-[10px] text-gray-500 block font-medium mt-1">Ref: ${bsPrice} Bs</span>` : '';
                 const ofertaDivisa = `<span class="text-[9px] text-green-600 font-bold block mb-1">✨ OFERTA EN DIVISAS</span>`;
 
@@ -3081,85 +3088,6 @@
                     <button onclick="eliminarGaleria('${g.id}')" class="text-red-400 hover:text-red-600 p-2 cursor-pointer"><i class="fas fa-trash-alt text-xs"></i></button>
                 </div>
             `).join('');
-        }
-
-        function abrirModalEditar(id) {
-            const p = inventarioGlobal.find(x => x.id == id);
-            if(!p) return;
-            document.getElementById('edit-id').value = p.id;
-            document.getElementById('edit-nombre').value = p.name;
-            document.getElementById('edit-precio').value = p.price;
-            const costoEl = document.getElementById('edit-costo'); if (costoEl) costoEl.value = p.costo || 0;
-            document.getElementById('edit-stock').value = p.stock;
-            const barcodeEl = document.getElementById('edit-barcode'); if (barcodeEl) barcodeEl.value = p.barcode || '';
-            document.getElementById('edit-categoria').value = p.category;
-            document.getElementById('edit-imagen-actual').value = p.image;
-            const fileNameDisplay = document.getElementById('edit-file-name'); if(fileNameDisplay) fileNameDisplay.textContent = "Mantener foto actual";
-            const fileInput = document.getElementById('edit-imagen'); if(fileInput) fileInput.value = ""; 
-            const webUrl = document.getElementById('edit-imagen-web-url'); if(webUrl) webUrl.value = "";
-            document.getElementById('edit-descripcion').value = p.description || '';
-            calcularPreciosERP('edit');
-            document.getElementById('modal-editar-producto').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function cerrarModalEditar() {
-            document.getElementById('modal-editar-producto').style.display = 'none';
-            document.body.style.overflow = '';
-            document.getElementById('form-editar-producto').reset();
-        }
-
-        const formEditar = document.getElementById('form-editar-producto');
-        if(formEditar) {
-            formEditar.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById('btn-guardar-edicion');
-                const txtOriginal = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Actualizando...';
-                btn.disabled = true;
-
-                try {
-                    const id = document.getElementById('edit-id').value;
-                    let finalImgUrl = document.getElementById('edit-imagen-actual').value;
-                    const fileInput = document.getElementById('edit-imagen');
-                    const webUrl = document.getElementById('edit-imagen-web-url').value;
-
-                    if (webUrl) {
-                        finalImgUrl = webUrl;
-                    } else if (fileInput.files && fileInput.files.length > 0) {
-                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo nueva foto...';
-                        finalImgUrl = await subirImagenSupabase(fileInput.files[0]);
-                    }
-
-                    const p = {
-                        name: document.getElementById('edit-nombre').value.trim(),
-                        price: parseFloat(document.getElementById('edit-precio').value),
-                        stock: parseInt(document.getElementById('edit-stock').value),
-                        category: document.getElementById('edit-categoria').value,
-                        image: finalImgUrl,
-                        description: document.getElementById('edit-descripcion').value.trim()
-                    };
-
-                    const costoEl = document.getElementById('edit-costo');
-                    if (costoEl && costoEl.value !== '') p.costo = parseFloat(costoEl.value); else p.costo = 0;
-
-                    const barcodeEl = document.getElementById('edit-barcode');
-                    if (barcodeEl) p.barcode = barcodeEl.value.trim();
-
-                    const { error } = await db.from('productos').update(p).eq('id', id);
-                    if (error) throw error;
-
-                    clearAutoSave('form-editar-producto');
-                    cerrarModalEditar();
-                    await cargarTodo();
-                    showToast('✅ Producto actualizado');
-                } catch(err) {
-                    showToast("⚠️ Error crítico al actualizar");
-                } finally {
-                    btn.innerHTML = txtOriginal;
-                    btn.disabled = false;
-                }
-            });
         }
 
         function renderAdmin(productos) {
@@ -3298,6 +3226,274 @@
             }
         }
 
+        function renderPedidosAdmin(pedidos) {
+            const cont = document.getElementById('lista-pedidos-admin');
+            if(!cont) return;
+
+            if(pedidos.length === 0) {
+                cont.innerHTML = '<div class="col-span-full p-8 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i class="fas fa-inbox text-3xl mb-2 block"></i> No hay pedidos de WhatsApp.</div>';
+                return;
+            }
+
+            cont.innerHTML = pedidos.map(p => {
+                const hora = new Date(p.created_at).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+                const fecha = new Date(p.created_at).toLocaleDateString('es-VE');
+                const isEntregado = p.estado === 'Entregado';
+                const statusClass = isEntregado ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                
+                let btnAccion = '';
+                if(!isEntregado) {
+                    btnAccion = `<button onclick="marcarPedidoEntregado('${p.id}')" class="w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer shadow-md">Marcar Entregado</button>`;
+                } else {
+                    btnAccion = `<button disabled class="w-full mt-3 bg-gray-200 text-gray-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1"><i class="fas fa-check"></i> Pedido Entregado</button>`;
+                }
+
+                let itemsHtml = '';
+                if(p.items && Array.isArray(p.items)) {
+                    itemsHtml = p.items.map(it => `
+                        <div class="flex justify-between text-[10px] text-gray-600 border-b border-gray-50 py-1 last:border-0">
+                            <span>${it.qty}x ${it.name}</span>
+                            <span class="font-bold">$${(it.price * it.qty).toFixed(2)}</span>
+                        </div>
+                    `).join('');
+                }
+
+                const msgWhatsapp = `¡Hola ${p.cliente}! Somos Bellisanty 🎁\nEscribimos sobre tu pedido ${p.codigo}.\n\nTotal a pagar: $${p.total_usd.toFixed(2)} / ${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs\n\n¿Cómo deseas realizar el pago?`;
+
+                return `
+                <div class="bg-white border ${isEntregado ? 'border-gray-200' : 'border-green-200 shadow-md'} p-4 rounded-2xl flex flex-col transition hover:shadow-lg">
+                    <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-3">
+                        <div>
+                            <span class="text-xs font-bold text-gray-900 block">${p.codigo}</span>
+                            <span class="text-[10px] text-gray-400">${fecha} • ${hora}</span>
+                        </div>
+                        <span class="${statusClass} text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider">${p.estado}</span>
+                    </div>
+                    
+                    <div class="mb-3 space-y-1">
+                        <p class="text-[10px] text-gray-600">👤 <b>Cliente:</b> ${p.cliente}</p>
+                        <p class="text-[10px] text-gray-600">📞 <b>Tel:</b> ${p.telefono}</p>
+                        <p class="text-[10px] text-gray-600">🛵 <b>Entrega:</b> ${p.metodo_entrega}</p>
+                    </div>
+
+                    <div class="bg-gray-50 p-2 rounded-lg mb-3">
+                        <p class="text-[9px] font-bold text-gray-500 uppercase mb-1">Detalle del Pedido</p>
+                        <div class="max-h-20 overflow-y-auto pr-1">
+                            ${itemsHtml}
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase block">Total a Cobrar</span>
+                                <span class="text-sm font-black text-gray-900 block">$${p.total_usd.toFixed(2)}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[9px] font-bold text-gray-400 uppercase block">Tasa: ${p.tasa_bcv}</span>
+                                <span class="text-xs font-bold text-gray-600 block">${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <a href="https://wa.me/${p.telefono.replace(/\D/g,'')}?text=${encodeURIComponent(msgWhatsapp)}" target="_blank" class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 font-bold py-2 rounded-xl text-xs transition text-center flex items-center justify-center gap-1 cursor-pointer">
+                                <i class="fab fa-whatsapp"></i> Chat
+                            </a>
+                            <button onclick="eliminarPedido('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-500 font-bold px-3 rounded-xl transition cursor-pointer" title="Eliminar Pedido">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </div>
+                        ${btnAccion}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        async function marcarPedidoEntregado(id) {
+            if(confirm("¿Confirmar que este pedido ya fue cobrado y entregado?")) {
+                try {
+                    const { error } = await db.from('pedidos').update({ estado: 'Entregado' }).eq('id', id);
+                    if (error) throw error;
+                    showToast('✅ Pedido marcado como Entregado');
+                    actualizarPedidosAdmin(null);
+                } catch(e) {
+                    showToast('⚠️ Error al actualizar el estado del pedido.');
+                }
+            }
+        }
+
+        async function eliminarPedido(id) {
+            if(confirm("¿Eliminar este pedido permanentemente?")) {
+                try {
+                    const { error } = await db.from('pedidos').delete().eq('id', id);
+                    if (error) throw error;
+                    showToast('✅ Pedido eliminado');
+                    actualizarPedidosAdmin(null);
+                } catch(e) {
+                    showToast('⚠️ Error al eliminar el pedido.');
+                }
+            }
+        }
+
+        const formGaleria = document.getElementById('form-galeria');
+        if(formGaleria) {
+            formGaleria.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const txtOriginal = btn ? btn.innerHTML : '';
+                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo...'; btn.disabled = true; }
+                
+                try {
+                    const fileInput = document.getElementById('galeria-img');
+                    const link = document.getElementById('galeria-link').value.trim();
+                    
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        showToast("⚠️ Selecciona una imagen.");
+                        return;
+                    }
+                    
+                    const imgUrl = await subirImagenSupabase(fileInput.files[0]);
+                    const payload = { image_url: imgUrl, instagram_url: link };
+                    
+                    const { error } = await db.from('galeria').insert([payload]);
+                    if(error) throw error;
+                    
+                    showToast('✅ Imagen agregada a la galería');
+                    formGaleria.reset();
+                    document.getElementById('gal-file-name').textContent = '';
+                    await cargarTodo();
+                } catch(err) {
+                    showToast('⚠️ Error al subir la imagen.');
+                } finally {
+                    if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
+                }
+            });
+        }
+
+        async function eliminarGaleria(id) {
+            if(confirm("¿Eliminar esta imagen de la galería?")) {
+                try {
+                    const { error } = await db.from('galeria').delete().eq('id', id);
+                    if (error) throw error;
+                    showToast('✅ Imagen eliminada');
+                    await cargarTodo();
+                } catch(e) {
+                    showToast('⚠️ Error al eliminar la imagen.');
+                }
+            }
+        }
+
+        function renderEquipoAdmin() {
+            const cont = document.getElementById('lista-equipo-admin');
+            if(!cont) return;
+            if(equipoGlobal.length === 0) { cont.innerHTML = '<p class="text-xs text-gray-400">No hay personal registrado.</p>'; return; }
+            cont.innerHTML = equipoGlobal.map(e => `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div>
+                        <span class="text-xs font-bold text-gray-900 block">${e.email}</span>
+                        <span class="text-[9px] text-indigo-500 font-bold uppercase">${e.rol}</span>
+                    </div>
+                    ${e.rol !== 'admin' ? `<button onclick="eliminarEmpleado('${e.email}')" class="text-red-400 hover:text-red-600 cursor-pointer p-2"><i class="fas fa-trash text-xs"></i></button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function eliminarEmpleado(email) {
+            if(confirm(`¿Eliminar acceso para ${email}?`)) {
+                try {
+                    const { error } = await db.from('equipo').delete().eq('email', email);
+                    if(error) throw error;
+                    showToast('✅ Empleado eliminado');
+                    await cargarTodo();
+                } catch(e) {
+                    showToast('⚠️ Error al eliminar empleado');
+                }
+            }
+        }
+
+        function imprimirFactura(idPedido) {
+            const ped = pedidosGlobal.find(p => p.id == idPedido);
+            if(!ped) return;
+            
+            const hora = new Date(ped.created_at).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            const fecha = new Date(ped.created_at).toLocaleDateString('es-VE');
+            
+            let htmlItems = '';
+            if(ped.items && Array.isArray(ped.items)) {
+                ped.items.forEach(i => {
+                    htmlItems += `
+                        <tr>
+                            <td style="padding: 4px 0; border-bottom: 1px dashed #eee;">${i.qty}</td>
+                            <td style="padding: 4px 0; border-bottom: 1px dashed #eee; font-size: 10px;">${i.name}</td>
+                            <td style="padding: 4px 0; border-bottom: 1px dashed #eee; text-align: right;">$${(i.price * i.qty).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Ticket ${ped.codigo}</title>
+                    <style>
+                        body { font-family: monospace; font-size: 12px; margin: 0; padding: 10px; width: 300px; color: #000; }
+                        .text-center { text-align: center; }
+                        .text-right { text-align: right; }
+                        .bold { font-weight: bold; }
+                        .divider { border-bottom: 1px dashed #000; margin: 10px 0; }
+                        table { width: 100%; border-collapse: collapse; }
+                    </style>
+                </head>
+                <body>
+                    <div class="text-center">
+                        <h2 style="margin:0;">BELLISANTY</h2>
+                        <p style="margin:2px 0;">Luxury Gifting</p>
+                        <p style="margin:2px 0;">Pueblo Llano, Mérida</p>
+                        <p style="margin:2px 0; font-size: 10px;">Tlf: ${whatsappNumber}</p>
+                    </div>
+                    <div class="divider"></div>
+                    <p style="margin:2px 0;"><b>Ticket:</b> ${ped.codigo}</p>
+                    <p style="margin:2px 0;"><b>Fecha:</b> ${fecha} ${hora}</p>
+                    <p style="margin:2px 0;"><b>Cajero:</b> ${ped.vendedor || 'Local'}</p>
+                    <div class="divider"></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; padding-bottom: 5px;">Cant</th>
+                                <th style="text-align: left; padding-bottom: 5px;">Desc</th>
+                                <th style="text-align: right; padding-bottom: 5px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${htmlItems}
+                        </tbody>
+                    </table>
+                    <div class="divider"></div>
+                    <div class="text-right">
+                        <h3 style="margin: 5px 0;">TOTAL USD: $${ped.total_usd.toFixed(2)}</h3>
+                        <p style="margin: 5px 0;">TOTAL BCV: ${(ped.total_usd * ped.tasa_bcv).toFixed(2)} Bs</p>
+                        <p style="margin: 5px 0; font-size: 10px;">(Tasa BCV: ${ped.tasa_bcv})</p>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="text-center">
+                        <p style="margin:2px 0;"><b>Método:</b> ${ped.metodo_pago || 'Local'}</p>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="text-center">
+                        <p>¡Gracias por tu compra!</p>
+                        <p style="font-size: 10px;">Vuelve pronto</p>
+                    </div>
+                    <script>
+                        setTimeout(() => { window.print(); window.close(); }, 500);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
         const formEq = document.getElementById('form-equipo');
         if(formEq) {
             formEq.addEventListener('submit', async (e) => {
@@ -3429,7 +3625,7 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { cerrarModalLogin(); cerrarModalResena(); cerrarModalProducto(); cerrarCarrito(); cerrarModalWA(); cerrarModalEditar(); cerrarPixabay(); }
+            if (e.key === 'Escape') { cerrarModalLogin(); cerrarModalResena(); cerrarModalProducto(); cerrarCarrito(); cerrarModalWA(); cerrarModalEditar(); cerrarPexels(); }
         });
 
         cargarTodo();
