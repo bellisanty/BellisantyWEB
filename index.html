@@ -806,10 +806,22 @@
                                 <option value="mayor">Precio al Mayor</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">MÉTODO DE PAGO</label>
-                            <select id="pos-metodo" onchange="renderPOS()" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm cursor-pointer bg-white">
+                        <div class="relative">
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">PAGOS MÚLTIPLES (MIXTOS)</label>
+                            <div class="flex gap-2">
+                                <select id="pos-metodo-mixto" class="w-1/2 border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-blue-500 text-xs cursor-pointer bg-white">
+                                    <option value="Divisa">Efectivo ($)</option>
+                                    <option value="Efectivo Bs">Efectivo (Bs)</option>
+                                    <option value="Pago Movil">Pago Móvil</option>
+                                    <option value="Punto de Venta">Punto de Venta</option>
+                                    <option value="Zelle">Zelle</option>
+                                    <option value="Binance">Binance</option>
                                 </select>
+                                <input type="number" id="pos-monto-pago" step="0.01" placeholder="Monto" class="w-1/3 border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-blue-500 text-xs">
+                                <button type="button" onclick="agregarPagoMixto()" class="w-1/6 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition text-xs cursor-pointer"><i class="fas fa-plus"></i></button>
+                            </div>
+                            <div id="lista-pagos-mixtos" class="mt-2 space-y-1 max-h-[80px] overflow-y-auto"></div>
+                            <div id="badge-falta-vuelto" class="mt-2 text-[10px] font-bold text-gray-500 text-right hidden"></div>
                         </div>
                     </div>
                     
@@ -840,7 +852,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="panel-inventario" style="display: none;" class="space-y-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
@@ -848,7 +859,7 @@
                         <div id="modulo-crear-producto" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-belli-500">
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-belli-50 rounded-lg flex items-center justify-center text-belli-600"><i class="fas fa-plus text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Nuevo Producto</h2></div>
                             
-                            <form id="form-producto" class="space-y-4">
+                            <form id="form-producto" class="space-y-4 auto-save-form">
                                 <div>
                                     <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CÓDIGO DE BARRAS</label>
                                     <div class="flex gap-2">
@@ -857,10 +868,22 @@
                                     </div>
                                 </div>
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">NOMBRE</label><input type="text" id="nombre" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
+                                
                                 <div class="grid grid-cols-2 gap-3">
-                                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">PRECIO VENTA ($)</label><input type="number" id="precio" step="0.01" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
-                                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">COSTO INV. ($)</label><input type="number" id="costo" step="0.01" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" value="0"></div>
+                                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">COSTO PROVEEDOR ($)</label><input type="number" id="costo" step="0.01" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" value="0" oninput="calcularPreciosERP('nuevo')"></div>
+                                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IVA</label><select id="iva" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer" onchange="calcularPreciosERP('nuevo')"><option value="0">Exento (0%)</option><option value="0.16">General (16%)</option></select></div>
                                 </div>
+                                <div class="grid grid-cols-3 gap-3 mt-2">
+                                    <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. DETAL</label><input type="number" id="ut_detal" step="0.1" value="30" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('nuevo')"></div>
+                                    <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. MAYOR</label><input type="number" id="ut_mayor" step="0.1" value="15" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('nuevo')"></div>
+                                    <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. OFERTA</label><input type="number" id="ut_oferta" step="0.1" value="10" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('nuevo')"></div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3 mb-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                    <div><label class="block text-[8px] font-bold text-gray-500 uppercase">PRECIO DETAL</label><input type="number" id="precio" step="0.01" readonly class="w-full bg-transparent font-black text-belli-700 outline-none text-sm pointer-events-none"></div>
+                                    <div><label class="block text-[8px] font-bold text-gray-500 uppercase">PRECIO MAYOR</label><input type="number" id="precio_mayor" step="0.01" readonly class="w-full bg-transparent font-black text-blue-600 outline-none text-sm pointer-events-none"></div>
+                                    <div><label class="block text-[8px] font-bold text-gray-500 uppercase">PRECIO OFERTA</label><input type="number" id="precio_oferta" step="0.01" readonly class="w-full bg-transparent font-black text-green-600 outline-none text-sm pointer-events-none"></div>
+                                </div>
+
                                 <div class="grid grid-cols-2 gap-3">
                                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">STOCK</label><input type="number" id="stock" min="0" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" value="10"></div>
                                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CATEGORÍA</label><select id="form-categoria" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"></select></div>
@@ -868,8 +891,12 @@
                                 
                                 <div>
                                     <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IMAGEN DEL PRODUCTO</label>
-                                    <label for="imagen" class="file-upload-btn block"><i class="fas fa-cloud-upload-alt mr-2"></i>Elegir Foto (Se comprimirá sola)</label>
+                                    <div class="flex gap-2">
+                                        <label for="imagen" class="file-upload-btn block flex-1"><i class="fas fa-cloud-upload-alt mr-2"></i>Subir PC</label>
+                                        <button type="button" onclick="abrirPixabay('nuevo')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
+                                    </div>
                                     <input type="file" id="imagen" accept="image/*" onchange="document.getElementById('prod-file-name').textContent = this.files[0] ? this.files[0].name : ''">
+                                    <input type="hidden" id="imagen-web-url">
                                     <p id="prod-file-name" class="text-[10px] text-gray-400 mt-1 text-center"></p>
                                 </div>
 
@@ -934,11 +961,12 @@
                                 <option value="Divisa">💵 Efectivo (Divisa)</option>
                                 <option value="Zelle">🟩 Zelle</option>
                                 <option value="Binance">🟨 Binance</option>
+                                <option value="Mixto">🔄 Pago Mixto</option>
                                 <option value="Por definir">⏳ Por definir (Web)</option>
                             </select>
 
                             <select id="filtro-rep-vendedor" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500 cursor-pointer bg-gray-50">
-                                </select>
+                            </select>
                             
                             <button onclick="descargarPDFReporte()" class="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-600 transition cursor-pointer text-xs shadow-md inline-flex items-center gap-2">
                                 <i class="fas fa-file-pdf"></i> Descargar PDF
@@ -953,13 +981,22 @@
                         <input type="date" id="filtro-fecha-hasta" onchange="actualizarReportes()" class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-600 outline-none focus:border-emerald-500">
                     </div>
 
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6" id="dashboard-pagos-mixtos">
+                        <div class="bg-green-50 p-3 rounded-xl border border-green-200 text-center"><p class="text-[9px] font-bold text-green-700 uppercase">Zelle</p><p id="tot-zelle" class="text-sm font-black text-green-700">$0.00</p></div>
+                        <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200 text-center"><p class="text-[9px] font-bold text-yellow-700 uppercase">Binance</p><p id="tot-binance" class="text-sm font-black text-yellow-700">$0.00</p></div>
+                        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-center"><p class="text-[9px] font-bold text-emerald-700 uppercase">Efectivo ($)</p><p id="tot-efectivo-usd" class="text-sm font-black text-emerald-700">$0.00</p></div>
+                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 text-center"><p class="text-[9px] font-bold text-blue-700 uppercase">Pago Móvil</p><p id="tot-pm" class="text-sm font-black text-blue-700">0.00 Bs</p></div>
+                        <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-200 text-center"><p class="text-[9px] font-bold text-indigo-700 uppercase">Punto de Venta</p><p id="tot-punto" class="text-sm font-black text-indigo-700">0.00 Bs</p></div>
+                        <div class="bg-cyan-50 p-3 rounded-xl border border-cyan-200 text-center"><p class="text-[9px] font-bold text-cyan-700 uppercase">Efectivo (Bs)</p><p id="tot-efectivo-bs" class="text-sm font-black text-cyan-700">0.00 Bs</p></div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center shadow-inner">
-                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Cobrado Divisas</p>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Global Divisas</p>
                             <p id="rep-divisas" class="text-2xl font-black text-gray-900">$0.00</p>
                         </div>
                         <div class="bg-blue-50 p-6 rounded-2xl border border-blue-200 text-center shadow-inner">
-                            <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-2">Total Cobrado Bolívares</p>
+                            <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-2">Total Global Bolívares</p>
                             <p id="rep-bolivares" class="text-xl font-black text-blue-600">0.00 Bs</p>
                         </div>
                         <div class="bg-red-50 p-6 rounded-2xl border border-red-100 text-center shadow-inner">
@@ -997,7 +1034,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="lista-detallada-reportes" class="divide-y divide-gray-50">
-                                    </tbody>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -1014,7 +1051,7 @@
                     <div class="space-y-6">
                         <div id="modulo-ajustes" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-gold-400">
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center text-gold-500"><i class="fas fa-cog text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Ajustes Web y Precios</h2></div>
-                            <form id="form-ajustes" class="space-y-4">
+                            <form id="form-ajustes" class="space-y-4 auto-save-form">
                                 <div class="grid grid-cols-2 gap-4 bg-yellow-50 p-4 rounded-xl border border-yellow-100 mb-2">
                                     <div><label class="block text-[10px] font-bold text-gray-600 mb-1.5 uppercase">Aumento para Bs (%)</label><input type="number" id="ajuste-recargo" required class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold-500 text-sm font-bold text-center" value="50"></div>
                                     <div><label class="block text-[10px] font-bold text-gray-600 mb-1.5 uppercase">Ajuste al Mayor (%)</label><input type="number" id="ajuste-mayor" required placeholder="Ej: -10 para descuento" class="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gold-500 text-sm font-bold text-center" value="0"></div>
@@ -1029,7 +1066,7 @@
 
                         <div id="modulo-equipo" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-indigo-500">
                             <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-500"><i class="fas fa-user-shield text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Equipo y Permisos</h2></div>
-                            <form id="form-equipo" class="space-y-4">
+                            <form id="form-equipo" class="space-y-4 auto-save-form">
                                 <div class="grid grid-cols-2 gap-3">
                                     <div><input type="email" id="equipo-email" required placeholder="Correo Empleado" class="w-full border border-gray-200 rounded-lg px-4 py-3 outline-none focus:border-indigo-500 text-sm"></div>
                                     <div><input type="text" id="equipo-pass" required placeholder="Clave (Min 6)" minlength="6" class="w-full border border-gray-200 rounded-lg px-4 py-3 outline-none focus:border-indigo-500 text-sm tracking-widest"></div>
@@ -1097,6 +1134,26 @@
         </main>
     </div>
 
+    <div id="modal-pixabay" style="display: none;" class="fixed inset-0 bg-black/80 z-[300] flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl relative animate-fade-up my-8 flex flex-col h-[80vh]">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-3xl shrink-0">
+                <h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-globe text-blue-500 mr-2"></i> Buscar en Pixabay</h3>
+                <button onclick="cerrarPixabay()" class="text-gray-400 hover:text-red-500 transition cursor-pointer"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 shrink-0 border-b border-gray-100">
+                <div class="flex gap-2">
+                    <input type="text" id="pixabay-query" placeholder="Ej: bouquet de rosas, globos de cumpleaños..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-sm" onkeydown="if(event.key==='Enter') buscarPixabay()">
+                    <button onclick="buscarPixabay()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+            </div>
+            <div class="p-6 flex-1 overflow-y-auto bg-gray-50">
+                <div id="pixabay-results" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <p class="text-gray-400 text-sm col-span-full text-center mt-10">Realiza una búsqueda para ver imágenes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="camara-modal" style="display: none;" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative animate-fade-up">
             <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -1118,13 +1175,25 @@
                 <button onclick="cerrarModalEditar()" class="text-gray-400 hover:text-red-500 transition cursor-pointer"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6">
-                <form id="form-editar-producto" class="space-y-4">
+                <form id="form-editar-producto" class="space-y-4 auto-save-form">
                     <input type="hidden" id="edit-id">
                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">NOMBRE</label><input type="text" id="edit-nombre" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
+                    
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">PRECIO VENTA ($)</label><input type="number" id="edit-precio" step="0.01" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
-                        <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">COSTO INV. ($)</label><input type="number" id="edit-costo" step="0.01" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" value="0"></div>
+                        <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">COSTO PROVEEDOR ($)</label><input type="number" id="edit-costo" step="0.01" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" value="0" oninput="calcularPreciosERP('edit')"></div>
+                        <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IVA</label><select id="edit-iva" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer" onchange="calcularPreciosERP('edit')"><option value="0">Exento (0%)</option><option value="0.16">General (16%)</option></select></div>
                     </div>
+                    <div class="grid grid-cols-3 gap-3 mt-2">
+                        <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. DETAL</label><input type="number" id="edit-ut_detal" step="0.1" value="30" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('edit')"></div>
+                        <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. MAYOR</label><input type="number" id="edit-ut_mayor" step="0.1" value="15" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('edit')"></div>
+                        <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. OFERTA</label><input type="number" id="edit-ut_oferta" step="0.1" value="10" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('edit')"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <div><label class="block text-[8px] font-bold text-gray-500 uppercase">PRECIO DETAL</label><input type="number" id="edit-precio" step="0.01" readonly class="w-full bg-transparent font-black text-belli-700 outline-none text-sm pointer-events-none"></div>
+                        <div><label class="block text-[8px] font-bold text-gray-500 uppercase">PRECIO MAYOR</label><input type="number" id="edit-precio_mayor" step="0.01" readonly class="w-full bg-transparent font-black text-blue-600 outline-none text-sm pointer-events-none"></div>
+                        <div><label class="block text-[8px] font-bold text-gray-500 uppercase">PRECIO OFERTA</label><input type="number" id="edit-precio_oferta" step="0.01" readonly class="w-full bg-transparent font-black text-green-600 outline-none text-sm pointer-events-none"></div>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">STOCK</label><input type="number" id="edit-stock" min="0" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm" value="10"></div>
                         <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CÓDIGO BARRAS</label><input type="text" id="edit-barcode" placeholder="Opcional..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
@@ -1133,8 +1202,12 @@
                     
                     <div>
                         <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CAMBIAR FOTO (Opcional)</label>
-                        <label for="edit-imagen" class="file-upload-btn block"><i class="fas fa-image mr-2"></i>Nueva Foto</label>
+                        <div class="flex gap-2">
+                            <label for="edit-imagen" class="file-upload-btn block flex-1"><i class="fas fa-image mr-2"></i>Subir PC</label>
+                            <button type="button" onclick="abrirPixabay('edit')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
+                        </div>
                         <input type="file" id="edit-imagen" accept="image/*" onchange="document.getElementById('edit-file-name').textContent = this.files[0] ? this.files[0].name : ''">
+                        <input type="hidden" id="edit-imagen-web-url">
                         <p id="edit-file-name" class="text-[10px] text-gray-400 mt-1 text-center">Dejar vacío para mantener foto actual</p>
                         <input type="hidden" id="edit-imagen-actual">
                     </div>
@@ -1145,6 +1218,7 @@
             </div>
         </div>
     </div>
+    
     <script>
         const whatsappNumber = "584126480799";
         
@@ -1162,17 +1236,118 @@
         let equipoGlobal = []; 
         let carrito = []; 
         let posCarrito = []; 
+        let pagosMixtos = []; // Nueva variable para pagos POS
         let tasaBCV = 0;  
         let anuncioId = null;
         let filtroActual = 'todos';
         let html5QrcodeScanner; 
         let scanTarget = ''; 
         let lineasWA = []; 
-        let ventasChart = null; // Variable para el gráfico Chart.js
+        let ventasChart = null; 
 
         let currentUserEmail = 'admin'; 
         let configRecargoBs = 50; 
         let configAjusteMayor = 0;
+
+        // Auto-Save Inicialización
+        function initAutoSave() {
+            document.querySelectorAll('.auto-save-form').forEach(form => {
+                const formId = form.id;
+                if (!formId) return;
+
+                const saved = localStorage.getItem('autosave_' + formId);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        for (const key in data) {
+                            const el = form.querySelector(`[id="${key}"]`);
+                            if (el && el.type !== 'file') el.value = data[key];
+                        }
+                        if (formId === 'form-producto') calcularPreciosERP('nuevo');
+                        if (formId === 'form-editar-producto') calcularPreciosERP('edit');
+                    } catch (e) { console.error('Error loading autosave', e); }
+                }
+
+                form.addEventListener('input', (e) => {
+                    if (e.target.id && e.target.type !== 'file') {
+                        const data = JSON.parse(localStorage.getItem('autosave_' + formId) || '{}');
+                        data[e.target.id] = e.target.value;
+                        localStorage.setItem('autosave_' + formId, JSON.stringify(data));
+                    }
+                });
+            });
+        }
+
+        function clearAutoSave(formId) {
+            localStorage.removeItem('autosave_' + formId);
+        }
+
+        // ERP Precios Automáticos
+        function calcularPreciosERP(mode) {
+            const pref = mode === 'edit' ? 'edit-' : '';
+            const costo = parseFloat(document.getElementById(pref+'costo').value) || 0;
+            const iva = parseFloat(document.getElementById(pref+'iva') ? document.getElementById(pref+'iva').value : 0) || 0;
+            const utDetal = parseFloat(document.getElementById(pref+'ut_detal').value) || 0;
+            const utMayor = parseFloat(document.getElementById(pref+'ut_mayor').value) || 0;
+            const utOferta = parseFloat(document.getElementById(pref+'ut_oferta').value) || 0;
+
+            const costoFinal = costo * (1 + iva);
+            
+            const pDetal = costoFinal * (1 + (utDetal/100));
+            const pMayor = costoFinal * (1 + (utMayor/100));
+            const pOferta = costoFinal * (1 + (utOferta/100));
+
+            document.getElementById(pref+'precio').value = pDetal.toFixed(2);
+            document.getElementById(pref+'precio_mayor').value = pMayor.toFixed(2);
+            document.getElementById(pref+'precio_oferta').value = pOferta.toFixed(2);
+        }
+
+        // Buscador Pixabay
+        let currentPixabayMode = 'nuevo';
+        function abrirPixabay(mode) {
+            currentPixabayMode = mode;
+            document.getElementById('modal-pixabay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (document.getElementById('pixabay-results').innerHTML.includes('Realiza una búsqueda')) {
+                document.getElementById('pixabay-query').focus();
+            }
+        }
+        function cerrarPixabay() {
+            document.getElementById('modal-pixabay').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        async function buscarPixabay() {
+            const q = document.getElementById('pixabay-query').value.trim();
+            const resultsDiv = document.getElementById('pixabay-results');
+            if(!q) return;
+            resultsDiv.innerHTML = '<div class="col-span-full text-center"><i class="fas fa-spinner fa-spin text-3xl text-blue-500"></i><p class="text-sm mt-2 text-gray-500">Buscando...</p></div>';
+            try {
+                const res = await fetch(`https://pixabay.com/api/?key=43093256-a94f6f40dc1b947c6eef96e81&q=${encodeURIComponent(q)}&image_type=photo&per_page=20`);
+                const data = await res.json();
+                if(data.hits && data.hits.length > 0) {
+                    resultsDiv.innerHTML = data.hits.map(img => `
+                        <div onclick="seleccionarImagenPixabay('${img.largeImageURL}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:ring-2 hover:ring-blue-500 transition relative group h-32">
+                            <img src="${img.webformatURL}" class="w-full h-full object-cover group-hover:scale-110 transition">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                                <span class="text-white text-xs font-bold bg-blue-600 px-3 py-1 rounded-lg"><i class="fas fa-check"></i> Elegir</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsDiv.innerHTML = '<p class="text-gray-400 text-sm col-span-full text-center mt-10">No se encontraron imágenes</p>';
+                }
+            } catch(e) {
+                resultsDiv.innerHTML = '<p class="text-red-400 text-sm col-span-full text-center mt-10">Error de conexión al buscar imágenes.</p>';
+            }
+        }
+        function seleccionarImagenPixabay(url) {
+            const pref = currentPixabayMode === 'edit' ? 'edit-' : '';
+            document.getElementById(pref+'imagen-web-url').value = url;
+            const fileInput = document.getElementById(pref+'imagen');
+            if(fileInput) fileInput.value = ''; // Clear file if URL selected
+            document.getElementById(pref+'file-name').innerHTML = '<span class="text-blue-500"><i class="fas fa-link"></i> Imagen Web Seleccionada</span>';
+            cerrarPixabay();
+        }
 
         const fallbackCategorias = [
             { id: 'c1', name: '🌹 Arreglos Premium' }, 
@@ -1208,8 +1383,8 @@
                 actualizarIconosCarrito(); 
                 renderItemsCarrito(); 
             }
+            initAutoSave();
             
-            // Setear fechas por defecto en Reportes (Últimos 7 días para un gráfico profesional)
             const hoy = new Date();
             const hace7Dias = new Date();
             hace7Dias.setDate(hoy.getDate() - 6);
@@ -1325,6 +1500,7 @@
                 
                 actualizarTotalesCarrito();
                 if (inventarioGlobal.length > 0) filtrarProductos(filtroActual);
+                renderPOS();
             } catch(e) {
                 const navDisplay = document.getElementById('bcv-rate-display');
                 if(navDisplay) navDisplay.innerHTML = `🇻🇪 BCV: <span class="font-bold text-red-300">N/D</span>`;
@@ -1613,7 +1789,6 @@
             btnConf.disabled = true;
 
             try {
-                // BLINDAJE ATÓMICO DE STOCK (Checkout Web)
                 const ids = carrito.map(i => i.id);
                 const { data: dbStock } = await db.from('productos').select('id, stock').in('id', ids);
                 
@@ -1622,7 +1797,6 @@
                     const dbItem = dbStock.find(x => x.id == item.id);
                     if(!dbItem || dbItem.stock < item.qty) {
                         stockInsuficiente = true;
-                        // Actualizar el inventario local para reflejar la realidad
                         const localItem = inventarioGlobal.find(x => x.id == item.id);
                         if(localItem && dbItem) localItem.stock = dbItem.stock;
                     }
@@ -1630,7 +1804,6 @@
                 
                 if(stockInsuficiente) {
                     showToast("⚠️ Alguien más acaba de comprar un producto de tu carrito. Stock insuficiente.");
-                    // Ajustar el carrito al stock máximo real
                     carrito = carrito.filter(item => {
                         const localItem = inventarioGlobal.find(x => x.id == item.id);
                         if(localItem && localItem.stock >= item.qty) return true;
@@ -1801,6 +1974,7 @@
                         document.getElementById('precio').value = viejo.price || '';
                         document.getElementById('costo').value = viejo.costo || 0;
                         document.getElementById('form-categoria').value = viejo.category || '';
+                        calcularPreciosERP('nuevo');
                         showToast('💡 Producto recuperado del historial.');
                         encontrado = true;
                         break;
@@ -1809,43 +1983,80 @@
             }
         }
 
-        function actualizarMetodosPago() {
-            const tipoPrecio = document.getElementById('pos-tipo-precio').value;
-            const selectMetodo = document.getElementById('pos-metodo');
-            if(!selectMetodo) return;
-
-            // Conservar la opción actual si es posible
-            const valorActual = selectMetodo.value;
-
-            let opciones = '';
-            if(tipoPrecio === 'bs') {
-                opciones = `
-                    <option value="Pago Movil">📱 Pago Móvil</option>
-                    <option value="Punto de Venta">💳 Punto de Venta</option>
-                    <option value="Efectivo Bs">💵 Efectivo (Bs)</option>
-                `;
-            } else if (tipoPrecio === 'mayor') {
-                opciones = `
-                    <option value="Divisa">💵 Efectivo (Divisa)</option>
-                    <option value="Zelle">🟩 Zelle</option>
-                    <option value="Binance">🟨 Binance</option>
-                    <option value="Pago Movil">📱 Pago Móvil</option>
-                    <option value="Punto de Venta">💳 Punto de Venta</option>
-                    <option value="Efectivo Bs">💵 Efectivo (Bs)</option>
-                `;
-            } else {
-                opciones = `
-                    <option value="Divisa">💵 Efectivo (Divisa)</option>
-                    <option value="Zelle">🟩 Zelle</option>
-                    <option value="Binance">🟨 Binance</option>
-                `;
-            }
-            selectMetodo.innerHTML = opciones;
+        // Lógica de Pagos Mixtos
+        function agregarPagoMixto() {
+            const selectMetodo = document.getElementById('pos-metodo-mixto');
+            const inputMonto = document.getElementById('pos-monto-pago');
             
-            // Re-asignar si existe en las nuevas opciones
-            Array.from(selectMetodo.options).forEach(opt => {
-                if(opt.value === valorActual) selectMetodo.value = valorActual;
+            const metodo = selectMetodo.value;
+            const monto = parseFloat(inputMonto.value);
+            
+            if(!monto || monto <= 0) {
+                showToast('⚠️ Ingresa un monto válido.');
+                return;
+            }
+
+            pagosMixtos.push({ metodo: metodo, monto: monto });
+            inputMonto.value = '';
+            renderPagosMixtos();
+        }
+
+        function eliminarPagoMixto(index) {
+            pagosMixtos.splice(index, 1);
+            renderPagosMixtos();
+        }
+
+        function renderPagosMixtos() {
+            const cont = document.getElementById('lista-pagos-mixtos');
+            const badge = document.getElementById('badge-falta-vuelto');
+            
+            if (pagosMixtos.length === 0) {
+                cont.innerHTML = '';
+                badge.classList.add('hidden');
+                return;
+            }
+
+            cont.innerHTML = pagosMixtos.map((p, i) => `
+                <div class="flex justify-between items-center bg-gray-100 px-2 py-1 rounded text-[10px]">
+                    <span><b>${p.metodo}:</b> ${p.monto.toFixed(2)} ${['Divisa','Zelle','Binance'].includes(p.metodo)?'$':'Bs'}</span>
+                    <button onclick="eliminarPagoMixto(${i})" class="text-red-500 hover:text-red-700"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+
+            // Calcular Falta / Vuelto unificado (Todo a USD para comparar)
+            const tipoPrecio = document.getElementById('pos-tipo-precio').value;
+            let modUsd = (tipoPrecio === 'mayor') ? configAjusteMayor : 0;
+            const itemsAjustados = posCarrito.map(i => ({ ...i, price: i.price * (1 + (modUsd/100)) }));
+            const totalUsdDeuda = itemsAjustados.reduce((s, i) => s + (i.price * i.qty), 0);
+
+            let totalPagadoConvertidoUsd = 0;
+
+            pagosMixtos.forEach(p => {
+                const isBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(p.metodo);
+                if (isBs) {
+                    const recargo = (tipoPrecio === 'bs' || tipoPrecio === 'mayor') ? (configRecargoBs/100) : 0;
+                    const tasaUsada = tasaBCV * (1 + recargo);
+                    totalPagadoConvertidoUsd += (p.monto / tasaUsada);
+                } else {
+                    totalPagadoConvertidoUsd += p.monto;
+                }
             });
+
+            badge.classList.remove('hidden');
+            const dif = totalPagadoConvertidoUsd - totalUsdDeuda;
+            
+            if (dif < -0.01) {
+                badge.innerHTML = `<span class="text-red-500">Falta: $${Math.abs(dif).toFixed(2)}</span>`;
+            } else if (dif > 0.01) {
+                badge.innerHTML = `<span class="text-green-600">Vuelto: $${dif.toFixed(2)}</span>`;
+            } else {
+                badge.innerHTML = `<span class="text-blue-600">Monto Exacto</span>`;
+            }
+        }
+
+        function actualizarMetodosPago() {
+            renderPOS();
+            renderPagosMixtos();
         }
 
         async function guardarPOSCloud() {
@@ -1908,12 +2119,11 @@
                 list.innerHTML = '<p class="text-sm text-gray-400 text-center py-10"><i class="fas fa-shopping-cart text-3xl mb-2 block text-gray-200"></i> Caja vacía</p>';
                 totalE.textContent = '$0.00'; 
                 if(totalBcvE) totalBcvE.textContent = '0.00 Bs';
+                renderPagosMixtos();
                 return;
             }
 
             const tipoPrecio = document.getElementById('pos-tipo-precio').value;
-            const metodo = document.getElementById('pos-metodo').value;
-            const esMetodoBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(metodo);
             
             let totalUsdBase = 0;
             let totalBsCalculado = 0;
@@ -1922,8 +2132,7 @@
                 const finalPriceBaseUsd = i.price * (1 + (tipoPrecio === 'mayor' ? (configAjusteMayor/100) : 0));
                 totalUsdBase += (finalPriceBaseUsd * i.qty);
                 
-                // Recargo aplica si es precio BS o si es precio MAYOR pagando en BS
-                const recargo = (tipoPrecio === 'bs' || (tipoPrecio === 'mayor' && esMetodoBs)) ? (configRecargoBs/100) : 0;
+                const recargo = (tipoPrecio === 'bs' || tipoPrecio === 'mayor') ? (configRecargoBs/100) : 0;
                 const precioBsItem = (finalPriceBaseUsd * tasaBCV) * (1 + recargo);
                 totalBsCalculado += (precioBsItem * i.qty);
                 
@@ -1954,11 +2163,13 @@
             `}).join('');
             
             totalE.textContent = `$${totalUsdBase.toFixed(2)}`;
-            if (tipoPrecio === 'bs' || (tipoPrecio === 'mayor' && esMetodoBs)) {
+            if (tipoPrecio === 'bs' || tipoPrecio === 'mayor') {
                 totalBcvE.textContent = `${totalBsCalculado.toFixed(2)} Bs (Inc. Recargo)`;
             } else {
                 totalBcvE.textContent = tasaBCV > 0 ? `${(totalUsdBase * tasaBCV).toFixed(2)} Bs (Tasa: ${tasaBCV})` : `0.00 Bs`;
             }
+
+            renderPagosMixtos();
         }
 
         function renderMisVentasHoy() {
@@ -1972,7 +2183,7 @@
             let misVentas = pedidosGlobal.filter(p => {
                 if(!p.created_at) return false;
                 const esHoy = p.created_at.split('T')[0] === hoy;
-                const esMia = p.vendedor === currentUserEmail;
+                const esMia = p.vendedor === currentUserEmail || currentUserEmail === 'admin';
                 const esPOS = p.origen === 'mostrador';
                 return esHoy && esMia && esPOS;
             });
@@ -1993,13 +2204,18 @@
                 if(p.items && Array.isArray(p.items)) {
                     cartList = p.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
                 }
+                
+                let displayMetodo = p.metodo_pago;
+                if(p.metodo_pago && p.metodo_pago.startsWith('Mixto:')) {
+                    displayMetodo = `<span class="text-purple-600 font-bold" title="${p.metodo_pago}">Mixto <i class="fas fa-info-circle text-[8px]"></i></span>`;
+                }
 
                 return `
                 <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2">
                     <div class="flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-gray-900 block">${p.codigo}</span>
-                            <span class="text-[10px] text-gray-500">${hora} • ${p.metodo_pago}</span>
+                            <span class="text-[10px] text-gray-500">${hora} • ${displayMetodo}</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="text-right">
@@ -2017,15 +2233,15 @@
         
         async function procesarVentaPOS() {
             if(posCarrito.length === 0) { showToast('⚠️ La caja está vacía.'); return; }
+            if(pagosMixtos.length === 0) { showToast('⚠️ Ingresa al menos un pago mixto.'); return; }
             
-            // Bloqueo visual del botón para evitar dobles clics
             const btnProcesar = document.querySelector('button[onclick="procesarVentaPOS()"]');
             const txtOriginal = btnProcesar.innerHTML;
             btnProcesar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando Venta...';
             btnProcesar.disabled = true;
 
             try {
-                // BLINDAJE ATÓMICO DE STOCK (POS)
+                // BLINDAJE ATÓMICO
                 const ids = posCarrito.map(i => i.id);
                 const { data: dbStock } = await db.from('productos').select('id, stock').in('id', ids);
                 
@@ -2040,52 +2256,56 @@
                 }
                 
                 if(stockInsuficiente) {
-                    showToast("⚠️ Alguien más compró uno de estos artículos. Stock BD insuficiente. Carrito de caja actualizado.");
+                    showToast("⚠️ Alguien más compró uno de estos artículos. Stock BD insuficiente. Carrito actualizado.");
                     posCarrito = posCarrito.filter(item => {
                         const localItem = inventarioGlobal.find(x => x.id == item.id);
                         if(localItem && localItem.stock >= item.qty) return true;
                         if(localItem && localItem.stock > 0) { item.qty = localItem.stock; return true; }
                         return false;
                     });
-                    renderPOS();
-                    renderTienda(inventarioGlobal);
-                    renderAdmin(inventarioGlobal);
-                    btnProcesar.innerHTML = txtOriginal;
-                    btnProcesar.disabled = false;
+                    renderPOS(); renderTienda(inventarioGlobal); renderAdmin(inventarioGlobal);
                     return;
                 }
 
                 const tipoPrecio = document.getElementById('pos-tipo-precio').value;
-                const metodo = document.getElementById('pos-metodo').value;
-                const esMetodoBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(metodo);
                 const notaPOS = document.getElementById('pos-nota') ? document.getElementById('pos-nota').value.trim() : '';
                 
                 let modUsd = (tipoPrecio === 'mayor') ? configAjusteMayor : 0;
-                
-                const itemsAjustados = posCarrito.map(i => ({
-                    ...i,
-                    price: i.price * (1 + (modUsd/100))
-                }));
-
+                const itemsAjustados = posCarrito.map(i => ({ ...i, price: i.price * (1 + (modUsd/100)) }));
                 const totalUsd = itemsAjustados.reduce((s, i) => s + (i.price * i.qty), 0);
                 const code = '#POS-' + Math.floor(1000 + Math.random()*9000);
                 
-                const recargo = (tipoPrecio === 'bs' || (tipoPrecio === 'mayor' && esMetodoBs)) ? (configRecargoBs/100) : 0;
+                const recargo = (tipoPrecio === 'bs' || tipoPrecio === 'mayor') ? (configRecargoBs/100) : 0;
                 const tasaAplicada = tasaBCV * (1 + recargo);
                 
+                // Formatear método de pago mixto para la BD
+                let metodoDB = "Mixto: ";
+                if(pagosMixtos.length === 1) {
+                    metodoDB = pagosMixtos[0].metodo; // Si solo usó 1, lo ponemos limpio para no romper otras partes
+                } else {
+                    const desgloses = pagosMixtos.map(p => {
+                        const isBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(p.metodo);
+                        return `${p.metodo} (${isBs? p.monto.toFixed(2)+' Bs' : '$'+p.monto.toFixed(2)})`;
+                    });
+                    metodoDB += desgloses.join(' + ');
+                }
+                // Si sobra, lo metemos en nota
+                const bdgFalta = document.getElementById('badge-falta-vuelto').textContent;
+                const finalNota = notaPOS + (bdgFalta.includes('Vuelto') ? ` [${bdgFalta}]` : '');
+
                 const nPed = { 
                     codigo: code, 
                     cliente: 'Mostrador', 
                     telefono: 'N/A', 
                     metodo_entrega: 'Local', 
-                    direccion: notaPOS ? `Nota: ${notaPOS}` : '', 
+                    direccion: finalNota, 
                     total_usd: totalUsd, 
                     tasa_bcv: tasaAplicada, 
                     items: itemsAjustados, 
                     estado: 'Entregado',
                     origen: 'mostrador',
                     vendedor: currentUserEmail,
-                    metodo_pago: metodo
+                    metodo_pago: metodoDB
                 };
                 
                 for(const item of posCarrito) { 
@@ -2094,15 +2314,15 @@
                 
                 await db.from('pedidos').insert([nPed]);
                 
-                posCarrito = []; 
+                posCarrito = []; pagosMixtos = [];
                 document.getElementById('pos-tipo-precio').value = 'divisa';
                 actualizarMetodosPago();
                 if(document.getElementById('pos-nota')) document.getElementById('pos-nota').value = '';
                 renderPOS(); 
                 guardarPOSCloud();
-                showToast('✅ Venta de Caja registrada y cobrada con éxito'); 
+                showToast('✅ Venta Mixta registrada con éxito'); 
                 
-                // ACTUALIZACIÓN LOCAL INMEDIATA Y LIGERA
+                // Refresh
                 const [{ data: nuevosPedidos }, { data: nuevosProductos }] = await Promise.all([
                     db.from('pedidos').select('*').order('created_at', { ascending: false }),
                     db.from('productos').select('*').order('id', { ascending: false })
@@ -2115,7 +2335,6 @@
                     actualizarReportes();
                     renderMisVentasHoy();
                 }
-
                 if(nuevosProductos) {
                     inventarioGlobal = nuevosProductos;
                     renderTienda(inventarioGlobal);
@@ -2130,7 +2349,6 @@
             }
         }
 
-        // --- SINCRONIZACIÓN REAL-TIME SUPABASE ---
         function setupRealtime() {
             db.channel('public:sync-bellisanty')
               .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, async (payload) => {
@@ -2199,9 +2417,6 @@
                     if(displayHorario) displayHorario.textContent = horarioDB;
                     if(inputRec) inputRec.value = configRecargoBs;
                     if(inputMay) inputMay.value = configAjusteMayor;
-                } else {
-                    const btnVip = document.getElementById('btn-comunidad-vip');
-                    if(btnVip) btnVip.href = `https://wa.me/${whatsappNumber}`;
                 }
 
                 renderCategoriasFiltros();
@@ -2226,8 +2441,6 @@
                 renderMisVentasHoy();
 
                 setTimeout(initScrollReveal, 100);
-                
-                // Iniciar escucha Real-Time
                 setupRealtime();
 
             } catch (e) {
@@ -2271,7 +2484,7 @@
             sel.innerHTML = html;
         }
 
-function obtenerRangoFechas(inicio, fin) {
+        function obtenerRangoFechas(inicio, fin) {
             const fechas = [];
             let actual = new Date(inicio + 'T00:00:00');
             const limite = new Date(fin + 'T00:00:00');
@@ -2306,9 +2519,11 @@ function obtenerRangoFechas(inicio, fin) {
                 const fecha = p.created_at.split('T')[0];
                 if(agrupado[fecha]) {
                     const met = p.metodo_pago || '';
-                    if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                    if (met.includes('Pago Movil') || met.includes('Punto de Venta') || met.includes('Efectivo Bs')) {
                         agrupado[fecha].bs += (parseFloat(p.total_usd) * (p.tasa_bcv || tasaBCV));
-                    } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
+                    } 
+                    if (met.includes('Divisa') || met.includes('Zelle') || met.includes('Binance')) {
+                        // En mixtos la proporción es compleja, simplificamos metiendo al dash lo principal
                         agrupado[fecha].usd += parseFloat(p.total_usd);
                     }
                 }
@@ -2436,7 +2651,11 @@ function obtenerRangoFechas(inicio, fin) {
             }
 
             if(metodoSelect && metodoSelect.value !== 'todos') {
-                filtrados = filtrados.filter(p => (p.metodo_pago || 'Por definir') === metodoSelect.value);
+                if(metodoSelect.value === 'Mixto') {
+                    filtrados = filtrados.filter(p => (p.metodo_pago || '').startsWith('Mixto:'));
+                } else {
+                    filtrados = filtrados.filter(p => (p.metodo_pago || 'Por definir') === metodoSelect.value);
+                }
             }
 
             pedidosReportesFiltrados = filtrados;
@@ -2444,6 +2663,11 @@ function obtenerRangoFechas(inicio, fin) {
             let vDivisas = 0; 
             let vBs = 0;
             let vCostos = 0;
+
+            let miniDash = {
+                zelle: 0, binance: 0, efectivo_usd: 0,
+                pm: 0, punto: 0, efectivo_bs: 0
+            };
             
             const entregados = filtrados.filter(p => p.estado === 'Entregado');
             
@@ -2451,10 +2675,40 @@ function obtenerRangoFechas(inicio, fin) {
                 const pedTasa = ped.tasa_bcv || tasaBCV;
                 const met = ped.metodo_pago || '';
                 
-                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
-                    vBs += (parseFloat(ped.total_usd) * pedTasa);
-                } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
-                    vDivisas += parseFloat(ped.total_usd);
+                // Parseo avanzado para mini-dashboard (incluye soporte para "Mixto: Zelle ($10) + Pago Movil (500 Bs)")
+                if(met.startsWith('Mixto:')) {
+                    // Extraer montos usando regex. Ej: Zelle ($10.50), Pago Movil (500.00 Bs)
+                    const matchesUsd = [...met.matchAll(/(Zelle|Binance|Divisa).*?\$([0-9.]+)/g)];
+                    matchesUsd.forEach(m => {
+                        const amount = parseFloat(m[2]);
+                        if(m[1]==='Zelle') miniDash.zelle += amount;
+                        if(m[1]==='Binance') miniDash.binance += amount;
+                        if(m[1]==='Divisa') miniDash.efectivo_usd += amount;
+                        vDivisas += amount;
+                    });
+                    const matchesBs = [...met.matchAll(/(Pago Movil|Punto de Venta|Efectivo Bs).*?\(([0-9.]+) Bs\)/g)];
+                    matchesBs.forEach(m => {
+                        const amount = parseFloat(m[2]);
+                        if(m[1]==='Pago Movil') miniDash.pm += amount;
+                        if(m[1]==='Punto de Venta') miniDash.punto += amount;
+                        if(m[1]==='Efectivo Bs') miniDash.efectivo_bs += amount;
+                        vBs += amount;
+                    });
+                } else {
+                    // Pago Simple
+                    if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                        const bMonto = parseFloat(ped.total_usd) * pedTasa;
+                        vBs += bMonto;
+                        if(met==='Pago Movil') miniDash.pm += bMonto;
+                        if(met==='Punto de Venta') miniDash.punto += bMonto;
+                        if(met==='Efectivo Bs') miniDash.efectivo_bs += bMonto;
+                    } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
+                        const dMonto = parseFloat(ped.total_usd);
+                        vDivisas += dMonto;
+                        if(met==='Zelle') miniDash.zelle += dMonto;
+                        if(met==='Binance') miniDash.binance += dMonto;
+                        if(met==='Divisa') miniDash.efectivo_usd += dMonto;
+                    }
                 }
                 
                 if(ped.items && Array.isArray(ped.items)) {
@@ -2465,6 +2719,14 @@ function obtenerRangoFechas(inicio, fin) {
                 }
             });
             
+            // Actualizar Mini Dashboard
+            if(document.getElementById('tot-zelle')) document.getElementById('tot-zelle').textContent = `$${miniDash.zelle.toFixed(2)}`;
+            if(document.getElementById('tot-binance')) document.getElementById('tot-binance').textContent = `$${miniDash.binance.toFixed(2)}`;
+            if(document.getElementById('tot-efectivo-usd')) document.getElementById('tot-efectivo-usd').textContent = `$${miniDash.efectivo_usd.toFixed(2)}`;
+            if(document.getElementById('tot-pm')) document.getElementById('tot-pm').textContent = `${miniDash.pm.toFixed(2)} Bs`;
+            if(document.getElementById('tot-punto')) document.getElementById('tot-punto').textContent = `${miniDash.punto.toFixed(2)} Bs`;
+            if(document.getElementById('tot-efectivo-bs')) document.getElementById('tot-efectivo-bs').textContent = `${miniDash.efectivo_bs.toFixed(2)} Bs`;
+
             const eDiv = document.getElementById('rep-divisas');
             const eBs = document.getElementById('rep-bolivares');
             const eC = document.getElementById('rep-costos');
@@ -2474,8 +2736,7 @@ function obtenerRangoFechas(inicio, fin) {
             if(eBs) eBs.textContent = `${vBs.toFixed(2)} Bs`;
             if(eC) eC.textContent = `$${vCostos.toFixed(2)}`;
             
-            let totalRevUsd = 0;
-            entregados.forEach(ped => { totalRevUsd += parseFloat(ped.total_usd); });
+            let totalRevUsd = vDivisas + (vBs > 0 ? (vBs / tasaBCV) : 0); // Aproximado para ganancia
             const ganancia = totalRevUsd - vCostos;
             if(eG) eG.textContent = `$${ganancia.toFixed(2)}`;
 
@@ -2510,18 +2771,23 @@ function obtenerRangoFechas(inicio, fin) {
 
                 const met = p.metodo_pago || '';
                 let montoDisplay = `<span class="text-gray-400">Por definir</span>`;
-                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                if(met.startsWith('Mixto:')) {
+                    montoDisplay = `<span class="text-purple-600 font-bold text-[10px]" title="${met}">Pago Mixto</span>`;
+                } else if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
                     montoDisplay = `<span class="text-blue-600 font-black">${(parseFloat(p.total_usd) * (p.tasa_bcv || 1)).toFixed(2)} Bs</span>`;
                 } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
                     montoDisplay = `<span class="text-green-600 font-black">$${parseFloat(p.total_usd).toFixed(2)}</span>`;
                 }
+
+                let badgeMetodo = met || 'Por definir';
+                if(met.startsWith('Mixto:')) badgeMetodo = 'Mixto';
 
                 return `
                 <tr class="hover:bg-gray-50 transition cursor-pointer border-b border-gray-100 last:border-0" onclick="document.getElementById('det-${p.id}').classList.toggle('hidden')">
                     <td class="px-4 py-3 whitespace-nowrap">${date}</td>
                     <td class="px-4 py-3 font-bold text-gray-900">${p.codigo} ${icon}</td>
                     <td class="px-4 py-3 truncate max-w-[150px]" title="${cl}">${cl}</td>
-                    <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${met || 'Por definir'}</span></td>
+                    <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">${badgeMetodo}</span></td>
                     <td class="px-4 py-3 text-right">${montoDisplay}</td>
                 </tr>
                 <tr id="det-${p.id}" class="hidden bg-gray-50 border-b border-gray-100">
@@ -2529,6 +2795,7 @@ function obtenerRangoFechas(inicio, fin) {
                         <div class="text-xs">
                             <span class="font-bold text-gray-700 block mb-1">Detalle del Pedido:</span>
                             ${detallesHtml}
+                            ${met.startsWith('Mixto:') ? `<div class="mt-2 p-2 bg-purple-50 rounded text-purple-800 border border-purple-100"><b>Desglose Mixto:</b> ${met.replace('Mixto: ', '')}</div>` : ''}
                         </div>
                     </td>
                 </tr>
@@ -2586,7 +2853,9 @@ function obtenerRangoFechas(inicio, fin) {
                             ${pedidosReportesFiltrados.map(p => {
                                 const met = p.metodo_pago || '';
                                 let montoStr = 'Por definir';
-                                if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
+                                if (met.startsWith('Mixto:')) {
+                                    montoStr = 'Pago Mixto';
+                                } else if (['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(met)) {
                                     montoStr = `${(parseFloat(p.total_usd) * (p.tasa_bcv || 1)).toFixed(2)} Bs`;
                                 } else if (['Divisa', 'Zelle', 'Binance'].includes(met)) {
                                     montoStr = `$${parseFloat(p.total_usd).toFixed(2)}`;
@@ -2596,7 +2865,7 @@ function obtenerRangoFechas(inicio, fin) {
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6; color: #6b7280;">${new Date(p.created_at).toLocaleDateString('es-VE')}</td>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6; font-weight: bold;">${p.codigo}</td>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6;">${p.origen === 'mostrador' ? 'POS - ' + p.vendedor : p.cliente}</td>
-                                    <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6;">${met || 'N/D'}</td>
+                                    <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6;">${met.startsWith('Mixto:') ? 'Mixto' : (met || 'N/D')}</td>
                                     <td style="padding: 8px 10px; border-bottom: 1px solid #f3f4f6; text-align: right; font-weight: bold;">${montoStr}</td>
                                 </tr>
                                 `;
@@ -2616,6 +2885,7 @@ function obtenerRangoFechas(inicio, fin) {
             };
             html2pdf().set(opt).from(element).save().then(() => showToast("✅ Reporte en PDF descargado con éxito"));
         }
+        
         async function reiniciarVentas() {
             if(confirm('🚨 ¡CUIDADO EXTREMO! Esto borrará TODOS los pedidos del historial y reiniciará las ganancias a $0.\n\nEsta acción es irreversible.\n\n¿Estás completamente seguro de que quieres entregar el sistema en blanco al cliente?')) {
                 try { 
@@ -2826,7 +3096,9 @@ function obtenerRangoFechas(inicio, fin) {
             document.getElementById('edit-imagen-actual').value = p.image;
             const fileNameDisplay = document.getElementById('edit-file-name'); if(fileNameDisplay) fileNameDisplay.textContent = "Mantener foto actual";
             const fileInput = document.getElementById('edit-imagen'); if(fileInput) fileInput.value = ""; 
+            const webUrl = document.getElementById('edit-imagen-web-url'); if(webUrl) webUrl.value = "";
             document.getElementById('edit-descripcion').value = p.description || '';
+            calcularPreciosERP('edit');
             document.getElementById('modal-editar-producto').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
@@ -2842,6 +3114,7 @@ function obtenerRangoFechas(inicio, fin) {
             formEditar.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('btn-guardar-edicion');
+                const txtOriginal = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Actualizando...';
                 btn.disabled = true;
 
@@ -2849,8 +3122,11 @@ function obtenerRangoFechas(inicio, fin) {
                     const id = document.getElementById('edit-id').value;
                     let finalImgUrl = document.getElementById('edit-imagen-actual').value;
                     const fileInput = document.getElementById('edit-imagen');
+                    const webUrl = document.getElementById('edit-imagen-web-url').value;
 
-                    if (fileInput.files && fileInput.files.length > 0) {
+                    if (webUrl) {
+                        finalImgUrl = webUrl;
+                    } else if (fileInput.files && fileInput.files.length > 0) {
                         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo nueva foto...';
                         finalImgUrl = await subirImagenSupabase(fileInput.files[0]);
                     }
@@ -2873,13 +3149,14 @@ function obtenerRangoFechas(inicio, fin) {
                     const { error } = await db.from('productos').update(p).eq('id', id);
                     if (error) throw error;
 
+                    clearAutoSave('form-editar-producto');
                     cerrarModalEditar();
                     await cargarTodo();
                     showToast('✅ Producto actualizado');
                 } catch(err) {
                     showToast("⚠️ Error crítico al actualizar");
                 } finally {
-                    btn.innerHTML = 'Actualizar Producto';
+                    btn.innerHTML = txtOriginal;
                     btn.disabled = false;
                 }
             });
@@ -2910,241 +3187,6 @@ function obtenerRangoFechas(inicio, fin) {
                     </div>
                 </div>
             `}).join('');
-        }
-
-        function renderPedidosAdmin(pedidosAMostrar = pedidosGlobal) {
-            const cont = document.getElementById('lista-pedidos-admin');
-            if (!cont) return;
-
-            if (pedidosAMostrar.length === 0) {
-                cont.innerHTML = '<p class="text-sm text-gray-400 py-6 text-center col-span-full">No se encontraron pedidos.</p>';
-                return;
-            }
-
-            const colors = {
-                'Pendiente': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-                'Preparando': 'bg-blue-50 text-blue-700 border-blue-200',
-                'En camino': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                'Entregado': 'bg-green-50 text-green-700 border-green-200',
-                'Cancelado': 'bg-red-50 text-red-700 border-red-200'
-            };
-
-            cont.innerHTML = pedidosAMostrar.map(p => {
-                const date = p.created_at ? new Date(p.created_at).toLocaleDateString('es-VE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : 'N/D';
-                const estadoClass = colors[p.estado] || colors['Pendiente'];
-                
-                let cartList = '';
-                if(p.items && Array.isArray(p.items)) {
-                    cartList = p.items.map(i => `<div class="text-[10px] text-gray-600 border-b border-gray-100 pb-1 mb-1"><b>${i.qty}x</b> ${i.name}</div>`).join('');
-                }
-
-                return `
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition">
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <span class="text-sm font-black text-gray-900">${p.codigo}</span>
-                            <div class="text-[9px] text-gray-400 font-bold">${date}</div>
-                        </div>
-                        <span class="text-[10px] font-bold px-2 py-1 rounded-lg border ${estadoClass}">${p.estado}</span>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-xl p-3 mb-3 border border-gray-100">
-                        <div class="text-[11px] text-gray-800"><i class="fas fa-user text-gray-400 w-4"></i> <b>${p.cliente}</b></div>
-                        <div class="text-[11px] text-gray-800 mt-1"><i class="fas fa-phone text-gray-400 w-4"></i> ${p.telefono}</div>
-                        <div class="text-[11px] text-gray-800 mt-1 truncate"><i class="fas fa-map-marker-alt text-gray-400 w-4"></i> ${p.direccion || p.metodo_entrega}</div>
-                    </div>
-
-                    <div class="mb-3 max-h-[60px] overflow-y-auto pr-1">${cartList}</div>
-
-                    <div class="flex justify-between items-end mb-4 border-t border-gray-100 pt-3">
-                        <div>
-                            <div class="text-[10px] text-gray-500 font-bold">TOTAL USD</div>
-                            <div class="text-base font-black text-green-600">$${parseFloat(p.total_usd).toFixed(2)}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-[10px] text-gray-500 font-bold">TOTAL BCV (Tasa ${p.tasa_bcv})</div>
-                            <div class="text-sm font-bold text-gray-800">${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</div>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <select onchange="actualizarEstadoPedido('${p.id}', this.value)" class="w-full text-[11px] font-bold bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 outline-none cursor-pointer">
-                            <option value="Pendiente" ${p.estado==='Pendiente'?'selected':''}>Pendiente</option>
-                            <option value="Preparando" ${p.estado==='Preparando'?'selected':''}>Preparando</option>
-                            <option value="En camino" ${p.estado==='En camino'?'selected':''}>En camino</option>
-                            <option value="Entregado" ${p.estado==='Entregado'?'selected':''}>Entregado</option>
-                            <option value="Cancelado" ${p.estado==='Cancelado'?'selected':''}>Cancelado</option>
-                        </select>
-                        <button onclick="imprimirFactura('${p.id}')" class="w-full bg-gray-900 text-white text-[11px] font-bold py-2 rounded-lg hover:bg-belli-700 transition cursor-pointer flex items-center justify-center gap-1"><i class="fas fa-print"></i> Generar Factura</button>
-                    </div>
-                </div>
-                `;
-            }).join('');
-        }
-
-        async function actualizarEstadoPedido(id, nuevoEstado) {
-            try {
-                const pedido = pedidosGlobal.find(x => String(x.id) === String(id));
-                if (nuevoEstado === 'Entregado' && pedido && pedido.estado !== 'Entregado') {
-                    if (pedido.items && Array.isArray(pedido.items)) {
-                        for (const item of pedido.items) {
-                            const pIndex = inventarioGlobal.findIndex(p => p.id == item.id);
-                            if (pIndex !== -1) {
-                                const p = inventarioGlobal[pIndex];
-                                const nuevoStock = p.stock - item.qty;
-                                await db.from('productos').update({ stock: nuevoStock }).eq('id', p.id);
-                                p.stock = nuevoStock; 
-                            }
-                        }
-                        showToast('✅ Stock descontado');
-                    }
-                }
-                const { error } = await db.from('pedidos').update({ estado: nuevoEstado }).eq('id', id);
-                if(error) throw error;
-                showToast('✅ Estado actualizado.');
-                // La sincronización en tiempo real se encargará de refrescar la vista.
-            } catch(e) { showToast('⚠️ Error al actualizar estado.'); }
-        }
-
-        // --- SISTEMA DE IMPRESIÓN INTELIGENTE (FACTURAS EN BS/DIVISAS) ---
-        function imprimirFactura(id) {
-            const p = pedidosGlobal.find(x => String(x.id) === String(id));
-            if(!p) { showToast('⚠️ Pedido no encontrado.'); return; }
-            
-            const esVentaBs = ['Pago Movil', 'Punto de Venta', 'Efectivo Bs'].includes(p.metodo_pago);
-
-            let itemsHtml = '';
-            if(p.items && Array.isArray(p.items)) {
-                itemsHtml = p.items.map(i => {
-                    if (esVentaBs) {
-                        const totalItemBs = (i.price * i.qty * p.tasa_bcv).toFixed(2);
-                        return `<div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px;"><span style="flex:1;">${i.qty}x ${i.name}</span><span style="font-weight:bold;">${totalItemBs} Bs</span></div>`;
-                    } else {
-                        return `<div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px;"><span style="flex:1;">${i.qty}x ${i.name}</span><span style="font-weight:bold;">$${(i.price * i.qty).toFixed(2)}</span></div>`;
-                    }
-                }).join('');
-            }
-            
-            let totalesHtml = '';
-            if(esVentaBs) {
-                totalesHtml = `<div style="display:flex; justify-content:space-between; font-size:16px; margin-top:4px;" class="font-bold"><span>TOTAL A PAGAR:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div>`;
-            } else {
-                totalesHtml = `
-                    <div style="display:flex; justify-content:space-between; font-size:16px;" class="font-bold"><span>TOTAL USD:</span><span>$${parseFloat(p.total_usd).toFixed(2)}</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px;"><span>TASA BCV:</span><span>${p.tasa_bcv} Bs</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size:14px; margin-top:4px;" class="font-bold"><span>TOTAL BS:</span><span>${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span></div>`;
-            }
-
-            const htmlContent = `<html><head><title>Factura ${p.codigo}</title><style>@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'); body { font-family: 'Courier Prime', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; background: #fff; } .text-center { text-align: center; } .border-b { border-bottom: 1px dashed #000; padding-bottom: 12px; margin-bottom: 12px; } .font-bold { font-weight: bold; } .title { font-size: 22px; font-weight: bold; margin-bottom: 5px; } p { margin: 4px 0; font-size: 13px; }</style></head><body onload="window.print(); setTimeout(() => window.close(), 500);"><div class="text-center border-b"><div class="title">BELLISANTY</div><p>LUXURY GIFTING</p><p>Pueblo Llano, Mérida</p><p>WhatsApp: +58 412-6480799</p></div><div class="border-b"><p><b>ORDEN:</b> ${p.codigo}</p><p><b>FECHA:</b> ${new Date(p.created_at).toLocaleString('es-VE')}</p><p><b>CLIENTE:</b> ${p.cliente.toUpperCase()}</p><p><b>TELÉFONO:</b> ${p.telefono}</p><p><b>MÉTODO PAGO:</b> ${p.metodo_pago}</p><p><b>CAJERO:</b> ${p.vendedor === 'cliente' ? 'Web' : p.vendedor}</p></div><div class="border-b"><p class="font-bold" style="margin-bottom:10px; display:flex; justify-content:space-between;"><span>CANT DESCRIPCIÓN</span><span>TOTAL</span></p>${itemsHtml}</div><div class="border-b">${totalesHtml}</div><div class="text-center" style="margin-top: 20px;"><p>¡Gracias por tu compra!</p><p>@bellisanty</p></div></body></html>`;
-            
-            const printWindow = window.open('', '_blank', 'width=400,height=600');
-            if(printWindow) { printWindow.document.write(htmlContent); printWindow.document.close(); } 
-            else { showToast("⚠️ Desactiva el bloqueo de pop-ups para imprimir."); }
-        }
-
-        function renderEquipoAdmin() {
-            const cont = document.getElementById('lista-equipo-admin');
-            if(!cont) return;
-            if(equipoGlobal.length === 0) { cont.innerHTML = '<p class="text-xs text-gray-400">No hay empleados.</p>'; return; }
-            cont.innerHTML = equipoGlobal.map(e => {
-                const isDueño = e.rol === 'admin';
-                const pPed = e.permisos?.pedidos !== false;
-                const pPos = e.permisos?.pos !== false;
-                const pInv = e.permisos?.inventario;
-                const pRep = e.permisos?.reportes;
-                const pCfg = e.permisos?.configuracion;
-                return `
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-3">
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                        <span class="text-xs font-bold text-gray-900"><i class="fas fa-user text-gray-400 mr-1"></i> ${e.email} ${isDueño ? '<span class="text-green-500 ml-1">(Dueño)</span>' : ''}</span>
-                        ${!isDueño ? `<button onclick="eliminarEmpleado('${e.id}')" class="text-red-400 hover:text-red-600 cursor-pointer px-2"><i class="fas fa-trash text-xs"></i></button>` : ''}
-                    </div>
-                    ${!isDueño ? `
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'pedidos', this.checked)" ${pPed ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Pedidos Web</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'pos', this.checked)" ${pPos ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Caja (POS)</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'inventario', this.checked)" ${pInv ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Inventario</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'reportes', this.checked)" ${pRep ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> Reportes</label>
-                        <label class="flex items-center gap-1.5 text-[10px] text-gray-600 cursor-pointer col-span-2 border-t border-gray-200 pt-2 mt-1"><input type="checkbox" onchange="cambiarPermiso('${e.id}', 'configuracion', this.checked)" ${pCfg ? 'checked' : ''} class="rounded text-indigo-600 w-4 h-4"> <span>Ajustes Totales</span></label>
-                    </div>
-                    ` : '<span class="text-[10px] text-gray-400 text-center block pb-1">Acceso total maestro y permisos absolutos</span>'}
-                </div>
-                `;
-            }).join('');
-        }
-
-        async function cambiarPermiso(id, tipo, valor) {
-            try {
-                const emp = equipoGlobal.find(x => x.id == id);
-                if(!emp) return;
-                const nuevosPermisos = { ...emp.permisos, [tipo]: valor };
-                const { error } = await db.from('equipo').update({ permisos: nuevosPermisos }).eq('id', id);
-                if(error) throw error;
-                showToast('✅ Permisos actualizados'); await cargarTodo();
-            } catch(e) { showToast("⚠️ Error al cambiar permiso"); }
-        }
-
-        async function eliminarEmpleado(id) {
-            if(confirm('¿Eliminar acceso a este empleado? Ya no podrá entrar al panel.')) {
-                try {
-                    const { error } = await db.from('equipo').delete().eq('id', id);
-                    if(error) throw error;
-                    showToast('✅ Empleado eliminado'); await cargarTodo();
-                } catch(e) { showToast("⚠️ Error al eliminar empleado"); }
-            }
-        }
-
-        const formAjustes = document.getElementById('form-ajustes');
-        if(formAjustes) {
-            formAjustes.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = e.target.querySelector('button[type="submit"]');
-                const txtOriginal = btn ? btn.innerHTML : '';
-                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...'; btn.disabled = true; }
-                try {
-                    const textoNuevo = document.getElementById('texto-anuncio').value.trim();
-                    const linkNuevo = document.getElementById('link-comunidad').value.trim();
-                    const horarioNuevo = document.getElementById('horario-tienda').value.trim();
-                    const rBs = parseFloat(document.getElementById('ajuste-recargo').value) || 0;
-                    const aMay = parseFloat(document.getElementById('ajuste-mayor').value) || 0;
-                    
-                    const payload = { texto: textoNuevo, link_comunidad: linkNuevo, horario: horarioNuevo, recargo_bs: rBs, ajuste_mayor: aMay };
-                    if(anuncioId) { await db.from('anuncios').update(payload).eq('id', anuncioId); } 
-                    else { await db.from('anuncios').insert([payload]); }
-                    await cargarTodo(); showToast('✅ Ajustes web actualizados');
-                } catch(err) { showToast("⚠️ Error al guardar ajustes"); } 
-                finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
-            });
-        }
-
-        const formGaleria = document.getElementById('form-galeria');
-        if(formGaleria) {
-            formGaleria.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = e.target.querySelector('button[type="submit"]');
-                const txtOriginal = btn ? btn.innerHTML : '';
-                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...'; btn.disabled = true; }
-                try {
-                    const fileInput = document.getElementById('galeria-img');
-                    if (!fileInput.files || fileInput.files.length === 0) { showToast("⚠️ Por favor selecciona una foto."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo...';
-                    let imgUrl = "";
-                    try { imgUrl = await subirImagenSupabase(fileInput.files[0]); } 
-                    catch (e) { showToast("⚠️ Error al subir: Comprueba tu conexión a internet."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
-                    const link = document.getElementById('galeria-link').value.trim();
-                    const { error } = await db.from('galeria').insert([{ image_url: imgUrl, instagram_url: link }]);
-                    if(error) throw error;
-                    document.getElementById('form-galeria').reset(); document.getElementById('gal-file-name').textContent = ''; await cargarTodo(); showToast('✅ Foto agregada');
-                } catch(err) { showToast("⚠️ Error al agregar foto"); } 
-                finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
-            });
-        }
-
-        async function eliminarGaleria(id) {
-            if(confirm("¿Eliminar foto de la galería web?")) {
-                try { const { error } = await db.from('galeria').delete().eq('id', id); if(error) throw error; await cargarTodo(); showToast('✅ Foto eliminada'); } 
-                catch(e) { showToast("⚠️ Error al eliminar la foto"); }
-            }
         }
 
         const formCatAdd = document.getElementById('form-categoria-add');
@@ -3206,12 +3248,19 @@ function obtenerRangoFechas(inicio, fin) {
                 try {
                     const cat = document.getElementById('form-categoria').value;
                     if(!cat) { showToast('⚠️ Crea una categoría primero.'); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
+                    
                     const fileInput = document.getElementById('imagen');
-                    if (!fileInput.files || fileInput.files.length === 0) { showToast("⚠️ Por favor selecciona una imagen."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
+                    const webUrl = document.getElementById('imagen-web-url').value;
+                    
+                    if (!webUrl && (!fileInput.files || fileInput.files.length === 0)) { showToast("⚠️ Por favor selecciona una imagen."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
                     
                     let imgUrl = "";
-                    try { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...'; imgUrl = await subirImagenSupabase(fileInput.files[0]); } 
-                    catch(err) { showToast("⚠️ Error de conexión al subir imagen."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
+                    if(webUrl) {
+                        imgUrl = webUrl;
+                    } else {
+                        try { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...'; imgUrl = await subirImagenSupabase(fileInput.files[0]); } 
+                        catch(err) { showToast("⚠️ Error de conexión al subir imagen."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
+                    }
                     
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando datos...';
                     const p = { name: document.getElementById('nombre').value.trim(), price: parseFloat(document.getElementById('precio').value), stock: parseInt(document.getElementById('stock').value), category: cat, image: imgUrl, description: document.getElementById('descripcion').value.trim() };
@@ -3223,7 +3272,8 @@ function obtenerRangoFechas(inicio, fin) {
                     if(error) { delete p.costo; delete p.barcode; const retry = await db.from('productos').insert([p]); if(retry.error) throw retry.error; showToast("⚠️ Producto guardado, pero faltó el costo/código en la BD."); } 
                     else { showToast('✅ Producto guardado correctamente'); }
                     
-                    document.getElementById('form-producto').reset(); document.getElementById('prod-file-name').textContent = ''; await cargarTodo();
+                    clearAutoSave('form-producto');
+                    document.getElementById('form-producto').reset(); document.getElementById('prod-file-name').textContent = ''; document.getElementById('imagen-web-url').value = ''; await cargarTodo();
                 } catch(err) { showToast("⚠️ Error crítico al guardar el producto"); } 
                 finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
             });
@@ -3272,6 +3322,7 @@ function obtenerRangoFechas(inicio, fin) {
                     const r = await db.from('equipo').insert([{ email: em, rol: 'empleado', pos_cart: [], permisos: { pedidos: pPed, pos: pPos, inventario: pInv, reportes: pRep, configuracion: pCfg } }]);
                     if(r.error) throw r.error;
                     
+                    clearAutoSave('form-equipo');
                     document.getElementById('form-equipo').reset(); showToast('✅ Empleado Autorizado'); await cargarTodo();
                 } catch(err) { showToast("⚠️ Error al registrar: " + (err.message || "Verifica RLS en Supabase.")); } 
                 finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
@@ -3378,7 +3429,7 @@ function obtenerRangoFechas(inicio, fin) {
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { cerrarModalLogin(); cerrarModalResena(); cerrarModalProducto(); cerrarCarrito(); cerrarModalWA(); cerrarModalEditar(); }
+            if (e.key === 'Escape') { cerrarModalLogin(); cerrarModalResena(); cerrarModalProducto(); cerrarCarrito(); cerrarModalWA(); cerrarModalEditar(); cerrarPixabay(); }
         });
 
         cargarTodo();
