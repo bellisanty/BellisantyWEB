@@ -1302,7 +1302,7 @@
 
             const utDetal = parseFloat(document.getElementById(pref+'ut_detal').value) || 0;
             const utMayor = parseFloat(document.getElementById(pref+'ut_mayor').value) || 0;
-            const utGranMayor = parseFloat(document.getElementById(pref+'ut_gran_mayor').value) || 0;
+            const utGranMayor = parseFloat(document.getElementById(pref+'ut_gran_mayor') ? document.getElementById(pref+'ut_gran_mayor').value : 0) || 0;
             const utOferta = parseFloat(document.getElementById(pref+'ut_oferta').value) || 0;
 
             document.getElementById(pref+'precio').value = (costoFinal * (1 + (utDetal/100))).toFixed(2);
@@ -2039,13 +2039,12 @@
             
             let totalUsdDeuda = 0;
             posCarrito.forEach(i => {
-                const prodDb = inventarioGlobal.find(x => x.id == i.id) || i;
-                let finalPriceBaseUsd = prodDb.price; 
-                if(tipoPrecio === 'precio_mayor' && prodDb.precio_mayor) finalPriceBaseUsd = prodDb.precio_mayor;
-                if(tipoPrecio === 'precio_gran_mayor' && prodDb.precio_gran_mayor) finalPriceBaseUsd = prodDb.precio_gran_mayor;
-                if(tipoPrecio === 'precio_oferta' && prodDb.precio_oferta) finalPriceBaseUsd = prodDb.precio_oferta;
-
-                totalUsdDeuda += (finalPriceBaseUsd * i.qty);
+                const prod = inventarioGlobal.find(x => x.id == i.id) || i;
+                let tPrice = prod.price;
+                if(tipoPrecio === 'precio_mayor' && prod.precio_mayor) tPrice = prod.precio_mayor;
+                if(tipoPrecio === 'precio_gran_mayor' && prod.precio_gran_mayor) tPrice = prod.precio_gran_mayor;
+                if(tipoPrecio === 'precio_oferta' && prod.precio_oferta) tPrice = prod.precio_oferta;
+                totalUsdDeuda += (tPrice * i.qty);
             });
 
             let totalPagadoConvertidoUsd = 0;
@@ -2811,6 +2810,7 @@
             }).join('');
         }
 
+        // NUEVAS FUNCIONES DE VISTA PREVIA PDF
         function abrirReportePreview() {
             if(pedidosReportesFiltrados.length === 0) {
                 showToast("⚠️ No hay datos para generar vista previa");
@@ -3106,6 +3106,20 @@
             setTimeout(initScrollReveal, 50);
         }
 
+        function filtrarProductos(categoria) {
+            filtroActual = categoria; renderCategoriasFiltros();
+            if (categoria === 'todos') renderTienda(inventarioGlobal);
+            else renderTienda(inventarioGlobal.filter(p => p.category === categoria));
+        }
+
+        function ordenarProductos(criterio) {
+            let prods = filtroActual === 'todos' ? [...inventarioGlobal] : inventarioGlobal.filter(p => p.category === filtroActual);
+            if(criterio === 'precio-asc') prods.sort((a,b) => a.price - b.price);
+            if(criterio === 'precio-desc') prods.sort((a,b) => b.price - a.price);
+            if(criterio === 'nombre') prods.sort((a,b) => a.name.localeCompare(b.name));
+            renderTienda(prods);
+        }
+
         function renderCategoriasAdmin() {
             const cont = document.getElementById('lista-categorias-admin');
             if(!cont) return;
@@ -3312,6 +3326,460 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') { cerrarModalLogin(); cerrarModalResena(); cerrarModalProducto(); cerrarCarrito(); cerrarModalWA(); cerrarModalEditar(); cerrarPixabay(); cerrarReportePreview(); }
         });
+
+        // El onAuthStateChange vital para entrar al Admin
+        db.auth.onAuthStateChange(async (event, session) => {
+            try {
+                if (session) {
+                    const vistaTienda = document.getElementById('vista-tienda');
+                    const vistaAdmin = document.getElementById('vista-admin');
+                    const userEmail = document.getElementById('admin-user-email');
+                    
+                    if(vistaTienda) vistaTienda.style.display = 'none';
+                    if(vistaAdmin) vistaAdmin.style.display = 'block';
+                    if(userEmail) userEmail.textContent = session.user.email;
+                    currentUserEmail = session.user.email;
+                    
+                    const { data: perfil } = await db.from('equipo').select('*').eq('email', session.user.email).maybeSingle();
+                    if(!perfil) {
+                        const { data: all } = await db.from('equipo').select('id');
+                        if(!all || all.length === 0) {
+                            await db.from('equipo').insert([{ email: session.user.email, rol: 'admin', pos_cart: [], permisos: {pedidos:true, pos:true, inventario:true, reportes:true, configuracion:true} }]);
+                            aplicarPermisos(true, {pedidos:true, pos:true, inventario:true, reportes:true, configuracion:true});
+                        } else {
+                            cerrarSesion(); showToast('⚠️ Usuario sin rol asignado.');
+                        }
+                    } else {
+                        const esAdmin = perfil.rol === 'admin';
+                        const p = perfil.permisos || {};
+                        if (perfil.pos_cart && Array.isArray(perfil.pos_cart) && perfil.pos_cart.length > 0) {
+                            posCarrito = perfil.pos_cart;
+                            renderPOS();
+                        }
+                        aplicarPermisos(esAdmin, p);
+                    }
+                } else {
+                    const vistaTienda = document.getElementById('vista-tienda');
+                    const vistaAdmin = document.getElementById('vista-admin');
+                    if(vistaAdmin) vistaAdmin.style.display = 'none';
+                    if(vistaTienda) vistaTienda.style.display = 'block';
+                }
+            } catch(e) { console.error("Error en auth state:", e); }
+        });
+
+        function aplicarPermisos(esAdmin, p) {
+            const badge = document.getElementById('admin-role-badge');
+            if(badge) badge.textContent = esAdmin ? '(Dueño)' : '(Staff)';
+            
+            const tabGest = document.getElementById('tab-gestion'); if(tabGest) tabGest.style.display = p.pedidos !== false || esAdmin ? 'block' : 'none';
+            const tabPos = document.getElementById('tab-pos'); if(tabPos) tabPos.style.display = p.pos !== false || esAdmin ? 'block' : 'none';
+            const tabInv = document.getElementById('tab-inventario'); if(tabInv) tabInv.style.display = p.inventario || esAdmin ? 'block' : 'none';
+            const tabRep = document.getElementById('tab-reportes'); if(tabRep) tabRep.style.display = p.reportes || esAdmin ? 'block' : 'none';
+            const tabCfg = document.getElementById('tab-configuracion'); if(tabCfg) tabCfg.style.display = p.configuracion || esAdmin ? 'block' : 'none';
+
+            if(p.pedidos !== false || esAdmin) cambiarPestana('gestion');
+            else if(p.pos !== false || esAdmin) cambiarPestana('pos');
+            else if(p.inventario || esAdmin) cambiarPestana('inventario');
+            else if(p.reportes || esAdmin) cambiarPestana('reportes');
+            else if(p.configuracion || esAdmin) cambiarPestana('configuracion');
+            
+            const tabsContainer = document.getElementById('admin-tabs');
+            if(tabsContainer) tabsContainer.style.display = 'flex';
+        }
+
+        const formCatAdd = document.getElementById('form-categoria-add');
+        if(formCatAdd) {
+            formCatAdd.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const txtOriginal = btn ? btn.innerHTML : '';
+                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...'; btn.disabled = true; }
+                try {
+                    const { error } = await db.from('categorias').insert([{ name: document.getElementById('nombre-categoria').value.trim() }]);
+                    if(error) throw error;
+                    document.getElementById('form-categoria-add').reset(); await cargarTodo(); showToast('✅ Categoría creada');
+                } catch(err) { showToast("⚠️ Error al crear categoría"); } 
+                finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
+            });
+        }
+
+        async function eliminarCategoria(id) {
+            if(String(id).startsWith('c')) { showToast('⚠️ Esta es una categoría de prueba.'); return; }
+            if(confirm("¿Eliminar categoría?")) {
+                try { const { error } = await db.from('categorias').delete().eq('id', id); if(error) throw error; await cargarTodo(); showToast('✅ Categoría eliminada'); } 
+                catch(e) { showToast("⚠️ Error al eliminar categoría"); }
+            }
+        }
+
+        const formResena = document.getElementById('form-resena');
+        if(formResena) {
+            formResena.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const txtOriginal = btn ? btn.innerHTML : '';
+                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Enviando...'; btn.disabled = true; }
+                try {
+                    const n = { name: document.getElementById('resena-nombre').value.trim(), rating: parseInt(document.getElementById('resena-rating').value), message: document.getElementById('resena-mensaje').value.trim() };
+                    const { error } = await db.from('testimonios').insert([n]);
+                    if(error) throw error;
+                    cerrarModalResena(); await cargarTodo(); showToast('✅ ¡Gracias por tu reseña!');
+                } catch(err) { showToast('⚠️ Error al enviar reseña.'); } 
+                finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
+            });
+        }
+
+        async function eliminarTestimonio(id) {
+            if(String(id).startsWith('t')) { showToast('⚠️ Reseña de prueba protegida.'); return; }
+            if(confirm("¿Borrar esta reseña?")) {
+                try { const { error } = await db.from('testimonios').delete().eq('id', id); if(error) throw error; await cargarTodo(); showToast('✅ Reseña borrada'); } 
+                catch(e) { showToast("⚠️ Error al borrar reseña"); }
+            }
+        }
+
+        const formProd = document.getElementById('form-producto');
+        if(formProd) {
+            formProd.addEventListener('submit', async (e) => {
+                e.preventDefault(); 
+                const btn = e.target.querySelector('button[type="submit"]');
+                const txtOriginal = btn ? btn.innerHTML : '';
+                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...'; btn.disabled = true; }
+                try {
+                    const cat = document.getElementById('form-categoria').value;
+                    if(!cat) { showToast('⚠️ Crea una categoría primero.'); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
+                    
+                    const fileInput = document.getElementById('imagen');
+                    const webUrl = document.getElementById('imagen-web-url').value;
+                    
+                    if (!webUrl && (!fileInput.files || fileInput.files.length === 0)) { showToast("⚠️ Por favor selecciona una imagen."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
+                    
+                    let imgUrl = "";
+                    if(webUrl) {
+                        imgUrl = webUrl;
+                    } else {
+                        try { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...'; imgUrl = await subirImagenSupabase(fileInput.files[0]); } 
+                        catch(err) { showToast("⚠️ Error de conexión al subir imagen."); btn.innerHTML = txtOriginal; btn.disabled = false; return; }
+                    }
+                    
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando datos...';
+                    
+                    const p = { 
+                        name: document.getElementById('nombre').value.trim(), 
+                        price: parseFloat(document.getElementById('precio').value),
+                        precio_mayor: parseFloat(document.getElementById('precio_mayor').value),
+                        precio_gran_mayor: parseFloat(document.getElementById('precio_gran_mayor').value),
+                        precio_oferta: parseFloat(document.getElementById('precio_oferta').value),
+                        iva_percent: parseFloat(document.getElementById('iva').value) || 0,
+                        utilidad_detal: parseFloat(document.getElementById('ut_detal').value) || 0,
+                        utilidad_mayor: parseFloat(document.getElementById('ut_mayor').value) || 0,
+                        utilidad_gran_mayor: parseFloat(document.getElementById('ut_gran_mayor').value) || 0,
+                        utilidad_oferta: parseFloat(document.getElementById('ut_oferta').value) || 0,
+                        stock: parseInt(document.getElementById('stock').value), 
+                        category: cat, 
+                        image: imgUrl, 
+                        description: document.getElementById('descripcion').value.trim() 
+                    };
+                    
+                    const costoEl = document.getElementById('costo'); const barcodeEl = document.getElementById('barcode');
+                    if (costoEl && costoEl.value !== '') p.costo = parseFloat(costoEl.value); else p.costo = 0;
+                    if (barcodeEl) p.barcode = barcodeEl.value.trim();
+                    const { error } = await db.from('productos').insert([p]);
+                    
+                    if(error) { delete p.costo; delete p.barcode; const retry = await db.from('productos').insert([p]); if(retry.error) throw retry.error; showToast("⚠️ Producto guardado, pero faltó el costo/código en la BD."); } 
+                    else { showToast('✅ Producto guardado correctamente'); }
+                    
+                    clearAutoSave('form-producto');
+                    document.getElementById('form-producto').reset(); document.getElementById('prod-file-name').textContent = ''; document.getElementById('imagen-web-url').value = ''; await cargarTodo();
+                } catch(err) { showToast("⚠️ Error crítico al guardar el producto"); } 
+                finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
+            });
+        }
+
+        async function descontarStock(id, currentStock) {
+            if(String(id).startsWith('p')) { showToast('⚠️ Producto de prueba.'); return; }
+            if(currentStock <= 0) { showToast("⚠️ Producto agotado."); return; }
+            try {
+                const nuevoStock = currentStock - 1;
+                const { error } = await db.from('productos').update({ stock: nuevoStock }).eq('id', id);
+                if(error) throw error;
+                await cargarTodo(); showToast(`✅ Venta registrada. Nuevo Stock: ${nuevoStock}`);
+            } catch(e) { showToast("⚠️ Error al descontar el stock."); }
+        }
+
+        async function eliminarProducto(id) {
+            if(String(id).startsWith('p')) { showToast('⚠️ Producto de prueba.'); return; }
+            if(confirm("¿Eliminar producto definitivamente?")) {
+                try { const { error } = await db.from('productos').delete().eq('id', id); if(error) throw error; await cargarTodo(); showToast('✅ Producto eliminado'); } 
+                catch(e) { showToast("⚠️ Error al eliminar el producto"); }
+            }
+        }
+
+        function renderPedidosAdmin(pedidos) {
+            const cont = document.getElementById('lista-pedidos-admin');
+            if(!cont) return;
+
+            if(pedidos.length === 0) {
+                cont.innerHTML = '<div class="col-span-full p-8 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i class="fas fa-inbox text-3xl mb-2 block"></i> No hay pedidos de WhatsApp.</div>';
+                return;
+            }
+
+            cont.innerHTML = pedidos.map(p => {
+                const hora = new Date(p.created_at).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+                const fecha = new Date(p.created_at).toLocaleDateString('es-VE');
+                const isEntregado = p.estado === 'Entregado';
+                const statusClass = isEntregado ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                
+                let btnAccion = '';
+                if(!isEntregado) {
+                    btnAccion = `<button onclick="marcarPedidoEntregado('${p.id}')" class="w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer shadow-md">Marcar Entregado</button>`;
+                } else {
+                    btnAccion = `<button disabled class="w-full mt-3 bg-gray-200 text-gray-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1"><i class="fas fa-check"></i> Pedido Entregado</button>`;
+                }
+
+                let itemsHtml = '';
+                if(p.items && Array.isArray(p.items)) {
+                    itemsHtml = p.items.map(it => `
+                        <div class="flex justify-between text-[10px] text-gray-600 border-b border-gray-50 py-1 last:border-0">
+                            <span>${it.qty}x ${it.name}</span>
+                            <span class="font-bold">$${(it.price * it.qty).toFixed(2)}</span>
+                        </div>
+                    `).join('');
+                }
+
+                const msgWhatsapp = `¡Hola ${p.cliente}! Somos Bellisanty 🎁\nEscribimos sobre tu pedido ${p.codigo}.\n\nTotal a pagar: $${p.total_usd.toFixed(2)} / ${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs\n\n¿Cómo deseas realizar el pago?`;
+
+                return `
+                <div class="bg-white border ${isEntregado ? 'border-gray-200' : 'border-green-200 shadow-md'} p-4 rounded-2xl flex flex-col transition hover:shadow-lg">
+                    <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-3">
+                        <div>
+                            <span class="text-xs font-bold text-gray-900 block">${p.codigo}</span>
+                            <span class="text-[10px] text-gray-400">${fecha} • ${hora}</span>
+                        </div>
+                        <span class="${statusClass} text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider">${p.estado}</span>
+                    </div>
+                    
+                    <div class="mb-3 space-y-1">
+                        <p class="text-[10px] text-gray-600">👤 <b>Cliente:</b> ${p.cliente}</p>
+                        <p class="text-[10px] text-gray-600">📞 <b>Tel:</b> ${p.telefono}</p>
+                        <p class="text-[10px] text-gray-600">🛵 <b>Entrega:</b> ${p.metodo_entrega}</p>
+                    </div>
+
+                    <div class="bg-gray-50 p-2 rounded-lg mb-3">
+                        <p class="text-[9px] font-bold text-gray-500 uppercase mb-1">Detalle del Pedido</p>
+                        <div class="max-h-20 overflow-y-auto pr-1">
+                            ${itemsHtml}
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase block">Total a Cobrar</span>
+                                <span class="text-sm font-black text-gray-900 block">$${p.total_usd.toFixed(2)}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[9px] font-bold text-gray-400 uppercase block">Tasa: ${p.tasa_bcv}</span>
+                                <span class="text-xs font-bold text-gray-600 block">${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <a href="https://wa.me/${p.telefono.replace(/\D/g,'')}?text=${encodeURIComponent(msgWhatsapp)}" target="_blank" class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 font-bold py-2 rounded-xl text-xs transition text-center flex items-center justify-center gap-1 cursor-pointer">
+                                <i class="fab fa-whatsapp"></i> Chat
+                            </a>
+                            <button onclick="eliminarPedido('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-500 font-bold px-3 rounded-xl transition cursor-pointer" title="Eliminar Pedido">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </div>
+                        ${btnAccion}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        async function marcarPedidoEntregado(id) {
+            if(confirm("¿Confirmar que este pedido ya fue cobrado y entregado?")) {
+                try {
+                    const { error } = await db.from('pedidos').update({ estado: 'Entregado' }).eq('id', id);
+                    if (error) throw error;
+                    showToast('✅ Pedido marcado como Entregado');
+                    actualizarPedidosAdmin(null);
+                } catch(e) {
+                    showToast('⚠️ Error al actualizar el estado del pedido.');
+                }
+            }
+        }
+
+        async function eliminarPedido(id) {
+            if(confirm("¿Eliminar este pedido permanentemente?")) {
+                try {
+                    const { error } = await db.from('pedidos').delete().eq('id', id);
+                    if (error) throw error;
+                    showToast('✅ Pedido eliminado');
+                    actualizarPedidosAdmin(null);
+                } catch(e) {
+                    showToast('⚠️ Error al eliminar el pedido.');
+                }
+            }
+        }
+
+        const formGaleria = document.getElementById('form-galeria');
+        if(formGaleria) {
+            formGaleria.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const txtOriginal = btn ? btn.innerHTML : '';
+                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo...'; btn.disabled = true; }
+                
+                try {
+                    const fileInput = document.getElementById('galeria-img');
+                    const link = document.getElementById('galeria-link').value.trim();
+                    
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        showToast("⚠️ Selecciona una imagen.");
+                        return;
+                    }
+                    
+                    const imgUrl = await subirImagenSupabase(fileInput.files[0]);
+                    const payload = { image_url: imgUrl, instagram_url: link };
+                    
+                    const { error } = await db.from('galeria').insert([payload]);
+                    if(error) throw error;
+                    
+                    showToast('✅ Imagen agregada a la galería');
+                    formGaleria.reset();
+                    document.getElementById('gal-file-name').textContent = '';
+                    await cargarTodo();
+                } catch(err) {
+                    showToast('⚠️ Error al subir la imagen.');
+                } finally {
+                    if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
+                }
+            });
+        }
+
+        async function eliminarGaleria(id) {
+            if(confirm("¿Eliminar esta imagen de la galería?")) {
+                try {
+                    const { error } = await db.from('galeria').delete().eq('id', id);
+                    if (error) throw error;
+                    showToast('✅ Imagen eliminada');
+                    await cargarTodo();
+                } catch(e) {
+                    showToast('⚠️ Error al eliminar la imagen.');
+                }
+            }
+        }
+
+        function renderEquipoAdmin() {
+            const cont = document.getElementById('lista-equipo-admin');
+            if(!cont) return;
+            if(equipoGlobal.length === 0) { cont.innerHTML = '<p class="text-xs text-gray-400">No hay personal registrado.</p>'; return; }
+            cont.innerHTML = equipoGlobal.map(e => `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div>
+                        <span class="text-xs font-bold text-gray-900 block">${e.email}</span>
+                        <span class="text-[9px] text-indigo-500 font-bold uppercase">${e.rol}</span>
+                    </div>
+                    ${e.rol !== 'admin' ? `<button onclick="eliminarEmpleado('${e.email}')" class="text-red-400 hover:text-red-600 cursor-pointer p-2"><i class="fas fa-trash text-xs"></i></button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function eliminarEmpleado(email) {
+            if(confirm(`¿Eliminar acceso para ${email}?`)) {
+                try {
+                    const { error } = await db.from('equipo').delete().eq('email', email);
+                    if(error) throw error;
+                    showToast('✅ Empleado eliminado');
+                    await cargarTodo();
+                } catch(e) {
+                    showToast('⚠️ Error al eliminar empleado');
+                }
+            }
+        }
+
+        function imprimirFactura(idPedido) {
+            const ped = pedidosGlobal.find(p => p.id == idPedido);
+            if(!ped) return;
+            
+            const hora = new Date(ped.created_at).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            const fecha = new Date(ped.created_at).toLocaleDateString('es-VE');
+            
+            let htmlItems = '';
+            if(ped.items && Array.isArray(ped.items)) {
+                ped.items.forEach(i => {
+                    htmlItems += `
+                        <tr>
+                            <td style="padding: 4px 0; border-bottom: 1px dashed #eee;">${i.qty}</td>
+                            <td style="padding: 4px 0; border-bottom: 1px dashed #eee; font-size: 10px;">${i.name}</td>
+                            <td style="padding: 4px 0; border-bottom: 1px dashed #eee; text-align: right;">$${(i.price * i.qty).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Ticket ${ped.codigo}</title>
+                    <style>
+                        body { font-family: monospace; font-size: 12px; margin: 0; padding: 10px; width: 300px; color: #000; }
+                        .text-center { text-align: center; }
+                        .text-right { text-align: right; }
+                        .bold { font-weight: bold; }
+                        .divider { border-bottom: 1px dashed #000; margin: 10px 0; }
+                        table { width: 100%; border-collapse: collapse; }
+                    </style>
+                </head>
+                <body>
+                    <div class="text-center">
+                        <h2 style="margin:0;">BELLISANTY</h2>
+                        <p style="margin:2px 0;">Luxury Gifting</p>
+                        <p style="margin:2px 0;">Pueblo Llano, Mérida</p>
+                        <p style="margin:2px 0; font-size: 10px;">Tlf: ${whatsappNumber}</p>
+                    </div>
+                    <div class="divider"></div>
+                    <p style="margin:2px 0;"><b>Ticket:</b> ${ped.codigo}</p>
+                    <p style="margin:2px 0;"><b>Fecha:</b> ${fecha} ${hora}</p>
+                    <p style="margin:2px 0;"><b>Cajero:</b> ${ped.vendedor || 'Local'}</p>
+                    <div class="divider"></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; padding-bottom: 5px;">Cant</th>
+                                <th style="text-align: left; padding-bottom: 5px;">Desc</th>
+                                <th style="text-align: right; padding-bottom: 5px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${htmlItems}
+                        </tbody>
+                    </table>
+                    <div class="divider"></div>
+                    <div class="text-right">
+                        <h3 style="margin: 5px 0;">TOTAL USD: $${ped.total_usd.toFixed(2)}</h3>
+                        <p style="margin: 5px 0;">TOTAL BCV: ${(ped.total_usd * ped.tasa_bcv).toFixed(2)} Bs</p>
+                        <p style="margin: 5px 0; font-size: 10px;">(Tasa BCV: ${ped.tasa_bcv})</p>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="text-center">
+                        <p style="margin:2px 0;"><b>Método:</b> ${ped.metodo_pago || 'Local'}</p>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="text-center">
+                        <p>¡Gracias por tu compra!</p>
+                        <p style="font-size: 10px;">Vuelve pronto</p>
+                    </div>
+                    <script>
+                        setTimeout(() => { window.print(); window.close(); }, 500);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
 
         cargarTodo();
 
