@@ -384,7 +384,6 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" class="w-full"><path fill="#fffbfc" d="M0,40L80,36C160,32,320,24,480,28C640,32,800,48,960,52C1120,56,1280,48,1360,44L1440,40L1440,80L1360,80C1280,80,1120,80,960,80C800,80,640,80,480,80C320,80,160,80,80,80L0,80Z"></path></svg>
             </div>
         </header>
-
         <section class="bg-cream py-12 scroll-reveal">
             <div class="max-w-6xl mx-auto px-4">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -407,339 +406,8 @@
                 </div>
             </div>
         </section>
+
         <main id="catalogo" class="max-w-7xl mx-auto px-4 py-20">
-            <div class="text-center mb-14 scroll-reveal">
-                <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Nuestro Catálogo</span>
-                <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Colección <span class="text-belli-600">Exclusive</span></h2>
-                <p class="text-gray-400 max-w-lg mx-auto font-light">Encuentra el detalle perfecto según la ocasión o tu presupuesto.</p>
-            </div>
-
-            <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 scroll-reveal">
-                <div id="filter-container" class="flex flex-wrap gap-2 justify-center">
-                </div>
-                <div class="flex items-center gap-3">
-                    <select id="sort-select" onchange="ordenarProductos(this.value)" class="border border-gray-200 rounded-xl px-4 py-2.5 text-xs font-medium text-gray-600 outline-none focus:border-belli-400 cursor-pointer bg-white">
-                        <option value="reciente">Más recientes</option>
-                        <option value="precio-asc">Precio: Menor a Mayor</option>
-                        <option value="precio-desc">Precio: Mayor a Menor</option>
-                        <option value="nombre">Nombre A-Z</option>
-                    </select>
-                    <span id="product-count" class="text-xs text-gray-400 font-medium hidden md:inline"></span>
-                </div>
-            </div>
-
-            <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 scroll-reveal"></div>
-
-            <div id="empty-state" class="hidden text-center py-20">
-                <div class="w-20 h-20 bg-belli-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-search text-belli-300 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">No se encontraron productos</h3>
-                <p class="text-gray-400 text-sm">Intenta cambiar los filtros o la búsqueda.</p>
-            </div>
-        </main>
-        <section id="ocasiones" class="bg-white py-20 border-t border-gray-50 scroll-reveal">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="text-center mb-14">
-                    <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Para Cada Momento</span>
-                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Regala en cualquier <span class="text-belli-600">ocasión</span></h2>
-                    <p class="text-gray-400 max-w-lg mx-auto font-light">Tenemos el detalle perfecto para cada celebración y momento especial de tu vida.</p>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <div class="group cursor-pointer text-center p-6 bg-gradient-to-b from-red-50 to-white rounded-2xl border border-red-100 hover:shadow-lg hover:shadow-red-100 hover:-translate-y-1 transition-all duration-300">
-                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">💕</div><h3 class="text-sm font-bold text-gray-900">San Valentín</h3><p class="text-[10px] text-gray-400 mt-1">Amor & Romance</p>
-                    </div>
-                    <div class="group cursor-pointer text-center p-6 bg-gradient-to-b from-yellow-50 to-white rounded-2xl border border-yellow-100 hover:shadow-lg hover:shadow-yellow-100 hover:-translate-y-1 transition-all duration-300">
-                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🎂</div><h3 class="text-sm font-bold text-gray-900">Cumpleaños</h3><p class="text-[10px] text-gray-400 mt-1">Celebración especial</p>
-                    </div>
-                    <div class="group cursor-pointer text-center p-6 bg-gradient-to-b from-pink-50 to-white rounded-2xl border border-pink-100 hover:shadow-lg hover:shadow-pink-100 hover:-translate-y-1 transition-all duration-300">
-                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">👩</div><h3 class="text-sm font-bold text-gray-900">Día de la Madre</h3><p class="text-[10px] text-gray-400 mt-1">Gratitud infinita</p>
-                    </div>
-                    <div class="group cursor-pointer text-center p-6 bg-gradient-to-b from-blue-50 to-white rounded-2xl border border-blue-100 hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1 transition-all duration-300">
-                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🎓</div><h3 class="text-sm font-bold text-gray-900">Graduación</h3><p class="text-[10px] text-gray-400 mt-1">Logros importantes</p>
-                    </div>
-                    <div class="group cursor-pointer text-center p-6 bg-gradient-to-b from-purple-50 to-white rounded-2xl border border-purple-100 hover:shadow-lg hover:shadow-purple-100 hover:-translate-y-1 transition-all duration-300">
-                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">💐</div><h3 class="text-sm font-bold text-gray-900">Aniversario</h3><p class="text-[10px] text-gray-400 mt-1">Recuerdos juntos</p>
-                    </div>
-                    <div class="group cursor-pointer text-center p-6 bg-gradient-to-b from-green-50 to-white rounded-2xl border border-green-100 hover:shadow-lg hover:shadow-green-100 hover:-translate-y-1 transition-all duration-300">
-                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🏥</div><h3 class="text-sm font-bold text-gray-900">Recuperación</h3><p class="text-[10px] text-gray-400 mt-1">Pronta mejoría</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="como-pedir" class="py-20 bg-cream border-t border-gray-50 scroll-reveal">
-            <div class="max-w-7xl mx-auto px-4 text-center">
-                <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Proceso Simple</span>
-                <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Tu regalo perfecto en <span class="text-belli-600">3 pasos</span></h2>
-                <p class="text-gray-400 max-w-lg mx-auto font-light mb-16">Sin complicaciones, sin cuentas. Solo elige, escribe y recibe.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
-                    <div class="hidden md:block absolute top-[72px] left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-belli-200 via-belli-300 to-belli-200"></div>
-                    <div class="relative bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        <div class="w-14 h-14 bg-gradient-to-br from-belli-600 to-belli-400 text-white rounded-2xl flex items-center justify-center text-2xl font-serif font-bold mx-auto mb-6 shadow-lg shadow-belli-200 relative z-10">1</div>
-                        <div class="text-3xl mb-4">🛍️</div><h3 class="text-xl font-bold text-gray-900 mb-3">Añade al Carrito</h3><p class="text-sm text-gray-500 font-light">Navega por nuestra colección exclusiva y agrega los arreglos que más te gusten.</p>
-                    </div>
-                    <div class="relative bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        <div class="w-14 h-14 bg-gradient-to-br from-belli-600 to-belli-400 text-white rounded-2xl flex items-center justify-center text-2xl font-serif font-bold mx-auto mb-6 shadow-lg shadow-belli-200 relative z-10">2</div>
-                        <div class="text-3xl mb-4">📝</div><h3 class="text-xl font-bold text-gray-900 mb-3">Llena tus Datos</h3><p class="text-sm text-gray-500 font-light">Calculamos tu total en $ y Bs al instante. Elige delivery o retiro por el local.</p>
-                    </div>
-                    <div class="relative bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        <div class="w-14 h-14 bg-gradient-to-br from-belli-600 to-belli-400 text-white rounded-2xl flex items-center justify-center text-2xl font-serif font-bold mx-auto mb-6 shadow-lg shadow-belli-200 relative z-10">3</div>
-                        <div class="text-3xl mb-4">🎉</div><h3 class="text-xl font-bold text-gray-900 mb-3">Recibe y Sorprende</h3><p class="text-sm text-gray-500 font-light">Te daremos un número de pedido y coordinaremos por WhatsApp. ¡Así de fácil!</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="testimonios" class="py-20 bg-white border-t border-gray-50 scroll-reveal">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="text-center mb-14">
-                    <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Testimonios</span>
-                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Lo que dicen nuestros <span class="text-belli-600">clientes</span></h2>
-                    <p class="text-gray-400 max-w-lg mx-auto font-light">Cada arreglo cuenta una historia. Estas son algunas de las experiencias de quienes nos eligen.</p>
-                </div>
-
-                <div id="contenedor-testimonios" class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12"></div>
-
-                <div class="text-center">
-                    <button onclick="abrirModalResena()" class="bg-white border-2 border-belli-200 text-belli-700 px-8 py-3 rounded-xl font-bold hover:bg-belli-50 hover:border-belli-300 transition-all text-sm inline-flex items-center gap-2 cursor-pointer shadow-sm hover:shadow-md">
-                        <i class="fas fa-pen"></i> Escribir una reseña
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <section class="py-20 bg-cream border-t border-gray-100 scroll-reveal">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="text-center mb-14">
-                    <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Galería</span>
-                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Síguenos en <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400">Instagram</span></h2>
-                    <p class="text-gray-400 max-w-lg mx-auto font-light">Mira nuestras creaciones más recientes y encuentra inspiración para tu próximo regalo.</p>
-                </div>
-                
-                <div id="contenedor-galeria" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"></div>
-            </div>
-        </section>
-
-        <section id="faq" class="py-20 bg-white border-t border-gray-50 scroll-reveal">
-            <div class="max-w-3xl mx-auto px-4">
-                <div class="text-center mb-14">
-                    <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Ayuda</span>
-                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Preguntas <span class="text-belli-600">frecuentes</span></h2>
-                </div>
-                <div class="space-y-3" id="faq-container">
-                    <div class="faq-item border border-gray-100 rounded-2xl overflow-hidden hover:border-belli-200 transition-colors">
-                        <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-5 text-left cursor-pointer">
-                            <span class="font-semibold text-gray-900 text-sm pr-4">¿Hacen envíos a domicilio en Pueblo Llano?</span>
-                            <span class="faq-icon text-belli-500 transition-transform duration-300 text-xl flex-shrink-0">+</span>
-                        </button>
-                        <div class="faq-answer px-5"><p class="text-gray-500 text-sm pb-5 leading-relaxed">¡Sí! Realizamos delivery a toda la zona de Pueblo Llano. También puedes recoger tu pedido en nuestra tienda física.</p></div>
-                    </div>
-                    <div class="faq-item border border-gray-100 rounded-2xl overflow-hidden hover:border-belli-200 transition-colors">
-                        <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-5 text-left cursor-pointer">
-                            <span class="font-semibold text-gray-900 text-sm pr-4">¿Puedo personalizar mi arreglo?</span>
-                            <span class="faq-icon text-belli-500 transition-transform duration-300 text-xl flex-shrink-0">+</span>
-                        </button>
-                        <div class="faq-answer px-5"><p class="text-gray-500 text-sm pb-5 leading-relaxed">¡Por supuesto! Ofrecemos personalización completa: puedes elegir colores, tipo de flores, añadir mensajes especiales, chocolates y más. Escríbenos por WhatsApp y nuestro equipo te ayudará a crear algo único.</p></div>
-                    </div>
-                    <div class="faq-item border border-gray-100 rounded-2xl overflow-hidden hover:border-belli-200 transition-colors">
-                        <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between p-5 text-left cursor-pointer">
-                            <span class="font-semibold text-gray-900 text-sm pr-4">¿Qué métodos de pago aceptan?</span>
-                            <span class="faq-icon text-belli-500 transition-transform duration-300 text-xl flex-shrink-0">+</span>
-                        </button>
-                        <div class="faq-answer px-5"><p class="text-gray-500 text-sm pb-5 leading-relaxed">Aceptamos: Pago Móvil, transferencia bancaria (Bs.), Zelle (USD), Binance Pay (USDT), efectivo en dólares o bolívares.</p></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="py-20 bg-gradient-to-br from-belli-700 via-belli-600 to-belli-500 relative overflow-hidden scroll-reveal">
-            <div class="blob w-96 h-96 bg-white/10 -top-20 -right-20"></div>
-            <div class="blob w-72 h-72 bg-white/10 bottom-10 -left-10" style="animation-delay:3s;"></div>
-            <div class="max-w-3xl mx-auto px-4 text-center relative z-10">
-                <div class="text-4xl mb-6">💌</div>
-                <h2 class="text-3xl md:text-4xl font-serif font-bold text-white mb-4">¿No quieres perderte ofertas exclusivas?</h2>
-                <p class="text-belli-100 font-light mb-8 max-w-md mx-auto">Únete a nuestra comunidad y recibe descuentos y tips de regalos directamente en tu WhatsApp.</p>
-                <a id="btn-comunidad-vip" href="https://wa.me/584126480799" target="_blank" class="inline-flex items-center gap-3 bg-white text-belli-700 px-8 py-4 rounded-xl font-bold hover:shadow-2xl hover:scale-105 transition-all duration-300 text-base cursor-pointer"><i class="fab fa-whatsapp text-green-500 text-xl"></i> Unirme a la Comunidad VIP</a>
-            </div>
-        </section>
-
-        <section class="py-12 bg-cream border-t border-gray-100 scroll-reveal">
-            <div class="max-w-5xl mx-auto px-4">
-                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-12 text-center">
-                    <div class="flex items-center gap-2 text-gray-400"><i class="fas fa-shield-alt text-lg text-belli-300"></i><span class="text-xs font-medium">Compra Segura</span></div>
-                    <div class="flex items-center gap-2 text-gray-400"><i class="fas fa-truck text-lg text-belli-300"></i><span class="text-xs font-medium">Delivery Local</span></div>
-                    <div class="flex items-center gap-2 text-gray-400"><i class="fas fa-hand-holding-heart text-lg text-belli-300"></i><span class="text-xs font-medium">Hecho con Amor</span></div>
-                    <div class="flex items-center gap-2 text-gray-400"><i class="fas fa-headset text-lg text-belli-300"></i><span class="text-xs font-medium">Atención Dedicada</span></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="visitanos" class="bg-white py-20 border-t border-gray-50 scroll-reveal">
-            <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
-                <div class="lg:col-span-2">
-                    <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">📍 Sede Física</span>
-                    <h2 class="text-4xl font-serif font-bold text-gray-900 mb-6 leading-tight">Ven a conocernos y personaliza tu <span class="text-belli-600">regalo</span></h2>
-                    <p class="text-gray-500 mb-8 font-light leading-relaxed">Te esperamos en nuestra tienda para asesorarte personalmente. Visita nuestro showroom y descubre todo lo que Bellisanty tiene para ofrecer.</p>
-                    
-                    <div class="space-y-4 mb-8">
-                        <div class="flex items-start gap-4 p-4 bg-belli-50 rounded-xl">
-                            <div class="w-10 h-10 bg-belli-100 rounded-xl flex items-center justify-center text-belli-600 flex-shrink-0"><i class="fas fa-clock text-sm"></i></div>
-                            <div><p class="text-sm font-semibold text-gray-900">Horario de Atención</p><p id="display-horario" class="text-xs text-gray-500 mt-0.5">Lun - Sáb: 9:00 AM - 6:00 PM</p></div>
-                        </div>
-                        <div class="flex items-start gap-4 p-4 bg-belli-50 rounded-xl">
-                            <div class="w-10 h-10 bg-belli-100 rounded-xl flex items-center justify-center text-belli-600 flex-shrink-0"><i class="fas fa-map-marker-alt text-sm"></i></div>
-                            <div><p class="text-sm font-semibold text-gray-900">Dirección</p><p class="text-xs text-gray-500 mt-0.5">Calle 3ª, Pueblo Llano 5124, Mérida, Venezuela.</p></div>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <a href="https://www.instagram.com/bellisanty?igsh=cTNzMXYxb25sOW4y" target="_blank" class="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 text-white rounded-xl flex items-center justify-center hover:shadow-lg hover:shadow-pink-200 transition-all"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.tiktok.com/@bellisanty1?_r=1&_t=ZS-94ktgh835nD" target="_blank" class="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center hover:shadow-lg hover:shadow-gray-400 transition-all"><i class="fab fa-tiktok"></i></a>
-                        <button onclick="abrirModalWA()" class="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center hover:shadow-lg hover:shadow-green-200 transition-all cursor-pointer"><i class="fab fa-whatsapp"></i></button>
-                    </div>
-                </div>
-                <div class="lg:col-span-3 h-[450px] bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 p-2">
-                    <iframe src="https://maps.google.com/maps?q=Bellisanty,+C.+3%C2%AA,+Pueblo+Llano+5124,+M%C3%A9rida,+Venezuela&t=&z=17&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" style="border:0; border-radius: 20px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-            </div>
-        </section>
-
-        <footer class="bg-gray-950 text-white pt-16 pb-8 px-4">
-            <div class="max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-                    <div>
-                        <div class="flex items-center gap-2 mb-4">
-                            <img src="https://i.postimg.cc/WpKvZHqJ/image.png" alt="Bellisanty Logo" class="w-10 h-10 object-contain drop-shadow-md">
-                            <div><h3 class="text-lg font-serif font-extrabold leading-none">Bellisanty</h3><span class="text-[8px] text-belli-400 uppercase tracking-[0.2em]">Luxury Gifting</span></div>
-                        </div>
-                        <p class="text-gray-400 text-sm font-light leading-relaxed mb-6">Creamos experiencias que perduran en el tiempo. Arreglos profesionales con amor y dedicación desde Pueblo Llano, Mérida.</p>
-                        <div class="flex gap-3">
-                            <a href="https://www.instagram.com/bellisanty?igsh=cTNzMXYxb25sOW4y" target="_blank" class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-belli-700 transition text-gray-400 hover:text-white"><i class="fab fa-instagram text-sm"></i></a>
-                            <a href="https://www.tiktok.com/@bellisanty1?_r=1&_t=ZS-94ktgh835nD" target="_blank" class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-belli-700 transition text-gray-400 hover:text-white"><i class="fab fa-tiktok text-sm"></i></a>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm mb-4 uppercase tracking-wider">Explorar</h4>
-                        <nav class="space-y-2.5"><a href="#catalogo" class="block text-sm text-gray-400 hover:text-belli-400 transition">Catálogo</a><a href="#como-pedir" class="block text-sm text-gray-400 hover:text-belli-400 transition">¿Cómo Pedir?</a><a href="#testimonios" class="block text-sm text-gray-400 hover:text-belli-400 transition">Testimonios</a></nav>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm mb-4 uppercase tracking-wider">Soporte</h4>
-                        <nav class="space-y-2.5"><a href="#faq" class="block text-sm text-gray-400 hover:text-belli-400 transition">Preguntas Frecuentes</a><button onclick="abrirModalWA()" class="block text-sm text-gray-400 hover:text-belli-400 transition text-left cursor-pointer w-full">WhatsApp Ventas</button></nav>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm mb-4 uppercase tracking-wider">Legal</h4>
-                        <nav class="space-y-2.5 mb-6"><a href="#" class="block text-sm text-gray-400 hover:text-belli-400 transition">Términos y Condiciones</a></nav>
-                    </div>
-                </div>
-                <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-xs text-gray-500 cursor-default select-none" onclick="activarPuertaSecreta()">© 2026 Bellisanty Luxury Gifting. Todos los derechos reservados.</p>
-                    <p class="text-xs text-gray-600">Desarrollado con <span class="text-belli-500">❤</span> por <span class="font-bold text-white transition hover:text-belli-400">VISSIONARY</span></p>
-                </div>
-            </div>
-        </footer>
-
-        <button id="floating-cart-btn" onclick="abrirCarrito()" class="fixed bottom-[5.5rem] right-6 z-50 bg-gray-900 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl hover:bg-belli-700 transition-all duration-300 cursor-pointer lg:hidden">
-            <div class="relative"><i class="fas fa-shopping-bag text-xl"></i><span id="floating-cart-count" class="absolute -top-2 -right-3 bg-belli-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-gray-900 hidden">0</span></div>
-        </button>
-
-        <button onclick="abrirModalWA()" class="fixed bottom-6 right-6 z-50 group cursor-pointer" aria-label="WhatsApp">
-            <div class="bg-green-500 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl shadow-green-200 hover:bg-green-600 transition-all group-hover:scale-110 duration-300"><i class="fab fa-whatsapp text-2xl"></i></div>
-        </button>
-        <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 left-6 z-50 bg-white text-gray-600 p-3 rounded-full shadow-lg border border-gray-200 hover:bg-belli-700 hover:text-white hover:border-belli-700 transition-all opacity-0 translate-y-4 pointer-events-none duration-300 cursor-pointer" aria-label="Volver arriba"><i class="fas fa-arrow-up text-sm"></i></button>
-    </div>
-
-    <div id="modal-resena" style="display: none;" class="fixed inset-0 bg-black/70 z-[100] items-center justify-center backdrop-blur-md px-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center relative animate-fade-up">
-            <button onclick="cerrarModalResena()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 cursor-pointer transition"><i class="fas fa-times text-sm"></i></button>
-            <div class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-200"><i class="fas fa-star text-white text-xl"></i></div>
-            <h2 class="text-2xl font-extrabold text-gray-900 mb-2 font-serif">Tu Experiencia</h2>
-            <form id="form-resena" class="space-y-4">
-                <div class="text-3xl mb-4 star-rating" id="star-rating-container"><i class="fas fa-star" data-rating="5" onclick="setRating(5)" onmouseover="hoverRating(5)" onmouseout="resetRating()"></i><i class="fas fa-star" data-rating="4" onclick="setRating(4)" onmouseover="hoverRating(4)" onmouseout="resetRating()"></i><i class="fas fa-star" data-rating="3" onclick="setRating(3)" onmouseover="hoverRating(3)" onmouseout="resetRating()"></i><i class="fas fa-star" data-rating="2" onclick="setRating(2)" onmouseover="hoverRating(2)" onmouseout="resetRating()"></i><i class="fas fa-star active" data-rating="1" onclick="setRating(1)" onmouseover="hoverRating(1)" onmouseout="resetRating()"></i></div>
-                <input type="hidden" id="resena-rating" value="5">
-                <input type="text" id="resena-nombre" placeholder="Tu nombre" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm text-center">
-                <textarea id="resena-mensaje" rows="3" placeholder="Mensaje..." required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea>
-                <button type="submit" id="btn-enviar-resena" class="w-full bg-gradient-to-r from-belli-700 to-belli-500 text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-belli-200 transition-all cursor-pointer">Enviar Reseña</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-login" style="display: none;" class="fixed inset-0 bg-black/70 z-[100] items-center justify-center backdrop-blur-md px-4">
-        <div class="bg-white p-10 rounded-3xl shadow-2xl max-w-sm w-full text-center relative animate-fade-up">
-            <button onclick="cerrarModalLogin()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 cursor-pointer transition"><i class="fas fa-times text-sm"></i></button>
-            <div class="w-16 h-16 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-gray-300"><i class="fas fa-lock text-white text-xl"></i></div>
-            <h2 class="text-2xl font-extrabold text-gray-900 mb-2 font-serif">Acceso Restringido</h2>
-            <p class="text-gray-400 text-sm mb-8">Personal Autorizado</p>
-            <form id="form-login" class="space-y-4">
-                <div class="relative"><i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i><input type="email" id="email-acceso" placeholder="Correo electrónico" required class="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3.5 outline-none focus:border-belli-500 text-sm text-center"></div>
-                <div class="relative"><i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i><input type="password" id="clave-acceso" placeholder="Contraseña" required class="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3.5 outline-none focus:border-belli-500 text-sm text-center tracking-widest"></div>
-                <button type="submit" id="btn-login-submit" class="w-full bg-gradient-to-r from-gray-900 to-gray-800 text-white font-bold py-3.5 rounded-xl hover:from-belli-700 hover:to-belli-600 transition-all cursor-pointer shadow-lg flex justify-center items-center"><i class="fas fa-sign-in-alt mr-2"></i> Entrar al Sistema</button>
-            </form>
-            <p id="error-login" style="display: none;" class="flex items-center justify-center gap-2 text-red-500 text-sm mt-4 bg-red-50 p-3 rounded-xl"><i class="fas fa-exclamation-circle"></i> Credenciales incorrectas.</p>
-        </div>
-    </div>
-
-    <div id="modal-producto" style="display: none;" class="fixed inset-0 bg-black/70 z-[100] items-center justify-center backdrop-blur-md px-4" onclick="if(event.target===this)cerrarModalProducto()">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden animate-fade-up max-h-[90vh] overflow-y-auto flex flex-col">
-            <div class="relative shrink-0">
-                <img id="modal-prod-img" src="" alt="" class="w-full h-64 md:h-80 object-cover">
-                <button onclick="cerrarModalProducto()" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-500 transition cursor-pointer shadow-lg"><i class="fas fa-times"></i></button>
-                <div class="absolute bottom-4 left-4"><span id="modal-prod-cat" class="bg-white/90 backdrop-blur-sm text-belli-700 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm"></span></div>
-            </div>
-            <div class="p-6 md:p-8 flex flex-col flex-grow">
-                <h2 id="modal-prod-name" class="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-3"></h2>
-                <p id="modal-prod-desc" class="text-gray-500 leading-relaxed mb-6 text-sm"></p>
-                <div class="flex items-end justify-between mb-8 pb-6 border-b border-gray-100">
-                    <div id="modal-prod-price-container"></div>
-                    <div id="modal-prod-stock"></div>
-                </div>
-                <button id="modal-btn-cart" class="mt-auto w-full bg-gray-900 text-white py-4 rounded-xl font-bold hover:bg-belli-700 transition-all flex items-center justify-center gap-3 text-sm cursor-pointer disabled:opacity-50"><i class="fas fa-shopping-bag text-lg"></i> Agregar al Carrito</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-carrito" style="display: none;" class="fixed inset-0 bg-black/70 z-[120] flex justify-end backdrop-blur-sm transition-opacity" onclick="if(event.target===this)cerrarCarrito()">
-        <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl animate-slide-right relative">
-            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <div><h2 class="text-xl font-serif font-bold text-gray-900">Tu Pedido</h2><p class="text-xs text-gray-500 mt-1" id="cart-items-count">0 productos</p></div>
-                <button onclick="cerrarCarrito()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-500 hover:bg-gray-100 cursor-pointer transition"><i class="fas fa-times text-sm"></i></button>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6" id="cart-content">
-                <div id="cart-step-1" class="space-y-4"><div id="cart-items-list" class="space-y-4"></div></div>
-                <div id="cart-step-2" style="display: none;" class="space-y-4 animate-fade-in">
-                    <div class="bg-belli-50 border border-belli-100 p-4 rounded-xl mb-6"><h3 class="text-sm font-bold text-belli-800 mb-1">Datos de Envío</h3><p class="text-xs text-belli-600">Completa tus datos para procesar la orden.</p></div>
-                    <form id="form-checkout" class="space-y-4">
-                        <div><input type="text" id="checkout-nombre" placeholder="Nombre Completo" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
-                        <div><input type="tel" id="checkout-tel" required placeholder="WhatsApp (Ej: 04121234567)" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm"></div>
-                        <div><select id="checkout-delivery" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"><option value="Retiro en tienda">Retiro por la Tienda</option><option value="Delivery Centro">Delivery (Centro Pueblo Llano)</option><option value="Delivery Afueras">Delivery (Afueras)</option></select></div>
-                        <div><textarea id="checkout-dir" rows="2" placeholder="Dirección Exacta..." class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea></div>
-                        <div class="pt-2"><button type="button" onclick="irPasoCarrito(1)" class="text-xs text-gray-500 font-bold hover:text-gray-900 transition cursor-pointer"><i class="fas fa-arrow-left mr-1"></i> Volver al carrito</button></div>
-                    </form>
-                </div>
-            </div>
-            <div class="border-t border-gray-100 p-6 bg-gray-50">
-                <div class="flex justify-between items-center mb-2"><span class="text-sm font-semibold text-gray-600">Total USD:</span><span class="text-xl font-black text-gray-900" id="cart-total-usd">$0.00</span></div>
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200"><span class="text-xs font-semibold text-gray-500">Total BCV (Tasa: <span id="cart-bcv-rate"></span>):</span><span class="text-sm font-bold text-gold-600" id="cart-total-bcv">0.00 Bs</span></div>
-                <button id="btn-cart-next" onclick="irPasoCarrito(2)" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-belli-700 flex justify-center items-center gap-2 disabled:opacity-50 cursor-pointer transition">Siguiente Paso <i class="fas fa-arrow-right"></i></button>
-                <button id="btn-cart-confirm" onclick="procesarCheckout()" style="display: none;" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl hover:bg-green-600 flex justify-center items-center gap-2 cursor-pointer transition"><i class="fab fa-whatsapp text-lg"></i> Confirmar Pedido</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-wa" style="display: none;" class="fixed inset-0 bg-black/70 z-[200] items-end sm:items-center justify-center backdrop-blur-md p-4" onclick="if(event.target===this)cerrarModalWA()">
-        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-fade-up pb-6">
-            <div class="bg-green-500 p-6 text-center relative">
-                <button onclick="cerrarModalWA()" class="absolute top-4 right-4 text-white hover:text-green-200 transition cursor-pointer"><i class="fas fa-times text-lg"></i></button>
-                <i class="fab fa-whatsapp text-white text-4xl mb-2"></i>
-                <h3 class="text-white font-bold text-lg">Contactar a Ventas</h3>
-                <p class="text-green-100 text-xs mt-1">Elige un número para comunicarte</p>
-            </div>
-            <div id="wa-list-public" class="p-6 space-y-3">
-                </div>
-        </div>
-    </div>
-    <main id="catalogo" class="max-w-7xl mx-auto px-4 py-20">
             <div class="text-center mb-14 scroll-reveal">
                 <span class="inline-block text-belli-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">Nuestro Catálogo</span>
                 <h2 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">Colección <span class="text-belli-600">Exclusive</span></h2>
@@ -1226,7 +894,7 @@
                                     <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IMAGEN DEL PRODUCTO</label>
                                     <div class="flex gap-2">
                                         <label for="imagen" class="file-upload-btn block flex-1"><i class="fas fa-cloud-upload-alt mr-2"></i>Subir PC</label>
-                                        <button type="button" onclick="abrirPexels('nuevo')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
+                                        <button type="button" onclick="abrirPixabay('nuevo')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
                                     </div>
                                     <input type="file" id="imagen" accept="image/*" onchange="document.getElementById('prod-file-name').textContent = this.files[0] ? this.files[0].name : ''">
                                     <input type="hidden" id="imagen-web-url">
@@ -1461,20 +1129,20 @@
 
         </main>
     </div>
-    <div id="modal-pexels" style="display: none;" class="fixed inset-0 bg-black/80 z-[300] flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+    <div id="modal-pixabay" style="display: none;" class="fixed inset-0 bg-black/80 z-[300] flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
         <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl relative animate-fade-up my-8 flex flex-col h-[80vh]">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-3xl shrink-0">
-                <h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-image text-blue-500 mr-2"></i> Buscar en Pexels</h3>
-                <button onclick="cerrarPexels()" class="text-gray-400 hover:text-red-500 transition cursor-pointer"><i class="fas fa-times text-lg"></i></button>
+                <h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-globe text-blue-500 mr-2"></i> Buscar en Pixabay</h3>
+                <button onclick="cerrarPixabay()" class="text-gray-400 hover:text-red-500 transition cursor-pointer"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-6 shrink-0 border-b border-gray-100">
                 <div class="flex gap-2">
-                    <input type="text" id="pexels-query" placeholder="Ej: rosas rojas, globos fiesta, chocolates..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-sm" onkeydown="if(event.key==='Enter') buscarPexels()">
-                    <button onclick="buscarPexels()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition"><i class="fas fa-search"></i> Buscar</button>
+                    <input type="text" id="pixabay-query" placeholder="Ej: bouquet de rosas, globos de cumpleaños..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-sm" onkeydown="if(event.key==='Enter') buscarPixabay()">
+                    <button onclick="buscarPixabay()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition"><i class="fas fa-search"></i> Buscar</button>
                 </div>
             </div>
             <div class="p-6 flex-1 overflow-y-auto bg-gray-50">
-                <div id="pexels-results" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div id="pixabay-results" class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <p class="text-gray-400 text-sm col-span-full text-center mt-10">Realiza una búsqueda para ver imágenes</p>
                 </div>
             </div>
@@ -1533,7 +1201,7 @@
                         <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CAMBIAR FOTO (Opcional)</label>
                         <div class="flex gap-2">
                             <label for="edit-imagen" class="file-upload-btn block flex-1"><i class="fas fa-image mr-2"></i>Subir PC</label>
-                            <button type="button" onclick="abrirPexels('edit')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
+                            <button type="button" onclick="abrirPixabay('edit')" class="w-1/3 border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-3 rounded-xl transition cursor-pointer text-center text-xs"><i class="fas fa-globe mr-1"></i> Buscar Web</button>
                         </div>
                         <input type="file" id="edit-imagen" accept="image/*" onchange="document.getElementById('edit-file-name').textContent = this.files[0] ? this.files[0].name : ''">
                         <input type="hidden" id="edit-imagen-web-url">
@@ -1623,13 +1291,14 @@
             localStorage.removeItem('autosave_' + formId);
         }
 
-        // ERP Precios Automáticos (Actualizado SIN IVA select)
+        // ERP Precios Automáticos
         function calcularPreciosERP(mode) {
             const pref = mode === 'edit' ? 'edit-' : '';
             const costo = parseFloat(document.getElementById(pref+'costo').value) || 0;
             const ivaPercent = parseFloat(document.getElementById(pref+'iva') ? document.getElementById(pref+'iva').value : 0) || 0;
+            
+            // Convertir porcentaje de IVA a factor multiplicador (ej. 16% -> 1.16)
             const ivaFactor = 1 + (ivaPercent / 100);
-
             const costoFinal = costo * ivaFactor;
 
             const utDetal = parseFloat(document.getElementById(pref+'ut_detal').value) || 0;
@@ -1639,43 +1308,40 @@
 
             document.getElementById(pref+'precio').value = (costoFinal * (1 + (utDetal/100))).toFixed(2);
             document.getElementById(pref+'precio_mayor').value = (costoFinal * (1 + (utMayor/100))).toFixed(2);
-            if(document.getElementById(pref+'precio_gran_mayor')) document.getElementById(pref+'precio_gran_mayor').value = (costoFinal * (1 + (utGranMayor/100))).toFixed(2);
+            if(document.getElementById(pref+'precio_gran_mayor')) {
+                document.getElementById(pref+'precio_gran_mayor').value = (costoFinal * (1 + (utGranMayor/100))).toFixed(2);
+            }
             document.getElementById(pref+'precio_oferta').value = (costoFinal * (1 + (utOferta/100))).toFixed(2);
         }
 
-        // Buscador Pexels (Reemplazo de Pixabay)
-        const PEXELS_API_KEY = 'Pbp4S18iXqD52z56o8SjB5j2lVzU0m6sH8f88M4a3g5t0G8E7k3C2R6D'; // Key genérica compartida.
-        let currentPexelsMode = 'nuevo';
+        // Buscador Pixabay Restaurado
+        const PIXABAY_API_KEY = '55257390-a2abd5120b63a25d849a4477b';
+        let currentPixabayMode = 'nuevo';
         
-        function abrirPexels(mode) {
-            currentPexelsMode = mode;
-            document.getElementById('modal-pexels').style.display = 'flex';
+        function abrirPixabay(mode) {
+            currentPixabayMode = mode;
+            document.getElementById('modal-pixabay').style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            if (document.getElementById('pexels-results').innerHTML.includes('Realiza una búsqueda')) {
-                document.getElementById('pexels-query').focus();
+            if (document.getElementById('pixabay-results').innerHTML.includes('Realiza una búsqueda')) {
+                document.getElementById('pixabay-query').focus();
             }
         }
-        function cerrarPexels() {
-            document.getElementById('modal-pexels').style.display = 'none';
+        function cerrarPixabay() {
+            document.getElementById('modal-pixabay').style.display = 'none';
             document.body.style.overflow = '';
         }
-        async function buscarPexels() {
-            const q = document.getElementById('pexels-query').value.trim();
-            const resultsDiv = document.getElementById('pexels-results');
+        async function buscarPixabay() {
+            const q = document.getElementById('pixabay-query').value.trim();
+            const resultsDiv = document.getElementById('pixabay-results');
             if(!q) return;
             resultsDiv.innerHTML = '<div class="col-span-full text-center"><i class="fas fa-spinner fa-spin text-3xl text-blue-500"></i><p class="text-sm mt-2 text-gray-500">Buscando...</p></div>';
             try {
-                const res = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=20`, {
-                    headers: { Authorization: PEXELS_API_KEY }
-                });
-                
-                if(!res.ok) throw new Error("API Error");
-
+                const res = await fetch(`https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(q)}&image_type=photo&per_page=20`);
                 const data = await res.json();
-                if(data.photos && data.photos.length > 0) {
-                    resultsDiv.innerHTML = data.photos.map(img => `
-                        <div onclick="seleccionarImagenPexels('${img.src.large}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:ring-2 hover:ring-blue-500 transition relative group h-32">
-                            <img src="${img.src.medium}" class="w-full h-full object-cover group-hover:scale-110 transition">
+                if(data.hits && data.hits.length > 0) {
+                    resultsDiv.innerHTML = data.hits.map(img => `
+                        <div onclick="seleccionarImagenPixabay('${img.largeImageURL}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:ring-2 hover:ring-blue-500 transition relative group h-32">
+                            <img src="${img.webformatURL}" class="w-full h-full object-cover group-hover:scale-110 transition">
                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
                                 <span class="text-white text-xs font-bold bg-blue-600 px-3 py-1 rounded-lg"><i class="fas fa-check"></i> Elegir</span>
                             </div>
@@ -1685,16 +1351,16 @@
                     resultsDiv.innerHTML = '<p class="text-gray-400 text-sm col-span-full text-center mt-10">No se encontraron imágenes</p>';
                 }
             } catch(e) {
-                resultsDiv.innerHTML = '<p class="text-red-400 text-sm col-span-full text-center mt-10">Error de conexión con Pexels API. Revisa tu consola.</p>';
+                resultsDiv.innerHTML = '<p class="text-red-400 text-sm col-span-full text-center mt-10">Error de conexión al buscar imágenes.</p>';
             }
         }
-        function seleccionarImagenPexels(url) {
-            const pref = currentPexelsMode === 'edit' ? 'edit-' : '';
+        function seleccionarImagenPixabay(url) {
+            const pref = currentPixabayMode === 'edit' ? 'edit-' : '';
             document.getElementById(pref+'imagen-web-url').value = url;
             const fileInput = document.getElementById(pref+'imagen');
             if(fileInput) fileInput.value = ''; 
             document.getElementById(pref+'file-name').innerHTML = '<span class="text-blue-500"><i class="fas fa-link"></i> Imagen Web Seleccionada</span>';
-            cerrarPexels();
+            cerrarPixabay();
         }
 
         const fallbackCategorias = [
@@ -1991,7 +1657,7 @@
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
             
-            // CÁLCULO DIRECTO (Tasa BCV Limpia)
+            // CÁLCULO DIRECTO SIN RECARGOS (Solo Tasa BCV)
             const bsPrice = (p.price * tasaBCV).toFixed(2);
             const precioHTML = `
                 <div>
@@ -3608,6 +3274,37 @@
             printWindow.document.close();
         }
 
+        const formEq = document.getElementById('form-equipo');
+        if(formEq) {
+            formEq.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const txtOriginal = btn ? btn.innerHTML : '';
+                if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Procesando...'; btn.disabled = true; }
+                
+                try {
+                    const em = document.getElementById('equipo-email').value.trim();
+                    const pa = document.getElementById('equipo-pass').value;
+                    const pPed = document.getElementById('perm-pedidos').checked;
+                    const pPos = document.getElementById('perm-pos').checked;
+                    const pInv = document.getElementById('perm-inv').checked;
+                    const pRep = document.getElementById('perm-rep').checked;
+                    const pCfg = document.getElementById('perm-cfg').checked;
+
+                    const authClient = supabase.createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false }});
+                    const { data, error } = await authClient.auth.signUp({ email: em, password: pa });
+                    if(error) throw error;
+                    
+                    const r = await db.from('equipo').insert([{ email: em, rol: 'empleado', pos_cart: [], permisos: { pedidos: pPed, pos: pPos, inventario: pInv, reportes: pRep, configuracion: pCfg } }]);
+                    if(r.error) throw r.error;
+                    
+                    clearAutoSave('form-equipo');
+                    document.getElementById('form-equipo').reset(); showToast('✅ Empleado Autorizado'); await cargarTodo();
+                } catch(err) { showToast("⚠️ Error al registrar: " + (err.message || "Verifica RLS en Supabase.")); } 
+                finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
+            });
+        }
+
         db.auth.onAuthStateChange(async (event, session) => {
             try {
                 if (session) {
@@ -3708,7 +3405,7 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { cerrarModalLogin(); cerrarModalResena(); cerrarModalProducto(); cerrarCarrito(); cerrarModalWA(); cerrarModalEditar(); cerrarPexels(); cerrarReportePreview(); }
+            if (e.key === 'Escape') { cerrarModalLogin(); cerrarModalResena(); cerrarModalProducto(); cerrarCarrito(); cerrarModalWA(); cerrarModalEditar(); cerrarPixabay(); cerrarReportePreview(); }
         });
 
         cargarTodo();
