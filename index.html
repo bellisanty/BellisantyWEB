@@ -1333,10 +1333,15 @@
             const q = document.getElementById('pixabay-query').value.trim();
             const resultsDiv = document.getElementById('pixabay-results');
             if(!q) return;
+            
+            // Mostramos el spinner de carga
             resultsDiv.innerHTML = '<div class="col-span-full text-center"><i class="fas fa-spinner fa-spin text-3xl text-blue-500"></i><p class="text-sm mt-2 text-gray-500">Buscando...</p></div>';
+            
             try {
-                const res = await fetch(`https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(q)}&image_type=photo&per_page=20`);
+                // NOTA: Agregamos &lang=es para que entienda español y &safesearch=true
+                const res = await fetch(`https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(q)}&image_type=photo&per_page=20&lang=es&safesearch=true`);
                 const data = await res.json();
+                
                 if(data.hits && data.hits.length > 0) {
                     resultsDiv.innerHTML = data.hits.map(img => `
                         <div onclick="seleccionarImagenPixabay('${img.largeImageURL}')" class="cursor-pointer rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:ring-2 hover:ring-blue-500 transition relative group h-32">
@@ -1347,10 +1352,10 @@
                         </div>
                     `).join('');
                 } else {
-                    resultsDiv.innerHTML = '<p class="text-gray-400 text-sm col-span-full text-center mt-10">No se encontraron imágenes</p>';
+                    resultsDiv.innerHTML = '<p class="text-gray-400 text-sm col-span-full text-center mt-10">No se encontraron imágenes. Intenta usar palabras más cortas (ej: "rosas", "globos dorados").</p>';
                 }
             } catch(e) {
-                resultsDiv.innerHTML = '<p class="text-red-400 text-sm col-span-full text-center mt-10">Error de conexión al buscar imágenes.</p>';
+                resultsDiv.innerHTML = '<p class="text-red-400 text-sm col-span-full text-center mt-10">Error de conexión. Verifica tu internet o intenta de nuevo.</p>';
             }
         }
         function seleccionarImagenPixabay(url) {
