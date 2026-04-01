@@ -3431,7 +3431,10 @@
                     
                     clearAutoSave('form-producto');
                     document.getElementById('form-producto').reset(); document.getElementById('prod-file-name').textContent = ''; document.getElementById('imagen-web-url').value = ''; await cargarTodo();
-                } catch(err) { showToast("⚠️ Error crítico al guardar el producto"); } 
+                } catch(err) { 
+    alert("EL ERROR EXACTO ES: " + err.message); 
+    console.error(err); 
+} 
                 finally { if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; } }
             });
         }
