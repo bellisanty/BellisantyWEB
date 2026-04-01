@@ -872,7 +872,13 @@
                                 <div class="grid grid-cols-3 gap-3">
                                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">COSTO ($)</label><input type="number" id="costo" step="0.01" required class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm" value="0" oninput="calcularPreciosERP('nuevo')"></div>
                                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IVA (%)</label><input type="number" id="iva" step="0.01" value="0" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm" oninput="calcularPreciosERP('nuevo')"></div>
-                                    <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CAMBIO $ (%)</label><input type="number" id="cambio_dolar" step="0.01" value="0" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm bg-blue-50" title="Porcentaje extra cambiario" oninput="calcularPreciosERP('nuevo')"></div>
+                                    <div>
+                                        <label class="flex items-center gap-1 text-[10px] font-semibold text-gray-600 mb-1.5 uppercase cursor-pointer" title="Activa para sumar porcentaje extra">
+                                            <input type="checkbox" id="aplica_cambio" class="rounded text-belli-600 focus:ring-belli-500 w-3 h-3" onchange="document.getElementById('cambio_dolar').disabled = !this.checked; calcularPreciosERP('nuevo');">
+                                            CAMBIO $ (%)
+                                        </label>
+                                        <input type="number" id="cambio_dolar" step="0.01" value="0" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm bg-blue-50 disabled:opacity-50 disabled:bg-gray-100" oninput="calcularPreciosERP('nuevo')" disabled>
+                                    </div>
                                 </div>
                                 <div class="grid grid-cols-4 gap-3 mt-2">
                                     <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. DETAL</label><input type="number" id="ut_detal" step="0.1" value="30" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('nuevo')"></div>
@@ -1165,7 +1171,13 @@
                     <div class="grid grid-cols-3 gap-3">
                         <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">COSTO ($)</label><input type="number" id="edit-costo" step="0.01" required class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm" value="0" oninput="calcularPreciosERP('edit')"></div>
                         <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IVA (%)</label><input type="number" id="edit-iva" step="0.01" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm" oninput="calcularPreciosERP('edit')"></div>
-                        <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CAMBIO $ (%)</label><input type="number" id="edit-cambio_dolar" step="0.01" value="0" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm bg-blue-50" title="Porcentaje extra cambiario" oninput="calcularPreciosERP('edit')"></div>
+                        <div>
+                            <label class="flex items-center gap-1 text-[10px] font-semibold text-gray-600 mb-1.5 uppercase cursor-pointer" title="Activa para sumar porcentaje extra">
+                                <input type="checkbox" id="edit-aplica_cambio" class="rounded text-belli-600 focus:ring-belli-500 w-3 h-3" onchange="document.getElementById('edit-cambio_dolar').disabled = !this.checked; calcularPreciosERP('edit');">
+                                CAMBIO $ (%)
+                            </label>
+                            <input type="number" id="edit-cambio_dolar" step="0.01" value="0" class="w-full border border-gray-200 rounded-xl px-3 py-3 outline-none focus:border-belli-500 text-sm bg-blue-50 disabled:opacity-50 disabled:bg-gray-100" oninput="calcularPreciosERP('edit')" disabled>
+                        </div>
                     </div>
                     <div class="grid grid-cols-4 gap-3 mt-2">
                         <div><label class="block text-[9px] font-semibold text-gray-600 mb-1 uppercase">% UT. DETAL</label><input type="number" id="edit-ut_detal" step="0.1" value="30" class="w-full border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-belli-500 text-xs" oninput="calcularPreciosERP('edit')"></div>
@@ -1289,12 +1301,13 @@
             const pref = mode === 'edit' ? 'edit-' : '';
             const costo = parseFloat(document.getElementById(pref+'costo').value) || 0;
             const ivaPercent = parseFloat(document.getElementById(pref+'iva') ? document.getElementById(pref+'iva').value : 0) || 0;
-            const cambioDolar = parseFloat(document.getElementById(pref+'cambio_dolar') ? document.getElementById(pref+'cambio_dolar').value : 0) || 0;
+            
+            const isCambioChecked = document.getElementById(pref+'aplica_cambio') ? document.getElementById(pref+'aplica_cambio').checked : false;
+            const cambioDolar = isCambioChecked ? (parseFloat(document.getElementById(pref+'cambio_dolar').value) || 0) : 0;
             
             const ivaFactor = 1 + (ivaPercent / 100);
             const costoFinal = costo * ivaFactor;
 
-            // Se suma el % de Cambio Dólar directamente a las utilidades base (oculto)
             const utDetal = (parseFloat(document.getElementById(pref+'ut_detal').value) || 0) + cambioDolar;
             const utMayor = (parseFloat(document.getElementById(pref+'ut_mayor').value) || 0) + cambioDolar;
             const utGranMayor = (parseFloat(document.getElementById(pref+'ut_gran_mayor') ? document.getElementById(pref+'ut_gran_mayor').value : 0) || 0) + cambioDolar;
@@ -1307,7 +1320,6 @@
             }
             document.getElementById(pref+'precio_oferta').value = (costoFinal * (1 + (utOferta/100))).toFixed(2);
         }
-
         const fallbackCategorias = [
             { id: 'c1', name: '🌹 Arreglos Premium' }, 
             { id: 'c2', name: '🎈 Globos & Helio' }, 
@@ -3126,7 +3138,6 @@
                         <div class="mt-1 flex items-center gap-2"><span class="text-[10px] font-bold ${isAgotado ? 'text-red-500' : 'text-green-600'}">${isAgotado ? '⚠️ Agotado' : `📦 Stock: ${p.stock}`}</span></div>
                     </div>
                     <div class="flex flex-col gap-2">
-                        <button onclick="descontarStock('${p.id}', ${p.stock})" class="bg-green-100 hover:bg-green-200 text-green-700 text-[10px] font-bold py-1.5 px-3 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-sm" title="Descontar 1 del inventario"><i class="fas fa-check"></i> Vender</button>
                         <button onclick="abrirModalEditar('${p.id}')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-[10px] font-bold py-1.5 px-3 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-sm justify-center"><i class="fas fa-edit"></i> Editar</button>
                         <button onclick="eliminarProducto('${p.id}')" class="bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 text-[10px] font-bold py-1.5 px-3 rounded-lg transition cursor-pointer flex items-center gap-1 shadow-sm justify-center"><i class="fas fa-trash-alt"></i> Borrar</button>
                     </div>
@@ -3139,9 +3150,18 @@
             if(!p) return;
             document.getElementById('edit-id').value = p.id;
             document.getElementById('edit-nombre').value = p.name;
-           const costoEl = document.getElementById('edit-costo'); if (costoEl) costoEl.value = p.costo || 0;
+            const costoEl = document.getElementById('edit-costo'); if (costoEl) costoEl.value = p.costo || 0;
             const ivaEl = document.getElementById('edit-iva'); if (ivaEl) ivaEl.value = p.iva_percent || 0;
-            const cambioEl = document.getElementById('edit-cambio_dolar'); if (cambioEl) cambioEl.value = p.cambio_dolar || 0;
+            
+            const checkboxCambio = document.getElementById('edit-aplica_cambio');
+            const cambioEl = document.getElementById('edit-cambio_dolar'); 
+            if (cambioEl && checkboxCambio) {
+                if (p.cambio_dolar && p.cambio_dolar > 0) {
+                    checkboxCambio.checked = true; cambioEl.disabled = false; cambioEl.value = p.cambio_dolar;
+                } else {
+                    checkboxCambio.checked = false; cambioEl.disabled = true; cambioEl.value = 0;
+                }
+            }
             
             document.getElementById('edit-ut_detal').value = p.utilidad_detal || 30;
             document.getElementById('edit-ut_mayor').value = p.utilidad_mayor || 15;
@@ -3158,11 +3178,9 @@
             document.getElementById('edit-descripcion').value = p.description || '';
             
             calcularPreciosERP('edit');
-            
             document.getElementById('modal-editar-producto').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
-
         function cerrarModalEditar() {
             document.getElementById('modal-editar-producto').style.display = 'none';
             document.body.style.overflow = '';
@@ -3175,6 +3193,11 @@
                 e.preventDefault();
                 const btn = document.getElementById('btn-guardar-edicion');
                 if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Actualizando...'; btn.disabled = true; }
+
+                // SALVAVIDAS ANTIBUG: Destraba el botón después de 10 segundos pase lo que pase
+                const failsafe = setTimeout(() => {
+                    if(btn) { btn.innerHTML = 'Actualizar Producto'; btn.disabled = false; }
+                }, 10000);
 
                 try {
                     const id = document.getElementById('edit-id').value;
@@ -3189,6 +3212,9 @@
                         finalImgUrl = await subirImagenSupabase(fileInput.files[0]);
                     }
 
+                    const isCambioChecked = document.getElementById('edit-aplica_cambio') ? document.getElementById('edit-aplica_cambio').checked : false;
+                    const vCambio = isCambioChecked ? (parseFloat(document.getElementById('edit-cambio_dolar').value) || 0) : 0;
+
                     const p = {
                         name: document.getElementById('edit-nombre').value.trim(),
                         price: parseFloat(document.getElementById('edit-precio').value),
@@ -3196,7 +3222,7 @@
                         precio_gran_mayor: parseFloat(document.getElementById('edit-precio_gran_mayor').value),
                         precio_oferta: parseFloat(document.getElementById('edit-precio_oferta').value),
                         iva_percent: parseFloat(document.getElementById('edit-iva').value) || 0,
-                        cambio_dolar: parseFloat(document.getElementById('edit-cambio_dolar').value) || 0,
+                        cambio_dolar: vCambio,
                         utilidad_detal: parseFloat(document.getElementById('edit-ut_detal').value) || 0,
                         utilidad_mayor: parseFloat(document.getElementById('edit-ut_mayor').value) || 0,
                         utilidad_gran_mayor: parseFloat(document.getElementById('edit-ut_gran_mayor').value) || 0,
@@ -3232,11 +3258,11 @@
                     console.error(err);
                     showToast("⚠️ Error crítico al actualizar. Intenta de nuevo.");
                 } finally {
+                    clearTimeout(failsafe); // Cancela el salvavidas si todo salió bien antes de los 10 seg
                     if(btn) { btn.innerHTML = 'Actualizar Producto'; btn.disabled = false; }
                 }
             });
         }
-
         const formLogin = document.getElementById('form-login');
         if(formLogin) {
             formLogin.addEventListener('submit', async (e) => {
@@ -3396,6 +3422,12 @@
                 e.preventDefault(); 
                 const btn = document.getElementById('btn-guardar-prod');
                 if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...'; btn.disabled = true; }
+                
+                // SALVAVIDAS ANTIBUG: Destraba el botón después de 10 segundos pase lo que pase
+                const failsafe = setTimeout(() => {
+                    if(btn) { btn.innerHTML = 'Guardar Producto'; btn.disabled = false; }
+                }, 10000);
+
                 try {
                     const cat = document.getElementById('form-categoria').value;
                     if(!cat) { showToast('⚠️ Crea una categoría primero.'); return; }
@@ -3415,6 +3447,9 @@
                     
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando en Base de Datos...';
                     
+                    const isCambioChecked = document.getElementById('aplica_cambio') ? document.getElementById('aplica_cambio').checked : false;
+                    const vCambio = isCambioChecked ? (parseFloat(document.getElementById('cambio_dolar').value) || 0) : 0;
+
                     const p = { 
                         name: document.getElementById('nombre').value.trim(), 
                         price: parseFloat(document.getElementById('precio').value),
@@ -3422,7 +3457,7 @@
                         precio_gran_mayor: parseFloat(document.getElementById('precio_gran_mayor').value),
                         precio_oferta: parseFloat(document.getElementById('precio_oferta').value),
                         iva_percent: parseFloat(document.getElementById('iva').value) || 0,
-                        cambio_dolar: parseFloat(document.getElementById('cambio_dolar').value) || 0,
+                        cambio_dolar: vCambio,
                         utilidad_detal: parseFloat(document.getElementById('ut_detal').value) || 0,
                         utilidad_mayor: parseFloat(document.getElementById('ut_mayor').value) || 0,
                         utilidad_gran_mayor: parseFloat(document.getElementById('ut_gran_mayor').value) || 0,
@@ -3453,13 +3488,14 @@
                     clearAutoSave('form-producto');
                     document.getElementById('form-producto').reset(); 
                     document.getElementById('prod-file-name').textContent = ''; 
-                    document.getElementById('imagen-web-url').value = ''; 
+                    document.getElementById('imagen-web-url').value = '';
+                    if(document.getElementById('cambio_dolar')) document.getElementById('cambio_dolar').disabled = true;
                     await cargarTodo();
                 } catch(err) { 
                     console.error(err);
                     showToast("⚠️ Error al guardar. Intenta de nuevo."); 
                 } finally { 
-                    // Siempre, pase lo que pase o si cambias de pestaña, el botón se destraba
+                    clearTimeout(failsafe); // Cancela el salvavidas si todo salió bien antes de los 10 seg
                     if(btn) { btn.innerHTML = 'Guardar Producto'; btn.disabled = false; } 
                 }
             });
