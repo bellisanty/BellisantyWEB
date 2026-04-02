@@ -788,6 +788,18 @@
                             <p class="text-xs text-gray-500">Ventas directas de mostrador</p>
                         </div>
                     </div>
+
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm">
+                        <h3 class="text-[10px] font-bold text-blue-800 uppercase mb-3"><i class="fas fa-user-check mr-1"></i> 1. Identificación del Cliente</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="relative">
+                                <input type="text" id="pos-cliente-cedula" placeholder="Cédula (Presiona ENTER)" class="w-full border border-gray-200 rounded-lg pl-3 pr-8 py-2.5 outline-none focus:border-blue-500 text-sm uppercase font-bold text-gray-700" onkeydown="buscarClientePOS(this.value, event)">
+                                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <div><input type="text" id="pos-cliente-nombre" placeholder="Nombre completo" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white transition-colors" oninput="this.classList.remove('border-red-400', 'bg-red-50')"></div>
+                            <div><input type="tel" id="pos-cliente-tel" placeholder="Teléfono (Opcional)" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white transition-colors" oninput="this.classList.remove('border-red-400', 'bg-red-50')"></div>
+                        </div>
+                    </div>
                     
                     <div class="flex flex-col md:flex-row gap-4 mb-6">
                         <div class="relative flex-1">
@@ -840,18 +852,7 @@
                         <span id="pos-total" class="text-4xl font-black text-blue-700">$0.00</span>
                     </div>
                     
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6">
-                        <h3 class="text-[10px] font-bold text-gray-500 uppercase mb-3"><i class="fas fa-user text-blue-500 mr-1"></i> Datos del Cliente</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div class="relative">
-                                <input type="text" id="pos-cliente-cedula" placeholder="Cédula (Ej: V12345678)" class="w-full border border-gray-200 rounded-lg pl-3 pr-8 py-2.5 outline-none focus:border-blue-500 text-sm uppercase" onchange="buscarClientePOS(this.value)">
-                                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            </div>
-                            <div><input type="text" id="pos-cliente-nombre" placeholder="Nombre completo" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white"></div>
-                            <div><input type="tel" id="pos-cliente-tel" placeholder="Teléfono" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white"></div>
-                        </div>
-                        <input type="text" id="pos-nota" placeholder="Nota opcional de la venta..." class="w-full border border-gray-200 rounded-lg px-3 py-2 mt-3 outline-none focus:border-blue-500 text-xs">
-                    </div>
+                    <textarea id="pos-nota" rows="2" placeholder="Agregar una nota a la venta (Ej: Mitad efectivo, mitad punto)..." class="w-full border border-gray-200 rounded-xl px-4 py-3 mb-6 outline-none focus:border-blue-500 text-sm resize-none shadow-inner"></textarea>
 
                     <button onclick="procesarVentaPOS()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition cursor-pointer text-lg shadow-xl shadow-blue-200 flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle"></i> Procesar Venta Local
@@ -3877,23 +3878,56 @@
         }
 
         cargarTodo();
-        // --- SISTEMA CRM CLIENTES ---
+        // --- SISTEMA CRM CLIENTES (Ranks y Totales) ---
         function renderClientesAdmin(clientes) {
             const cont = document.getElementById('lista-clientes-admin');
             if(!cont) return;
             if(clientes.length === 0) { cont.innerHTML = '<p class="text-xs text-gray-400 p-4 text-center">No hay clientes registrados.</p>'; return; }
-            cont.innerHTML = clientes.map(c => `
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-indigo-200 transition gap-3">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
+            
+            cont.innerHTML = clientes.map(c => {
+                // Calcular total gastado histórico
+                const gastado = pedidosGlobal
+                    .filter(p => p.estado === 'Entregado' && p.cliente.toLowerCase() === c.nombre.toLowerCase())
+                    .reduce((sum, p) => sum + parseFloat(p.total_usd), 0);
+                
+                // Sistema de Rangos
+                let rank = { name: 'Nuevo', color: 'text-gray-500 bg-gray-200 border-gray-300', icon: '🌱' };
+                if(gastado > 0) rank = { name: 'Bronce', color: 'text-orange-500 bg-orange-50 border-orange-200', icon: '🥉' };
+                if(gastado >= 100) rank = { name: 'Plata', color: 'text-slate-600 bg-slate-100 border-slate-300', icon: '🥈' };
+                if(gastado >= 300) rank = { name: 'Oro', color: 'text-yellow-600 bg-yellow-50 border-yellow-300', icon: '🥇' };
+                if(gastado >= 600) rank = { name: 'VIP', color: 'text-purple-600 bg-purple-50 border-purple-300', icon: '💎' };
+
+                // Link de WhatsApp
+                let waLink = c.telefono ? `https://wa.me/${c.telefono.replace(/\D/g,'')}` : '#';
+                let waHTML = c.telefono 
+                    ? `<a href="${waLink}" target="_blank" class="hover:text-green-500 transition font-bold" title="Chatear en WhatsApp"><i class="fab fa-whatsapp text-green-500 text-sm mr-1"></i> ${c.telefono}</a>` 
+                    : `<span><i class="fas fa-phone text-gray-300 mr-1"></i> N/D</span>`;
+
+                return `
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-indigo-200 transition gap-3 shadow-sm">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
                             <span class="text-xs font-black text-gray-900 uppercase">${c.cedula}</span>
-                            <span class="bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-full">${c.nombre}</span>
+                            <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full truncate max-w-[150px]">${c.nombre}</span>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full border ${rank.color} flex items-center shadow-sm">${rank.icon} ${rank.name}</span>
                         </div>
-                        <p class="text-[10px] text-gray-500"><i class="fas fa-phone mr-1"></i> ${c.telefono || 'N/D'} | <i class="fas fa-map-marker-alt mr-1 ml-2"></i> ${c.direccion || 'N/D'}</p>
+                        <p class="text-[10px] text-gray-500 flex items-center gap-3 mt-2">
+                            ${waHTML}
+                            <span class="truncate max-w-[200px]"><i class="fas fa-map-marker-alt text-gray-300 mr-1"></i> ${c.direccion || 'Sin dirección'}</span>
+                        </p>
                     </div>
-                    <button onclick="eliminarCliente('${c.cedula}')" class="text-red-400 hover:text-red-600 transition cursor-pointer self-end sm:self-auto p-2" title="Eliminar Cliente"><i class="fas fa-trash-alt text-sm"></i></button>
+                    <div class="flex items-center gap-5 self-end sm:self-auto">
+                        <div class="text-right bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-inner">
+                            <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Total Compras</p>
+                            <p class="text-sm font-black ${gastado > 0 ? 'text-green-600' : 'text-gray-400'}">$${gastado.toFixed(2)}</p>
+                        </div>
+                        <button onclick="eliminarCliente('${c.cedula}')" class="text-red-400 hover:bg-red-50 hover:text-red-600 transition cursor-pointer p-2.5 rounded-lg border border-transparent hover:border-red-100" title="Eliminar Cliente">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function buscarClientesAdmin(query) {
@@ -3944,57 +3978,53 @@
         }
 
         // Buscador Mágico en el POS
-        async function buscarClientePOS(cedulaOriginal) {
+        async function buscarClientePOS(cedulaOriginal, event) {
+            // Solo actuar si presiona ENTER
+            if(event && event.key !== 'Enter') return;
+            
             const ced = cedulaOriginal.trim().toUpperCase();
             if(!ced) return;
             
             const inputNom = document.getElementById('pos-cliente-nombre');
             const inputTel = document.getElementById('pos-cliente-tel');
             
-            // Buscar en nuestra Base de Datos primero (Súper Rápido)
+            // 1. Buscar en BD local
             const clienteDB = clientesGlobal.find(c => c.cedula === ced);
             if(clienteDB) {
                 inputNom.value = clienteDB.nombre;
                 inputTel.value = clienteDB.telefono || '';
-                showToast('💡 Cliente encontrado en base de datos.');
+                inputNom.classList.remove('border-red-400', 'bg-red-50');
+                inputTel.classList.remove('border-red-400', 'bg-red-50');
+                showToast('💡 Cliente cargado de la base de datos.');
                 return;
             }
             
-            // Si no está, intentamos consultar una API Pública de CNE (Si funciona)
+            // 2. Si no está, buscar en API
             showToast('🔍 Buscando cédula...');
             try {
-                // Hay varias APIs públicas. Usamos una común, si falla, no pasa nada, se llena manual.
-                const numCedula = ced.replace(/\D/g,''); // Solo números
+                const numCedula = ced.replace(/\D/g,''); 
                 const tipo = ced.startsWith('E') ? 'E' : 'V';
                 const res = await fetch(`https://ve.tytus.net/api/v1/person?id=${numCedula}&type=${tipo}`);
                 if(res.ok) {
                     const data = await res.json();
                     if(data && data.name) {
                         inputNom.value = data.name;
-                        showToast('✅ Cédula encontrada. Completa el teléfono para guardarlo.');
-                        
-                        // Opcional: Guardarlo automáticamente en la BD
-                        await db.from('clientes').insert([{ cedula: ced, nombre: data.name }]);
-                        await cargarTodo(); // Recargar silente
+                        inputNom.classList.remove('border-red-400', 'bg-red-50');
+                        inputTel.focus();
+                        showToast('✅ Encontrado en CNE. Agrega el teléfono.');
                         return;
                     }
                 }
-            } catch(e) {
-                console.log("API Cédula no respondió, ingreso manual.");
-            }
+            } catch(e) { console.log("API Cédula no respondió."); }
             
-            // Si todo falla
-            showToast('ℹ️ Cliente no registrado. Ingresa sus datos para guardarlo.');
+            // 3. Si no existe en ningún lado: Alerta Roja
+            showToast('🚨 Cliente NO registrado. Por favor, llena sus datos.');
             inputNom.value = ''; inputTel.value = '';
-            inputNom.focus();
             
-            // Evento para auto-guardar si se llena manual en el POS
-            inputNom.onblur = async () => {
-                if(inputNom.value.trim() !== '') {
-                    await db.from('clientes').upsert([{ cedula: ced, nombre: inputNom.value.trim(), telefono: inputTel.value.trim() }]);
-                    cargarTodo();
-                }
-            };
+            // Pintar campos de rojo para llamar la atención
+            inputNom.classList.add('border-red-400', 'bg-red-50');
+            inputTel.classList.add('border-red-400', 'bg-red-50');
+            inputNom.focus();
         }
         // Agregamos la pestaña nueva a la función cambiarPestana
         const originalCambiarPestana = cambiarPestana;
