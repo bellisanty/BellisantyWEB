@@ -4009,25 +4009,25 @@
             }
         }
 
-        // --- REGISTRO DE EMPLEADOS (El candado que faltaba) ---
-        const formEquipo = document.getElementById('form-equipo');
-        if(formEquipo) {
-            formEquipo.addEventListener('submit', async (e) => {
-                e.preventDefault(); // ¡ESTO EVITA QUE LA PÁGINA SE RECARGUE!
+        // --- REGISTRO DE EMPLEADOS (Candado Blindado para todos los formularios) ---
+        document.querySelectorAll('#form-equipo').forEach(formulario => {
+            formulario.addEventListener('submit', async (e) => {
+                e.preventDefault(); // ESTE CANDADO AHORA SÍ APLICA A TODOS
                 
                 const btn = e.target.querySelector('button[type="submit"]');
                 const txtOriginal = btn ? btn.innerHTML : '';
                 if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Registrando...'; btn.disabled = true; }
                 
                 try {
-                    const email = document.getElementById('equipo-email').value.trim();
-                    const pass = document.getElementById('equipo-pass').value;
+                    // Ahora buscamos los inputs DENTRO del formulario que estamos usando
+                    const email = e.target.querySelector('#equipo-email').value.trim();
+                    const pass = e.target.querySelector('#equipo-pass').value;
                     const permisos = {
-                        pedidos: document.getElementById('perm-pedidos').checked,
-                        pos: document.getElementById('perm-pos').checked,
-                        inventario: document.getElementById('perm-inv').checked,
-                        reportes: document.getElementById('perm-rep').checked,
-                        configuracion: document.getElementById('perm-cfg').checked
+                        pedidos: e.target.querySelector('#perm-pedidos').checked,
+                        pos: e.target.querySelector('#perm-pos').checked,
+                        inventario: e.target.querySelector('#perm-inv').checked,
+                        reportes: e.target.querySelector('#perm-rep').checked,
+                        configuracion: e.target.querySelector('#perm-cfg').checked
                     };
 
                     // 1. Crear usuario en la bóveda de Supabase
@@ -4040,7 +4040,7 @@
                     if(dbError) throw dbError;
 
                     showToast('✅ Empleado registrado con éxito');
-                    formEquipo.reset();
+                    e.target.reset(); // Limpia el formulario actual
                     await cargarTodo();
                 } catch(err) {
                     showToast('⚠️ Error al registrar empleado. Verifica que el correo no exista ya.');
@@ -4048,8 +4048,7 @@
                     if(btn) { btn.innerHTML = txtOriginal; btn.disabled = false; }
                 }
             });
-        }
-
+        });
         function renderEquipoAdmin() {
             const cont = document.getElementById('lista-equipo-admin');
             if(!cont) return;
