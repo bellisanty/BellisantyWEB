@@ -681,14 +681,16 @@
         </div>
     </div>
 
-    <div id="modal-producto" style="display: none;" class="fixed inset-0 bg-black/70 z-[100] items-center justify-center backdrop-blur-md px-4" onclick="if(event.target===this)cerrarModalProducto()">
+    <div <div id="modal-producto" style="display: none;" class="fixed inset-0 bg-black/70 z-[100] items-center justify-center backdrop-blur-md px-4" onclick="if(event.target===this)cerrarModalProducto()">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden animate-fade-up max-h-[90vh] overflow-y-auto flex flex-col">
             <div class="relative shrink-0">
-                <img id="modal-prod-img" src="" alt="" class="w-full h-64 md:h-80 object-cover">
+                <img id="modal-prod-img" src="" alt="" class="w-full h-64 md:h-80 object-cover transition-all duration-300">
                 <button onclick="cerrarModalProducto()" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-500 transition cursor-pointer shadow-lg"><i class="fas fa-times"></i></button>
                 <div class="absolute bottom-4 left-4"><span id="modal-prod-cat" class="bg-white/90 backdrop-blur-sm text-belli-700 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm"></span></div>
             </div>
-            <div class="p-6 md:p-8 flex flex-col flex-grow">
+            <div id="modal-prod-gallery" class="px-6 md:px-8 pt-4 flex gap-2 overflow-x-auto hide-scrollbar"></div>
+            
+            <div class="p-6 md:p-8 flex flex-col flex-grow pt-4">
                 <h2 id="modal-prod-name" class="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-3"></h2>
                 <p id="modal-prod-desc" class="text-gray-500 leading-relaxed mb-6 text-sm"></p>
                 <div class="flex items-end justify-between mb-8 pb-6 border-b border-gray-100">
@@ -757,6 +759,7 @@
                 <button onclick="cambiarPestana('gestion')" id="tab-gestion" class="px-5 py-2 font-bold text-sm rounded-t-lg border-b-2 border-gray-900 text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-globe mr-1"></i> Pedidos Web</button>
                 <button onclick="cambiarPestana('pos')" id="tab-pos" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-cash-register mr-1"></i> Punto de Venta</button>
                 <button onclick="cambiarPestana('inventario')" id="tab-inventario" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-box mr-1"></i> Inventario</button>
+                <button onclick="cambiarPestana('clientes')" id="tab-clientes" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-users mr-1"></i> Clientes</button>
                 <button onclick="cambiarPestana('reportes')" id="tab-reportes" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-chart-line mr-1"></i> Reportes</button>
                 <button onclick="cambiarPestana('configuracion')" id="tab-configuracion" class="px-5 py-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-900 whitespace-nowrap transition-colors"><i class="fas fa-cog mr-1"></i> Configuración</button>
             </div>
@@ -837,7 +840,18 @@
                         <span id="pos-total" class="text-4xl font-black text-blue-700">$0.00</span>
                     </div>
                     
-                    <textarea id="pos-nota" rows="1" placeholder="Agregar una nota a la venta (Ej: Mitad efectivo, mitad punto)..." class="w-full border border-gray-200 rounded-xl px-4 py-3 mb-6 outline-none focus:border-blue-500 text-sm resize-none shadow-inner"></textarea>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6">
+                        <h3 class="text-[10px] font-bold text-gray-500 uppercase mb-3"><i class="fas fa-user text-blue-500 mr-1"></i> Datos del Cliente</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="relative">
+                                <input type="text" id="pos-cliente-cedula" placeholder="Cédula (Ej: V12345678)" class="w-full border border-gray-200 rounded-lg pl-3 pr-8 py-2.5 outline-none focus:border-blue-500 text-sm uppercase" onchange="buscarClientePOS(this.value)">
+                                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <div><input type="text" id="pos-cliente-nombre" placeholder="Nombre completo" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white"></div>
+                            <div><input type="tel" id="pos-cliente-tel" placeholder="Teléfono" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white"></div>
+                        </div>
+                        <input type="text" id="pos-nota" placeholder="Nota opcional de la venta..." class="w-full border border-gray-200 rounded-lg px-3 py-2 mt-3 outline-none focus:border-blue-500 text-xs">
+                    </div>
 
                     <button onclick="procesarVentaPOS()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition cursor-pointer text-lg shadow-xl shadow-blue-200 flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle"></i> Procesar Venta Local
@@ -899,19 +913,22 @@
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">IMAGEN DEL PRODUCTO</label>
+                                    <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase text-belli-600">GALERÍA DE IMÁGENES (Agrega 1 o 1000 fotos)</label>
                                     <div class="flex gap-2 mb-2">
-                                        <input type="url" id="imagen-web-url" placeholder="Pega el enlace de Google Imágenes aquí..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm">
-                                        <button type="button" onclick="const q=document.getElementById('nombre').value; if(q) window.open('https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q), '_blank'); else showToast('Escribe un nombre primero');" class="bg-blue-50 text-blue-600 px-5 rounded-xl hover:bg-blue-100 transition font-bold text-xs flex items-center justify-center whitespace-nowrap shadow-sm cursor-pointer">
-                                            <i class="fab fa-google mr-2"></i> Buscar en Google
+                                        <input type="url" id="imagen-web-url" placeholder="Pega enlace de Google Imágenes..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm">
+                                        <button type="button" onclick="agregarImagenLista('nuevo', 'url')" class="bg-belli-50 text-belli-600 px-4 rounded-xl hover:bg-belli-100 transition font-bold text-xs flex items-center justify-center whitespace-nowrap shadow-sm cursor-pointer">
+                                            <i class="fas fa-plus"></i> Añadir
+                                        </button>
+                                        <button type="button" onclick="const q=document.getElementById('nombre').value; if(q) window.open('https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q), '_blank'); else showToast('Escribe el nombre primero');" class="bg-gray-100 text-gray-600 px-3 rounded-xl hover:bg-gray-200 transition font-bold text-xs flex items-center justify-center shadow-sm cursor-pointer" title="Buscar en Google">
+                                            <i class="fab fa-google"></i>
                                         </button>
                                     </div>
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-2 mb-3">
                                         <span class="text-[10px] text-gray-400 font-bold uppercase">O subir desde PC:</span>
-                                        <label for="imagen" class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold transition shadow-sm"><i class="fas fa-upload"></i> Subir Archivo</label>
-                                        <input type="file" id="imagen" accept="image/*" class="hidden" onchange="document.getElementById('prod-file-name').textContent = this.files[0] ? this.files[0].name : ''">
-                                        <span id="prod-file-name" class="text-[10px] text-belli-600 font-bold truncate max-w-[150px]"></span>
+                                        <label for="imagen-file" class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold transition shadow-sm"><i class="fas fa-upload"></i> Subir Archivo</label>
+                                        <input type="file" id="imagen-file" accept="image/*" class="hidden" onchange="agregarImagenLista('nuevo', 'file', this)">
                                     </div>
+                                    <div id="lista-imagenes-nuevo" class="flex gap-2 overflow-x-auto pb-2 min-h-[4rem]"></div>
                                 </div>
 
                                 <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">DESCRIPCIÓN</label><textarea id="descripcion" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea></div>
@@ -950,6 +967,35 @@
                         <div id="modulo-lista-cat" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                             <h2 class="text-lg font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100"><i class="fas fa-layer-group text-purple-400 mr-2"></i> Categorías</h2>
                             <div id="lista-categorias-admin" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-clientes" style="display: none;" class="space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-indigo-500">
+                            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div class="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600"><i class="fas fa-user-plus text-xs"></i></div><h2 class="text-lg font-bold text-gray-900">Registrar Cliente</h2></div>
+                            <form id="form-cliente" class="space-y-4">
+                                <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">Cédula / RIF</label><input type="text" id="cliente-cedula" required placeholder="V-12345678" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm uppercase"></div>
+                                <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">Nombre Completo</label><input type="text" id="cliente-nombre" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm"></div>
+                                <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">Teléfono (WhatsApp)</label><input type="tel" id="cliente-tel" placeholder="0412-1234567" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm"></div>
+                                <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">Dirección (Opcional)</label><textarea id="cliente-dir" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm resize-none"></textarea></div>
+                                <button type="submit" id="btn-guardar-cliente" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition cursor-pointer shadow-md">Guardar Cliente</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-gray-100 gap-4">
+                                <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-users text-indigo-400 mr-2"></i> Base de Datos (CRM)</h2>
+                                <div class="relative w-full sm:w-64">
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                    <input type="text" id="admin-search-clientes" placeholder="Buscar por cédula o nombre..." class="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-2 outline-none focus:border-indigo-500 text-xs" oninput="buscarClientesAdmin(this.value)">
+                                </div>
+                            </div>
+                            <div id="lista-clientes-admin" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
                         </div>
                     </div>
                 </div>
@@ -1199,20 +1245,22 @@
                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CATEGORÍA</label><select id="edit-categoria" required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm cursor-pointer"></select></div>
                     
                     <div>
-                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">CAMBIAR FOTO (Opcional)</label>
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase text-belli-600">GALERÍA DE IMÁGENES (Agrega o elimina fotos)</label>
                         <div class="flex gap-2 mb-2">
-                            <input type="url" id="edit-imagen-web-url" placeholder="Pega el enlace de Google Imágenes aquí..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm">
-                            <button type="button" onclick="const q=document.getElementById('edit-nombre').value; if(q) window.open('https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q), '_blank'); else showToast('Escribe un nombre primero');" class="bg-blue-50 text-blue-600 px-5 rounded-xl hover:bg-blue-100 transition font-bold text-xs flex items-center justify-center whitespace-nowrap shadow-sm cursor-pointer">
-                                <i class="fab fa-google mr-2"></i> Buscar en Google
+                            <input type="url" id="edit-imagen-web-url" placeholder="Pega enlace nuevo aquí..." class="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm">
+                            <button type="button" onclick="agregarImagenLista('edit', 'url')" class="bg-belli-50 text-belli-600 px-4 rounded-xl hover:bg-belli-100 transition font-bold text-xs flex items-center justify-center whitespace-nowrap shadow-sm cursor-pointer">
+                                <i class="fas fa-plus"></i> Añadir
+                            </button>
+                            <button type="button" onclick="const q=document.getElementById('edit-nombre').value; if(q) window.open('https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q), '_blank');" class="bg-gray-100 text-gray-600 px-3 rounded-xl hover:bg-gray-200 transition font-bold text-xs flex items-center justify-center shadow-sm cursor-pointer" title="Buscar en Google">
+                                <i class="fab fa-google"></i>
                             </button>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 mb-3">
                             <span class="text-[10px] text-gray-400 font-bold uppercase">O subir desde PC:</span>
-                            <label for="edit-imagen" class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold transition shadow-sm"><i class="fas fa-upload"></i> Subir Archivo</label>
-                            <input type="file" id="edit-imagen" accept="image/*" class="hidden" onchange="document.getElementById('edit-file-name').textContent = this.files[0] ? this.files[0].name : ''">
-                            <span id="edit-file-name" class="text-[10px] text-belli-600 font-bold truncate max-w-[150px]">Dejar vacío para mantener actual</span>
-                            <input type="hidden" id="edit-imagen-actual">
+                            <label for="edit-imagen-file" class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold transition shadow-sm"><i class="fas fa-upload"></i> Subir Archivo</label>
+                            <input type="file" id="edit-imagen-file" accept="image/*" class="hidden" onchange="agregarImagenLista('edit', 'file', this)">
                         </div>
+                        <div id="lista-imagenes-edit" class="flex gap-2 overflow-x-auto pb-2 min-h-[4rem]"></div>
                     </div>
 
                     <div><label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase">DESCRIPCIÓN</label><textarea id="edit-descripcion" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea></div>
@@ -1251,6 +1299,7 @@
         let pedidosGlobal = [];
         let pedidosReportesFiltrados = []; 
         let equipoGlobal = []; 
+        let clientesGlobal = [];
         let carrito = []; 
         let posCarrito = []; 
         let pagosMixtos = []; 
@@ -1613,6 +1662,22 @@
             document.getElementById('modal-prod-name').textContent = p.name;
             document.getElementById('modal-prod-desc').textContent = p.description || 'Arreglo premium. Personalizable según tu preferencia.';
             document.getElementById('modal-prod-cat').textContent = p.category;
+            
+            // Lógica para mostrar las miniaturas de la galería al cliente
+            const galeriaContainer = document.getElementById('modal-prod-gallery');
+            if(p.galeria && p.galeria.length > 1) {
+                // Si tiene más de 1 foto, creamos los botoncitos miniatura
+                galeriaContainer.innerHTML = p.galeria.map((url) => `
+                    <button onclick="document.getElementById('modal-prod-img').src='${url}'" class="w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 border-transparent hover:border-belli-500 focus:border-belli-500 transition-all focus:outline-none shadow-sm cursor-pointer hover:-translate-y-1">
+                        <img src="${url}" class="w-full h-full object-cover">
+                    </button>
+                `).join('');
+                galeriaContainer.style.display = 'flex';
+            } else {
+                // Si solo tiene 1 foto, ocultamos el contenedor de miniaturas
+                galeriaContainer.style.display = 'none';
+                galeriaContainer.innerHTML = '';
+            }
             
             const bsPrice = (p.price * tasaBCV).toFixed(2);
             const precioHTML = `
@@ -2271,12 +2336,15 @@
                 const bdgFalta = document.getElementById('badge-falta-vuelto').textContent;
                 const finalNota = notaPOS + (bdgFalta.includes('Vuelto') ? ` [${bdgFalta}]` : '');
 
+               const nombreClientePOS = document.getElementById('pos-cliente-nombre') ? document.getElementById('pos-cliente-nombre').value.trim() : 'Mostrador';
+                const telClientePOS = document.getElementById('pos-cliente-tel') ? document.getElementById('pos-cliente-tel').value.trim() : 'N/A';
+                
                 const nPed = { 
                     codigo: code, 
-                    cliente: 'Mostrador', 
-                    telefono: 'N/A', 
+                    cliente: nombreClientePOS || 'Mostrador', 
+                    telefono: telClientePOS || 'N/A', 
                     metodo_entrega: 'Local', 
-                    direccion: finalNota, 
+                    direccion: finalNota,
                     total_usd: totalUsd, 
                     tasa_bcv: tasaAplicada, 
                     items: itemsAjustados, 
@@ -2354,14 +2422,15 @@
             await cargarNumerosWA();
 
             try {
-                const [resProd, resCat, resTest, resAnun, resGaleria, resPed, resEq] = await Promise.all([
+                const [resProd, resCat, resTest, resAnun, resGaleria, resPed, resEq, resClientes] = await Promise.all([
                     db.from('productos').select('*').order('id', { ascending: false }),
                     db.from('categorias').select('*').order('id', { ascending: true }),
                     db.from('testimonios').select('*').order('id', { ascending: false }),
                     db.from('anuncios').select('*').limit(1),
                     db.from('galeria').select('*').order('id', { ascending: false }).limit(5),
                     db.from('pedidos').select('*').order('created_at', { ascending: false }),
-                    db.from('equipo').select('*').order('email', { ascending: true })
+                    db.from('equipo').select('*').order('email', { ascending: true }),
+                    db.from('clientes').select('*').order('created_at', { ascending: false })
                 ]);
 
                 inventarioGlobal = (resProd.data && resProd.data.length > 0) ? resProd.data : fallbackProductos;
@@ -2370,6 +2439,7 @@
                 galeriaGlobal = resGaleria.data || [];
                 if(resPed && resPed.data) pedidosGlobal = resPed.data;
                 if(resEq && resEq.data) equipoGlobal = resEq.data;
+                if(resClientes && resClientes.data) { clientesGlobal = resClientes.data; renderClientesAdmin(clientesGlobal); }
                 
                 if(resAnun.data && resAnun.data.length > 0) {
                     anuncioId = resAnun.data[0].id;
@@ -3171,11 +3241,17 @@
             document.getElementById('edit-stock').value = p.stock;
             const barcodeEl = document.getElementById('edit-barcode'); if (barcodeEl) barcodeEl.value = p.barcode || '';
             document.getElementById('edit-categoria').value = p.category;
-            document.getElementById('edit-imagen-actual').value = p.image;
-            const fileNameDisplay = document.getElementById('edit-file-name'); if(fileNameDisplay) fileNameDisplay.textContent = "Mantener foto actual";
-            const fileInput = document.getElementById('edit-imagen'); if(fileInput) fileInput.value = ""; 
-            const webUrl = document.getElementById('edit-imagen-web-url'); if(webUrl) webUrl.value = "";
             document.getElementById('edit-descripcion').value = p.description || '';
+            
+            // Cargar Galería del producto en el modo edición
+            if(p.galeria && Array.isArray(p.galeria) && p.galeria.length > 0) {
+                arrImagenesEdit = [...p.galeria];
+            } else if (p.image) {
+                arrImagenesEdit = [p.image]; // Si es un producto viejo con 1 sola foto, la convierte a galería
+            } else {
+                arrImagenesEdit = [];
+            }
+            renderListaImagenes('edit');
             
             calcularPreciosERP('edit');
             document.getElementById('modal-editar-producto').style.display = 'flex';
@@ -3193,24 +3269,13 @@
                 e.preventDefault();
                 const btn = document.getElementById('btn-guardar-edicion');
                 if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Actualizando...'; btn.disabled = true; }
-
-                // SALVAVIDAS ANTIBUG: Destraba el botón después de 10 segundos pase lo que pase
-                const failsafe = setTimeout(() => {
-                    if(btn) { btn.innerHTML = 'Actualizar Producto'; btn.disabled = false; }
-                }, 10000);
+                
+                const failsafe = setTimeout(() => { if(btn) { btn.innerHTML = 'Actualizar Producto'; btn.disabled = false; } }, 10000);
 
                 try {
                     const id = document.getElementById('edit-id').value;
-                    let finalImgUrl = document.getElementById('edit-imagen-actual').value;
-                    const fileInput = document.getElementById('edit-imagen');
-                    const webUrl = document.getElementById('edit-imagen-web-url').value;
-
-                    if (webUrl) {
-                        finalImgUrl = webUrl;
-                    } else if (fileInput.files && fileInput.files.length > 0) {
-                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo nueva foto...';
-                        finalImgUrl = await subirImagenSupabase(fileInput.files[0]);
-                    }
+                    
+                    if (arrImagenesEdit.length === 0) { showToast("⚠️ Añade al menos una imagen a la galería."); return; }
 
                     const isCambioChecked = document.getElementById('edit-aplica_cambio') ? document.getElementById('edit-aplica_cambio').checked : false;
                     const vCambio = isCambioChecked ? (parseFloat(document.getElementById('edit-cambio_dolar').value) || 0) : 0;
@@ -3229,7 +3294,8 @@
                         utilidad_oferta: parseFloat(document.getElementById('edit-ut_oferta').value) || 0,
                         stock: parseInt(document.getElementById('edit-stock').value),
                         category: document.getElementById('edit-categoria').value,
-                        image: finalImgUrl,
+                        image: arrImagenesEdit[0], 
+                        galeria: arrImagenesEdit,
                         description: document.getElementById('edit-descripcion').value.trim()
                     };
 
@@ -3241,24 +3307,18 @@
 
                     const { error } = await db.from('productos').update(p).eq('id', id);
                     if (error) {
-                        console.error("Update Error:", error);
-                        // Fallback
-                        delete p.cambio_dolar;
-                        const retry = await db.from('productos').update(p).eq('id', id);
-                        if(retry.error) throw retry.error;
-                        showToast("⚠️ Actualizado, pero falta la columna Cambio $ en BD.");
-                    } else {
-                        showToast('✅ Producto actualizado');
+                        delete p.cambio_dolar; delete p.galeria;
+                        await db.from('productos').update(p).eq('id', id);
                     }
 
+                    showToast('✅ Producto actualizado');
                     clearAutoSave('form-editar-producto');
                     cerrarModalEditar();
                     await cargarTodo();
                 } catch(err) {
-                    console.error(err);
                     showToast("⚠️ Error crítico al actualizar. Intenta de nuevo.");
                 } finally {
-                    clearTimeout(failsafe); // Cancela el salvavidas si todo salió bien antes de los 10 seg
+                    clearTimeout(failsafe);
                     if(btn) { btn.innerHTML = 'Actualizar Producto'; btn.disabled = false; }
                 }
             });
@@ -3416,6 +3476,55 @@
             }
         }
 
+        // --- SISTEMA DE GALERÍA MULTIMEDIA ---
+        let arrImagenesNuevo = [];
+        let arrImagenesEdit = [];
+        
+        async function agregarImagenLista(mode, type, fileInput = null) {
+            const urlInput = document.getElementById(mode === 'nuevo' ? 'imagen-web-url' : 'edit-imagen-web-url');
+            const arr = mode === 'nuevo' ? arrImagenesNuevo : arrImagenesEdit;
+
+            if (type === 'url') {
+                const url = urlInput.value.trim();
+                if (!url) { showToast("⚠️ Pega un enlace primero."); return; }
+                arr.push(url);
+                urlInput.value = '';
+                showToast("✅ Imagen añadida.");
+            } else if (type === 'file') {
+                if (!fileInput.files || fileInput.files.length === 0) return;
+                const file = fileInput.files[0];
+                showToast("⏳ Subiendo imagen a la nube...");
+                try {
+                    const uploadedUrl = await subirImagenSupabase(file);
+                    arr.push(uploadedUrl);
+                    showToast("✅ Imagen subida y añadida a la galería.");
+                } catch (e) {
+                    showToast("⚠️ Error al subir. Comprueba tu conexión.");
+                }
+                fileInput.value = '';
+            }
+            renderListaImagenes(mode);
+        }
+
+        function renderListaImagenes(mode) {
+            const container = document.getElementById(mode === 'nuevo' ? 'lista-imagenes-nuevo' : 'lista-imagenes-edit');
+            const arr = mode === 'nuevo' ? arrImagenesNuevo : arrImagenesEdit;
+            if(arr.length === 0) { container.innerHTML = '<span class="text-xs text-gray-400 italic">No hay imágenes. Agrega la primera.</span>'; return; }
+            
+            container.innerHTML = arr.map((url, index) => `
+                <div class="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 ${index === 0 ? 'border-belli-500' : 'border-gray-200'}">
+                    ${index === 0 ? '<div class="absolute bottom-0 inset-x-0 bg-belli-500 text-white text-[8px] font-bold text-center">PORTADA</div>' : ''}
+                    <img src="${url}" class="w-full h-full object-cover">
+                    <button type="button" onclick="eliminarImagenLista('${mode}', ${index})" class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-[10px] hover:bg-red-600 transition cursor-pointer"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function eliminarImagenLista(mode, index) {
+            if(mode === 'nuevo') arrImagenesNuevo.splice(index, 1);
+            else arrImagenesEdit.splice(index, 1);
+            renderListaImagenes(mode);
+        }
         const formProd = document.getElementById('form-producto');
         if(formProd) {
             formProd.addEventListener('submit', async (e) => {
@@ -3423,29 +3532,15 @@
                 const btn = document.getElementById('btn-guardar-prod');
                 if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...'; btn.disabled = true; }
                 
-                // SALVAVIDAS ANTIBUG: Destraba el botón después de 10 segundos pase lo que pase
-                const failsafe = setTimeout(() => {
-                    if(btn) { btn.innerHTML = 'Guardar Producto'; btn.disabled = false; }
-                }, 10000);
+                const failsafe = setTimeout(() => { if(btn) { btn.innerHTML = 'Guardar Producto'; btn.disabled = false; } }, 10000);
 
                 try {
                     const cat = document.getElementById('form-categoria').value;
                     if(!cat) { showToast('⚠️ Crea una categoría primero.'); return; }
                     
-                    const fileInput = document.getElementById('imagen');
-                    const webUrl = document.getElementById('imagen-web-url').value;
+                    if (arrImagenesNuevo.length === 0) { showToast("⚠️ Añade al menos una imagen a la galería."); return; }
                     
-                    if (!webUrl && (!fileInput.files || fileInput.files.length === 0)) { showToast("⚠️ Por favor selecciona una imagen."); return; }
-                    
-                    let imgUrl = "";
-                    if(webUrl) {
-                        imgUrl = webUrl;
-                    } else {
-                        try { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Subiendo imagen...'; imgUrl = await subirImagenSupabase(fileInput.files[0]); } 
-                        catch(err) { showToast("⚠️ Error de conexión al subir imagen."); return; }
-                    }
-                    
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando en Base de Datos...';
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando en BD...';
                     
                     const isCambioChecked = document.getElementById('aplica_cambio') ? document.getElementById('aplica_cambio').checked : false;
                     const vCambio = isCambioChecked ? (parseFloat(document.getElementById('cambio_dolar').value) || 0) : 0;
@@ -3464,7 +3559,8 @@
                         utilidad_oferta: parseFloat(document.getElementById('ut_oferta').value) || 0,
                         stock: parseInt(document.getElementById('stock').value), 
                         category: cat, 
-                        image: imgUrl, 
+                        image: arrImagenesNuevo[0], // La foto principal (portada)
+                        galeria: arrImagenesNuevo, // El array con TODAS las fotos
                         description: document.getElementById('descripcion').value.trim() 
                     };
                     
@@ -3473,29 +3569,21 @@
                     if (barcodeEl) p.barcode = barcodeEl.value.trim();
                     
                     const { error } = await db.from('productos').insert([p]);
-                    
                     if(error) { 
-                        console.error("Supabase Error:", error);
-                        // Fallback por si faltan columnas
-                        delete p.costo; delete p.barcode; delete p.cambio_dolar;
-                        const retry = await db.from('productos').insert([p]); 
-                        if(retry.error) throw retry.error; 
-                        showToast("⚠️ Guardado, pero faltan columnas en Supabase."); 
-                    } else { 
-                        showToast('✅ Producto guardado correctamente'); 
+                        delete p.costo; delete p.barcode; delete p.cambio_dolar; delete p.galeria;
+                        await db.from('productos').insert([p]); 
                     }
                     
+                    showToast('✅ Producto guardado'); 
                     clearAutoSave('form-producto');
                     document.getElementById('form-producto').reset(); 
-                    document.getElementById('prod-file-name').textContent = ''; 
-                    document.getElementById('imagen-web-url').value = '';
+                    arrImagenesNuevo = []; renderListaImagenes('nuevo');
                     if(document.getElementById('cambio_dolar')) document.getElementById('cambio_dolar').disabled = true;
                     await cargarTodo();
                 } catch(err) { 
-                    console.error(err);
                     showToast("⚠️ Error al guardar. Intenta de nuevo."); 
                 } finally { 
-                    clearTimeout(failsafe); // Cancela el salvavidas si todo salió bien antes de los 10 seg
+                    clearTimeout(failsafe);
                     if(btn) { btn.innerHTML = 'Guardar Producto'; btn.disabled = false; } 
                 }
             });
@@ -3789,6 +3877,149 @@
         }
 
         cargarTodo();
+        // --- SISTEMA CRM CLIENTES ---
+        function renderClientesAdmin(clientes) {
+            const cont = document.getElementById('lista-clientes-admin');
+            if(!cont) return;
+            if(clientes.length === 0) { cont.innerHTML = '<p class="text-xs text-gray-400 p-4 text-center">No hay clientes registrados.</p>'; return; }
+            cont.innerHTML = clientes.map(c => `
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-indigo-200 transition gap-3">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-black text-gray-900 uppercase">${c.cedula}</span>
+                            <span class="bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-full">${c.nombre}</span>
+                        </div>
+                        <p class="text-[10px] text-gray-500"><i class="fas fa-phone mr-1"></i> ${c.telefono || 'N/D'} | <i class="fas fa-map-marker-alt mr-1 ml-2"></i> ${c.direccion || 'N/D'}</p>
+                    </div>
+                    <button onclick="eliminarCliente('${c.cedula}')" class="text-red-400 hover:text-red-600 transition cursor-pointer self-end sm:self-auto p-2" title="Eliminar Cliente"><i class="fas fa-trash-alt text-sm"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function buscarClientesAdmin(query) {
+            const q = query.toLowerCase().trim();
+            if (q === '') { renderClientesAdmin(clientesGlobal); return; }
+            const filtrados = clientesGlobal.filter(c => 
+                c.cedula.toLowerCase().includes(q) || c.nombre.toLowerCase().includes(q) || (c.telefono && c.telefono.toLowerCase().includes(q))
+            );
+            renderClientesAdmin(filtrados);
+        }
+
+        const formCliente = document.getElementById('form-cliente');
+        if(formCliente) {
+            formCliente.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btn-guardar-cliente');
+                const txtOriginal = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...'; btn.disabled = true;
+                try {
+                    const ced = document.getElementById('cliente-cedula').value.trim().toUpperCase();
+                    const c = { 
+                        cedula: ced,
+                        nombre: document.getElementById('cliente-nombre').value.trim(),
+                        telefono: document.getElementById('cliente-tel').value.trim(),
+                        direccion: document.getElementById('cliente-dir').value.trim()
+                    };
+                    const { error } = await db.from('clientes').upsert([c]); // Upsert actualiza si ya existe
+                    if(error) throw error;
+                    
+                    showToast('✅ Cliente registrado/actualizado exitosamente');
+                    document.getElementById('form-cliente').reset();
+                    await cargarTodo();
+                } catch(err) { 
+                    showToast("⚠️ Error al guardar cliente."); 
+                } finally { btn.innerHTML = txtOriginal; btn.disabled = false; }
+            });
+        }
+
+        async function eliminarCliente(cedula) {
+            if(confirm(`¿Eliminar al cliente con cédula ${cedula} de la base de datos?`)) {
+                try {
+                    const { error } = await db.from('clientes').delete().eq('cedula', cedula);
+                    if(error) throw error;
+                    showToast('✅ Cliente eliminado');
+                    await cargarTodo();
+                } catch(e) { showToast("⚠️ Error al eliminar cliente"); }
+            }
+        }
+
+        // Buscador Mágico en el POS
+        async function buscarClientePOS(cedulaOriginal) {
+            const ced = cedulaOriginal.trim().toUpperCase();
+            if(!ced) return;
+            
+            const inputNom = document.getElementById('pos-cliente-nombre');
+            const inputTel = document.getElementById('pos-cliente-tel');
+            
+            // Buscar en nuestra Base de Datos primero (Súper Rápido)
+            const clienteDB = clientesGlobal.find(c => c.cedula === ced);
+            if(clienteDB) {
+                inputNom.value = clienteDB.nombre;
+                inputTel.value = clienteDB.telefono || '';
+                showToast('💡 Cliente encontrado en base de datos.');
+                return;
+            }
+            
+            // Si no está, intentamos consultar una API Pública de CNE (Si funciona)
+            showToast('🔍 Buscando cédula...');
+            try {
+                // Hay varias APIs públicas. Usamos una común, si falla, no pasa nada, se llena manual.
+                const numCedula = ced.replace(/\D/g,''); // Solo números
+                const tipo = ced.startsWith('E') ? 'E' : 'V';
+                const res = await fetch(`https://ve.tytus.net/api/v1/person?id=${numCedula}&type=${tipo}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    if(data && data.name) {
+                        inputNom.value = data.name;
+                        showToast('✅ Cédula encontrada. Completa el teléfono para guardarlo.');
+                        
+                        // Opcional: Guardarlo automáticamente en la BD
+                        await db.from('clientes').insert([{ cedula: ced, nombre: data.name }]);
+                        await cargarTodo(); // Recargar silente
+                        return;
+                    }
+                }
+            } catch(e) {
+                console.log("API Cédula no respondió, ingreso manual.");
+            }
+            
+            // Si todo falla
+            showToast('ℹ️ Cliente no registrado. Ingresa sus datos para guardarlo.');
+            inputNom.value = ''; inputTel.value = '';
+            inputNom.focus();
+            
+            // Evento para auto-guardar si se llena manual en el POS
+            inputNom.onblur = async () => {
+                if(inputNom.value.trim() !== '') {
+                    await db.from('clientes').upsert([{ cedula: ced, nombre: inputNom.value.trim(), telefono: inputTel.value.trim() }]);
+                    cargarTodo();
+                }
+            };
+        }
+        // Agregamos la pestaña nueva a la función cambiarPestana
+        const originalCambiarPestana = cambiarPestana;
+        cambiarPestana = function(pestana) {
+            const paneles = ['gestion', 'pos', 'inventario', 'clientes', 'reportes', 'configuracion'];
+            paneles.forEach(p => {
+                const panel = document.getElementById('panel-' + p);
+                const btn = document.getElementById('tab-' + p);
+                if(panel && btn) {
+                    if(p === pestana) {
+                        panel.style.display = 'block';
+                        btn.classList.add('border-gray-900', 'text-gray-900');
+                        btn.classList.remove('border-transparent', 'text-gray-500');
+                    } else {
+                        panel.style.display = 'none';
+                        btn.classList.remove('border-gray-900', 'text-gray-900');
+                        btn.classList.add('border-transparent', 'text-gray-500');
+                    }
+                }
+            });
+            if(pestana === 'pos') {
+                actualizarMetodosPago();
+                renderMisVentasHoy();
+            }
+        };
 
     </script>
 </body>
