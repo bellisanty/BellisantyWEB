@@ -2261,6 +2261,7 @@
             guardarPOSCloud();
         }
 
+        // --- INICIO DE CAJA REGISTRADORA Y NUBE ---
         function renderPOS() {
             const list = document.getElementById('pos-cart-list');
             const contTotales = document.getElementById('contenedor-totales-dinamicos');
@@ -2274,28 +2275,25 @@
             
             const tipoPrecio = document.getElementById('pos-tipo-precio').value;
 
-            // Función auxiliar para renderizar los totales dinámicos (AHORA SÍ ESTÁ DEFINIDA)
+            // Función para renderizar los totales dinámicos (Grande $ o Grande Bs)
             const dibujarTotales = (tUsd, tBs, tipo) => {
                 let html = '';
                 const strUsd = `$${tUsd.toFixed(2)}`;
                 const strBs = `${tBs.toFixed(2)} Bs`;
 
                 if(tipo === 'precio_detal') {
-                    // Detal: Bolívares Grandes, Dólares Pequeños
                     html = `
                         <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Total a Cobrar (Detal)</span>
                         <span class="text-5xl font-black text-blue-400 drop-shadow-md tracking-tighter leading-none">${strBs}</span>
                         <span class="text-sm font-bold text-gray-400 mt-2">Ref: ${strUsd}</span>
                     `;
                 } else if(tipo === 'precio_oferta') {
-                    // Oferta: Dólares Grandes, Bolívares Pequeños
                     html = `
                         <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Total a Cobrar (Oferta)</span>
                         <span class="text-5xl font-black text-green-400 drop-shadow-md tracking-tighter leading-none">${strUsd}</span>
                         <span class="text-xs font-bold text-gray-500 mt-2">Al cambio: ${strBs}</span>
                     `;
                 } else {
-                    // Mayor o Gran Mayor: Ambos Medianamente Grandes
                     html = `
                         <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Total a Cobrar (Mayor)</span>
                         <div class="flex items-center gap-4 justify-center w-full">
@@ -2346,59 +2344,6 @@
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="flex items-center gap-3 pl-2 flex-1 min-w-0">
                         <img src="${prodDb.image}" class="w-11 h-11 object-cover rounded-lg shadow-sm border border-gray-50" onerror="this.src='https://via.placeholder.com/50'">
-                        <div class="flex-1 min-w-0">
-                            <span class="text-xs font-bold text-gray-800 block truncate leading-tight">${i.name}</span>
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-xs text-blue-600 font-black">$${finalPriceBaseUsd.toFixed(2)}</span>
-                                <span class="text-[9px] text-gray-400 font-medium hidden sm:inline">Ref: ${unitBsRef} Bs</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3 pr-2">
-                        <div class="flex flex-col items-end">
-                            <span class="text-sm font-black text-gray-900 leading-none">$${(finalPriceBaseUsd * i.qty).toFixed(2)}</span>
-                        </div>
-                        <div class="flex items-center bg-gray-50 rounded-lg p-0.5 border border-gray-200">
-                            <button onclick="actualizarCantidadPOS('${i.id}', ${i.qty - 1})" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md cursor-pointer font-bold transition">-</button>
-                            <span class="text-xs font-bold w-6 text-center text-gray-800">${i.qty}</span>
-                            <button onclick="actualizarCantidadPOS('${i.id}', ${i.qty + 1})" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md cursor-pointer font-bold transition">+</button>
-                        </div>
-                        <button onclick="eliminarDelPOS('${i.id}')" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition cursor-pointer" title="Eliminar">
-                            <i class="fas fa-trash-alt text-[11px]"></i>
-                        </button>
-                    </div>
-                </div>
-                `;
-            }).join('');
-            
-            if(subtotalE) subtotalE.textContent = `$${totalUsdBase.toFixed(2)}`;
-            dibujarTotales(totalUsdBase, (tasaBCV > 0 ? totalUsdBase * tasaBCV : 0), tipoPrecio);
-
-            renderPagosMixtos();
-        }
-            
-            let totalUsdBase = 0;
-            let totalBsCalculado = 0;
-            
-            list.innerHTML = posCarrito.map(i => {
-                const prodDb = inventarioGlobal.find(x => x.id == i.id) || i;
-                let finalPriceBaseUsd = prodDb.price; 
-                if(tipoPrecio === 'precio_mayor' && prodDb.precio_mayor) finalPriceBaseUsd = prodDb.precio_mayor;
-                if(tipoPrecio === 'precio_gran_mayor' && prodDb.precio_gran_mayor) finalPriceBaseUsd = prodDb.precio_gran_mayor;
-                if(tipoPrecio === 'precio_oferta' && prodDb.precio_oferta) finalPriceBaseUsd = prodDb.precio_oferta;
-
-                totalUsdBase += (finalPriceBaseUsd * i.qty);
-                const precioBsItem = (finalPriceBaseUsd * tasaBCV);
-                totalBsCalculado += (precioBsItem * i.qty);
-                
-                const unitUsd = finalPriceBaseUsd.toFixed(2);
-                const unitBsRef = (finalPriceBaseUsd * tasaBCV).toFixed(2);
-
-                return `
-                <div class="flex justify-between items-center bg-white p-2 rounded-xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] relative overflow-hidden group hover:border-blue-200 transition-colors">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="flex items-center gap-3 pl-2 flex-1 min-w-0">
-                        <img src="${prodDb.image}" class="w-11 h-11 object-cover rounded-lg shadow-sm border border-gray-50">
                         <div class="flex-1 min-w-0">
                             <span class="text-xs font-bold text-gray-800 block truncate leading-tight">${i.name}</span>
                             <div class="flex items-center gap-2 mt-0.5">
@@ -2646,6 +2591,7 @@
                 if(btnProcesar) { btnProcesar.innerHTML = txtOriginal; btnProcesar.disabled = false; }
             }
         }
+        // --- FIN DE CAJA REGISTRADORA Y NUBE ---
         
         function verificarLoginSeniat(e) {
             e.preventDefault();
@@ -3690,10 +3636,9 @@
                     } else {
                         const esAdmin = perfil.rol === 'admin';
                         const p = perfil.permisos || {};
-                        if (perfil.pos_cart && Array.isArray(perfil.pos_cart) && perfil.pos_cart.length > 0) {
-                            posCarrito = perfil.pos_cart;
-                            renderPOS();
-                        }
+                        
+                        cargarPOSDesdeNube(); // Sincronizar la memoria automáticamente
+                        
                         aplicarPermisos(esAdmin, p);
                     }
                 } else {
