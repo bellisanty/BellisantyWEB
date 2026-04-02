@@ -635,7 +635,12 @@
                     </div>
                 </div>
                 <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-xs text-gray-500 cursor-default select-none" onclick="activarPuertaSecreta()">© 2026 Bellisanty Luxury Gifting. Todos los derechos reservados.</p>
+                    <div class="flex items-center gap-4">
+                        <p class="text-xs text-gray-500 cursor-default select-none" onclick="activarPuertaSecreta()">© 2026 Bellisanty Luxury Gifting. Todos los derechos reservados.</p>
+                        <button onclick="document.getElementById('modal-login-seniat').style.display='flex'; document.body.style.overflow='hidden';" class="text-[10px] text-gray-500 hover:text-white transition flex items-center gap-1 border border-gray-800 px-2 py-1 rounded cursor-pointer">
+                            <i class="fas fa-lock"></i> Intranet Catálogo
+                        </button>
+                    </div>
                     <p class="text-xs text-gray-600">Desarrollado con <span class="text-belli-500">❤</span> por <span class="font-bold text-white transition hover:text-belli-400">VISSIONARY</span></p>
                 </div>
             </div>
@@ -663,6 +668,41 @@
                 <textarea id="resena-mensaje" rows="3" placeholder="Mensaje..." required class="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-belli-500 text-sm resize-none"></textarea>
                 <button type="submit" id="btn-enviar-resena" class="w-full bg-gradient-to-r from-belli-700 to-belli-500 text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-belli-200 transition-all cursor-pointer">Enviar Reseña</button>
             </form>
+        </div>
+    </div>
+
+    <div id="modal-login-seniat" style="display: none;" class="fixed inset-0 bg-black/80 z-[998] items-center justify-center backdrop-blur-md px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center relative animate-fade-up">
+            <button onclick="document.getElementById('modal-login-seniat').style.display='none'; document.body.style.overflow='';" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer transition"><i class="fas fa-times"></i></button>
+            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-blue-500"><i class="fas fa-images text-xl"></i></div>
+            <h2 class="text-xl font-bold text-gray-800 mb-1">Gestor de Catálogo</h2>
+            <p class="text-xs text-gray-500 mb-6">Ingresa tus credenciales operativas</p>
+            <form onsubmit="verificarLoginSeniat(event)" class="space-y-4">
+                <input type="text" id="seniat-user" placeholder="Usuario" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 text-center">
+                <input type="password" id="seniat-pass" placeholder="Contraseña" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 text-center">
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-md cursor-pointer">Ingresar al Catálogo</button>
+            </form>
+            <p id="error-seniat" class="text-red-500 text-xs mt-3 hidden bg-red-50 p-2 rounded">Credenciales inválidas.</p>
+        </div>
+    </div>
+
+    <div id="modal-seniat" style="display: none;" class="fixed inset-0 bg-white z-[999] overflow-y-auto">
+        <div class="max-w-4xl mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-8 border-b pb-4">
+                <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-images text-blue-500 mr-2"></i> Gestor de Catálogo Básico</h2>
+                <button onclick="document.getElementById('modal-seniat').style.display='none'; document.body.style.overflow='';" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 cursor-pointer">Salir</button>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-8">
+                <h3 class="font-bold text-gray-700 mb-4">Subir Artículo al Catálogo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><label class="text-xs font-bold text-gray-500">Nombre</label><input type="text" id="seniat-nombre" class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1"></div>
+                    <div><label class="text-xs font-bold text-gray-500">Precio Venta ($)</label><input type="number" step="0.01" id="seniat-precio" class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1"></div>
+                    <div><label class="text-xs font-bold text-gray-500">Foto (Link de Google)</label><input type="url" id="seniat-foto" placeholder="Pega el enlace de la imagen" class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1"></div>
+                </div>
+                <button onclick="guardarProductoSeniat()" class="mt-4 bg-blue-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-blue-700 shadow-md cursor-pointer">Guardar en Catálogo</button>
+            </div>
+            <h3 class="font-bold text-gray-700 mb-4">Artículos Públicos</h3>
+            <div id="seniat-lista" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
         </div>
     </div>
 
@@ -779,92 +819,127 @@
                     <div id="lista-pedidos-admin" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-2"></div>
                 </div>
             </div>
-            <div id="panel-pos" style="display: none;" class="space-y-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-blue-500 max-w-4xl mx-auto">
-                    <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500"><i class="fas fa-cash-register text-lg"></i></div>
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-900">Caja Registradora</h2>
-                            <p class="text-xs text-gray-500">Ventas directas de mostrador</p>
-                        </div>
+            <div id="panel-pos" style="display: none;" class="space-y-6">
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">Punto de Venta (POS)</h2>
+                        <p class="text-xs text-gray-500 font-medium uppercase tracking-widest">Módulo de Ventas Mostrador</p>
                     </div>
+                </div>
 
-                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm">
-                        <h3 class="text-[10px] font-bold text-blue-800 uppercase mb-3"><i class="fas fa-user-check mr-1"></i> 1. Identificación del Cliente</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div class="relative">
-                                <input type="text" id="pos-cliente-cedula" placeholder="Cédula (Presiona ENTER)" class="w-full border border-gray-200 rounded-lg pl-3 pr-8 py-2.5 outline-none focus:border-blue-500 text-sm uppercase font-bold text-gray-700" onkeydown="buscarClientePOS(this.value, event)">
-                                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-8 flex flex-col gap-4">
+                        
+                        <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fas fa-barcode absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"></i>
+                                <input type="text" id="pos-barcode" placeholder="Escanear código de barras o buscar por nombre..." class="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 text-sm font-medium" onkeypress="escanearPOS(event)">
                             </div>
-                            <div><input type="text" id="pos-cliente-nombre" placeholder="Nombre completo" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white transition-colors" oninput="this.classList.remove('border-red-400', 'bg-red-50')"></div>
-                            <div><input type="tel" id="pos-cliente-tel" placeholder="Teléfono (Opcional)" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm bg-white transition-colors" oninput="this.classList.remove('border-red-400', 'bg-red-50')"></div>
+                            <button type="button" onclick="iniciarEscaner('pos')" class="bg-blue-600 text-white px-5 rounded-xl hover:bg-blue-700 transition flex items-center justify-center cursor-pointer shadow-md font-bold text-sm" title="Usar Cámara">
+                                <i class="fas fa-camera"></i>
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="flex flex-col md:flex-row gap-4 mb-6">
-                        <div class="relative flex-1">
-                            <i class="fas fa-barcode absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="pos-barcode" placeholder="Escanear o Escribir Código/Nombre..." class="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-4 outline-none focus:border-blue-500 text-sm shadow-inner" onkeypress="escanearPOS(event)">
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest"><i class="fas fa-user mr-1"></i> Cliente Asociado</h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div class="relative">
+                                    <input type="text" id="pos-cliente-cedula" placeholder="Cédula (Enter)" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2.5 outline-none focus:border-blue-500 text-xs uppercase font-bold text-gray-700" onkeydown="buscarClientePOS(this.value, event)">
+                                    <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                </div>
+                                <div><input type="text" id="pos-cliente-nombre" placeholder="Nombre completo" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-blue-500 text-xs transition-colors" oninput="this.classList.remove('border-red-400', 'bg-red-50')"></div>
+                                <div><input type="tel" id="pos-cliente-tel" placeholder="Teléfono" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-blue-500 text-xs transition-colors" oninput="this.classList.remove('border-red-400', 'bg-red-50')"></div>
+                            </div>
                         </div>
-                        <button type="button" onclick="iniciarEscaner('pos')" class="bg-blue-100 text-blue-600 px-6 rounded-xl hover:bg-blue-200 transition flex items-center justify-center cursor-pointer shadow-sm font-bold" title="Escanear con cámara">
-                            <i class="fas fa-camera mr-2"></i> Escanear
-                        </button>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex-1 flex flex-col overflow-hidden min-h-[350px]">
+                            <div class="bg-gray-50 border-b border-gray-100 px-4 py-2 flex justify-between items-center">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Detalle de Artículos</span>
+                                <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md" id="pos-items-count">0 Ítems</span>
+                            </div>
+                            <div id="pos-cart-list" class="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50/30 hide-scrollbar">
+                                </div>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">TIPO DE PRECIO</label>
-                            <select id="pos-tipo-precio" onchange="actualizarMetodosPago(); renderPOS()" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-blue-500 text-sm cursor-pointer bg-white">
-                                <option value="precio_detal">Precio al Detal</option>
-                                <option value="precio_mayor">Precio al Mayor</option>
-                                <option value="precio_gran_mayor">Precio Gran Mayor</option>
-                                <option value="precio_oferta">Precio Oferta</option>
+                    <div class="lg:col-span-4 flex flex-col gap-4">
+                        
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2"><i class="fas fa-tags mr-1"></i> Lista de Precios</label>
+                            <select id="pos-tipo-precio" onchange="actualizarMetodosPago(); renderPOS()" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-blue-500 text-sm font-bold text-gray-700 cursor-pointer">
+                                <option value="precio_detal">🏷️ Precio al Detal</option>
+                                <option value="precio_mayor">📦 Precio al Mayor</option>
+                                <option value="precio_gran_mayor">🏢 Precio Gran Mayor</option>
+                                <option value="precio_oferta">🔥 Precio Oferta</option>
                             </select>
                         </div>
-                        <div class="relative">
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">PAGOS MÚLTIPLES (MIXTOS)</label>
-                            <div class="flex gap-2">
-                                <select id="pos-metodo-mixto" class="w-1/2 border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-blue-500 text-xs cursor-pointer bg-white">
-                                    <option value="Divisa">Efectivo ($)</option>
-                                    <option value="Efectivo Bs">Efectivo (Bs)</option>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-1 flex flex-col">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3"><i class="fas fa-wallet mr-1"></i> Métodos de Pago</label>
+                            
+                            <div class="grid grid-cols-3 gap-2 mb-4">
+                                <button type="button" onclick="setMetodoRapido('Divisa')" class="bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl p-2 text-[10px] font-bold hover:bg-emerald-100 transition shadow-sm cursor-pointer"><i class="fas fa-dollar-sign block text-sm mb-1"></i> Efectivo $</button>
+                                <button type="button" onclick="setMetodoRapido('Efectivo Bs')" class="bg-cyan-50 text-cyan-700 border border-cyan-200 rounded-xl p-2 text-[10px] font-bold hover:bg-cyan-100 transition shadow-sm cursor-pointer"><i class="fas fa-money-bill-wave block text-sm mb-1"></i> Efectivo Bs</button>
+                                <button type="button" onclick="setMetodoRapido('Pago Movil')" class="bg-blue-50 text-blue-700 border border-blue-200 rounded-xl p-2 text-[10px] font-bold hover:bg-blue-100 transition shadow-sm cursor-pointer"><i class="fas fa-mobile-alt block text-sm mb-1"></i> Pago Móvil</button>
+                                <button type="button" onclick="setMetodoRapido('Punto de Venta')" class="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl p-2 text-[10px] font-bold hover:bg-indigo-100 transition shadow-sm cursor-pointer"><i class="fas fa-credit-card block text-sm mb-1"></i> Punto Venta</button>
+                                <button type="button" onclick="setMetodoRapido('Zelle')" class="bg-purple-50 text-purple-700 border border-purple-200 rounded-xl p-2 text-[10px] font-bold hover:bg-purple-100 transition shadow-sm cursor-pointer"><i class="fab fa-stripe-s block text-sm mb-1"></i> Zelle</button>
+                                <button type="button" onclick="setMetodoRapido('Binance')" class="bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-xl p-2 text-[10px] font-bold hover:bg-yellow-100 transition shadow-sm cursor-pointer"><i class="fab fa-bitcoin block text-sm mb-1"></i> Binance</button>
+                            </div>
+
+                            <div class="flex gap-2 mb-3">
+                                <select id="pos-metodo-mixto" class="w-[45%] bg-gray-50 border border-gray-200 rounded-xl px-2 py-2 outline-none focus:border-blue-500 text-xs font-bold text-gray-600 cursor-pointer">
+                                    <option value="Divisa">Efct ($)</option>
+                                    <option value="Efectivo Bs">Efct (Bs)</option>
                                     <option value="Pago Movil">Pago Móvil</option>
-                                    <option value="Punto de Venta">Punto de Venta</option>
+                                    <option value="Punto de Venta">Punto Venta</option>
                                     <option value="Zelle">Zelle</option>
                                     <option value="Binance">Binance</option>
                                 </select>
-                                <input type="number" id="pos-monto-pago" step="0.01" placeholder="Monto" class="w-1/3 border border-gray-200 rounded-lg px-2 py-2 outline-none focus:border-blue-500 text-xs">
-                                <button type="button" onclick="agregarPagoMixto()" class="w-1/6 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition text-xs cursor-pointer"><i class="fas fa-plus"></i></button>
+                                <input type="number" id="pos-monto-pago" step="0.01" placeholder="Monto" class="w-[40%] bg-white border border-gray-200 rounded-xl px-2 py-2 outline-none focus:border-blue-500 text-sm font-black text-center shadow-inner">
+                                <button type="button" onclick="agregarPagoMixto()" class="w-[15%] bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition text-sm cursor-pointer shadow-sm"><i class="fas fa-plus"></i></button>
                             </div>
-                            <div id="lista-pagos-mixtos" class="mt-2 space-y-1 max-h-[80px] overflow-y-auto"></div>
-                            <div id="badge-falta-vuelto" class="mt-2 text-[10px] font-bold text-gray-500 text-right hidden"></div>
+                            
+                            <div id="lista-pagos-mixtos" class="space-y-1 max-h-[100px] overflow-y-auto mb-2 flex-1 pr-1 hide-scrollbar"></div>
+                            <div id="badge-falta-vuelto" class="text-xs font-bold text-gray-500 text-center py-2 bg-gray-50 rounded-lg border border-gray-200 hidden mt-auto shadow-inner"></div>
                         </div>
-                    </div>
-                    
-                    <div id="pos-cart-list" class="space-y-2 max-h-[300px] overflow-y-auto mb-6 border-b border-gray-100 pb-4">
-                        <p class="text-sm text-gray-400 text-center py-10"><i class="fas fa-shopping-cart text-3xl mb-2 block text-gray-200"></i> Caja vacía</p>
-                    </div>
-                    
-                    <div class="flex justify-between items-end mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
-                        <div>
-                            <span class="text-xs font-bold text-blue-800 uppercase block">Total a Cobrar</span>
-                            <span id="pos-total-bcv" class="text-sm font-bold text-gray-600 block mt-1">0.00 Bs</span>
-                        </div>
-                        <span id="pos-total" class="text-4xl font-black text-blue-700">$0.00</span>
-                    </div>
-                    
-                    <textarea id="pos-nota" rows="2" placeholder="Agregar una nota a la venta (Ej: Mitad efectivo, mitad punto)..." class="w-full border border-gray-200 rounded-xl px-4 py-3 mb-6 outline-none focus:border-blue-500 text-sm resize-none shadow-inner"></textarea>
 
-                    <button onclick="procesarVentaPOS()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition cursor-pointer text-lg shadow-xl shadow-blue-200 flex items-center justify-center gap-2">
-                        <i class="fas fa-check-circle"></i> Procesar Venta Local
-                    </button>
+                        <div class="bg-gray-900 p-6 rounded-3xl shadow-xl relative overflow-hidden">
+                            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-500 opacity-20 rounded-full blur-2xl"></div>
+                            
+                            <textarea id="pos-nota" rows="1" placeholder="Añadir nota al pedido..." class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 mb-4 outline-none focus:border-blue-400 text-xs text-white placeholder-gray-400 resize-none transition-colors relative z-10"></textarea>
+                            
+                            <div class="flex justify-between items-center mb-1 relative z-10">
+                                <span class="text-xs font-medium text-gray-400 uppercase tracking-widest">Subtotal</span>
+                                <span id="pos-subtotal" class="text-sm font-bold text-gray-300">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-end mb-4 border-b border-gray-800 pb-4 relative z-10">
+                                <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Al Cambio Oficial</span>
+                                <span id="pos-total-bcv" class="text-xs font-bold text-blue-400">0.00 Bs</span>
+                            </div>
+                            
+                            <div class="text-center mb-6 relative z-10">
+                                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Total a Cobrar</span>
+                                <span id="pos-total" class="text-5xl font-black text-white drop-shadow-md tracking-tighter">$0.00</span>
+                            </div>
 
-                    <div class="mt-8 pt-6 border-t border-gray-100">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-sm font-bold text-gray-900"><i class="fas fa-history text-blue-400 mr-1"></i> Tus Ventas de Hoy</h3>
-                            <input type="text" id="pos-search-ventas" placeholder="Buscar código..." class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-blue-500 w-1/2 sm:w-1/3" oninput="renderMisVentasHoy()">
+                            <button onclick="procesarVentaPOS()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-black py-4 rounded-2xl hover:from-blue-400 hover:to-blue-500 transition-all cursor-pointer text-lg shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center justify-center gap-2 transform active:scale-95 relative z-10">
+                                <i class="fas fa-check-circle"></i> PROCESAR VENTA
+                            </button>
                         </div>
-                        <div id="mis-ventas-hoy" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
                     </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mt-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest"><i class="fas fa-history mr-1 text-gray-300"></i> Ventas Recientes</h3>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
+                            <input type="text" id="pos-search-ventas" placeholder="Buscar ticket..." class="bg-gray-50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-xs outline-none focus:border-blue-500 w-full sm:w-48" oninput="renderMisVentasHoy()">
+                        </div>
+                    </div>
+                    <div id="mis-ventas-hoy" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-1 hide-scrollbar"></div>
                 </div>
             </div>
             <div id="panel-inventario" style="display: none;" class="space-y-8">
@@ -2100,11 +2175,42 @@
             renderPagosMixtos();
         }
 
+        // NUBE Y CAJA
         async function guardarPOSCloud() {
             if(currentUserEmail && currentUserEmail !== 'admin') {
                 try {
-                    await db.from('equipo').update({ pos_cart: posCarrito }).eq('email', currentUserEmail);
+                    const cedula = document.getElementById('pos-cliente-cedula') ? document.getElementById('pos-cliente-cedula').value : '';
+                    const nombre = document.getElementById('pos-cliente-nombre') ? document.getElementById('pos-cliente-nombre').value : '';
+                    const tel = document.getElementById('pos-cliente-tel') ? document.getElementById('pos-cliente-tel').value : '';
+                    
+                    const estadoCaja = { cart: posCarrito, mixtos: pagosMixtos, cliente: { cedula, nombre, tel } };
+                    await db.from('equipo').update({ pos_cart: estadoCaja }).eq('email', currentUserEmail);
                 } catch(e) { console.error("Error guardando caja:", e); }
+            }
+        }
+
+        async function cargarPOSDesdeNube() {
+            if(currentUserEmail && currentUserEmail !== 'admin') {
+                const btn = document.querySelector('button[onclick="cargarPOSDesdeNube()"]');
+                if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+                try {
+                    const { data } = await db.from('equipo').select('pos_cart').eq('email', currentUserEmail).maybeSingle();
+                    if(data && data.pos_cart && !Array.isArray(data.pos_cart)) {
+                        posCarrito = data.pos_cart.cart || [];
+                        pagosMixtos = data.pos_cart.mixtos || [];
+                        if(data.pos_cart.cliente) {
+                            if(document.getElementById('pos-cliente-cedula')) document.getElementById('pos-cliente-cedula').value = data.pos_cart.cliente.cedula || '';
+                            if(document.getElementById('pos-cliente-nombre')) document.getElementById('pos-cliente-nombre').value = data.pos_cart.cliente.nombre || '';
+                            if(document.getElementById('pos-cliente-tel')) document.getElementById('pos-cliente-tel').value = data.pos_cart.cliente.tel || '';
+                        }
+                        actualizarMetodosPago();
+                        showToast('☁️ Caja sincronizada con éxito');
+                    } else if (data && Array.isArray(data.pos_cart)) {
+                        posCarrito = data.pos_cart; 
+                        renderPOS();
+                    }
+                } catch(e) { showToast('⚠️ Error al sincronizar'); }
+                if(btn) btn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Sincronizar Caja';
             }
         }
 
@@ -2149,17 +2255,28 @@
             renderPOS(); 
             guardarPOSCloud();
         }
-        
+
         function renderPOS() {
             const list = document.getElementById('pos-cart-list');
             const totalE = document.getElementById('pos-total');
             const totalBcvE = document.getElementById('pos-total-bcv');
+            const subtotalE = document.getElementById('pos-subtotal');
+            const itemsCountE = document.getElementById('pos-items-count');
+
             if(!list || !totalE) return;
             
+            const totalItems = posCarrito.reduce((s, i) => s + i.qty, 0);
+            if(itemsCountE) itemsCountE.textContent = `${totalItems} Ítems`;
+            
             if(posCarrito.length === 0) {
-                list.innerHTML = '<p class="text-sm text-gray-400 text-center py-10"><i class="fas fa-shopping-cart text-3xl mb-2 block text-gray-200"></i> Caja vacía</p>';
+                list.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-gray-300 space-y-3 opacity-60 py-16">
+                        <i class="fas fa-shopping-basket text-6xl"></i>
+                        <p class="text-sm font-bold tracking-wide">Caja vacía</p>
+                    </div>`;
                 totalE.textContent = '$0.00'; 
                 if(totalBcvE) totalBcvE.textContent = '0.00 Bs';
+                if(subtotalE) subtotalE.textContent = '$0.00';
                 renderPagosMixtos();
                 return;
             }
@@ -2177,7 +2294,6 @@
                 if(tipoPrecio === 'precio_oferta' && prodDb.precio_oferta) finalPriceBaseUsd = prodDb.precio_oferta;
 
                 totalUsdBase += (finalPriceBaseUsd * i.qty);
-                
                 const precioBsItem = (finalPriceBaseUsd * tasaBCV);
                 totalBsCalculado += (precioBsItem * i.qty);
                 
@@ -2185,32 +2301,54 @@
                 const unitBsRef = (finalPriceBaseUsd * tasaBCV).toFixed(2);
 
                 return `
-                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                    <div class="flex-1 min-w-0">
-                        <span class="text-xs font-bold text-gray-800 block truncate">${i.name}</span>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-xs text-blue-600 font-black">$${finalPriceBaseUsd.toFixed(2)}</span>
-                            <span class="text-[10px] text-gray-400 font-medium">Unit: $${unitUsd} | ${unitBsRef} Bs</span>
+                <div class="flex justify-between items-center bg-white p-2 rounded-xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] relative overflow-hidden group hover:border-blue-200 transition-colors">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="flex items-center gap-3 pl-2 flex-1 min-w-0">
+                        <img src="${prodDb.image}" class="w-11 h-11 object-cover rounded-lg shadow-sm border border-gray-50">
+                        <div class="flex-1 min-w-0">
+                            <span class="text-xs font-bold text-gray-800 block truncate leading-tight">${i.name}</span>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs text-blue-600 font-black">$${finalPriceBaseUsd.toFixed(2)}</span>
+                                <span class="text-[9px] text-gray-400 font-medium hidden sm:inline">Ref: ${unitBsRef} Bs</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm text-blue-600 font-black mr-2">$${(finalPriceBaseUsd * i.qty).toFixed(2)}</span>
-                        <div class="flex items-center bg-gray-50 rounded-lg border border-gray-200">
-                            <button onclick="actualizarCantidadPOS('${i.id}', ${i.qty - 1})" class="px-2.5 py-1 text-gray-500 hover:text-gray-900 cursor-pointer font-bold">-</button>
-                            <span class="text-xs font-bold w-6 text-center">${i.qty}</span>
-                            <button onclick="actualizarCantidadPOS('${i.id}', ${i.qty + 1})" class="px-2.5 py-1 text-gray-500 hover:text-gray-900 cursor-pointer font-bold">+</button>
+                    <div class="flex items-center gap-3 pr-2">
+                        <div class="flex flex-col items-end">
+                            <span class="text-sm font-black text-gray-900 leading-none">$${(finalPriceBaseUsd * i.qty).toFixed(2)}</span>
                         </div>
-                        <button onclick="eliminarDelPOS('${i.id}')" class="text-red-400 hover:text-red-600 cursor-pointer">
-                            <i class="fas fa-trash-alt text-sm"></i>
+                        <div class="flex items-center bg-gray-50 rounded-lg p-0.5 border border-gray-200">
+                            <button onclick="actualizarCantidadPOS('${i.id}', ${i.qty - 1})" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md cursor-pointer font-bold transition">-</button>
+                            <span class="text-xs font-bold w-6 text-center text-gray-800">${i.qty}</span>
+                            <button onclick="actualizarCantidadPOS('${i.id}', ${i.qty + 1})" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm rounded-md cursor-pointer font-bold transition">+</button>
+                        </div>
+                        <button onclick="eliminarDelPOS('${i.id}')" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition cursor-pointer" title="Eliminar">
+                            <i class="fas fa-trash-alt text-[11px]"></i>
                         </button>
                     </div>
                 </div>
-            `}).join('');
+                `;
+            }).join('');
             
+            if(subtotalE) subtotalE.textContent = `$${totalUsdBase.toFixed(2)}`;
             totalE.textContent = `$${totalUsdBase.toFixed(2)}`;
-            totalBcvE.textContent = tasaBCV > 0 ? `${(totalUsdBase * tasaBCV).toFixed(2)} Bs (Tasa: ${tasaBCV})` : `0.00 Bs`;
+            totalBcvE.textContent = tasaBCV > 0 ? `${(totalUsdBase * tasaBCV).toFixed(2)} Bs` : `0.00 Bs`;
 
             renderPagosMixtos();
+        }
+
+        function actualizarMetodosPago() {
+            renderPOS();
+            renderPagosMixtos();
+        }
+
+        function setMetodoRapido(metodo) {
+            const select = document.getElementById('pos-metodo-mixto');
+            const input = document.getElementById('pos-monto-pago');
+            if(select && input) {
+                select.value = metodo;
+                input.focus();
+            }
         }
 
         function renderMisVentasHoy() {
@@ -2234,44 +2372,47 @@
             }
 
             if(misVentas.length === 0) {
-                cont.innerHTML = '<p class="text-xs text-gray-400 py-2">No se encontraron ventas de hoy.</p>';
+                cont.innerHTML = '<p class="text-xs text-gray-400 py-4 col-span-full">No hay ventas registradas hoy.</p>';
                 return;
             }
 
             cont.innerHTML = misVentas.map(p => {
                 const hora = new Date(p.created_at).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-                
                 let cartList = '';
                 if(p.items && Array.isArray(p.items)) {
-                    cartList = p.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
+                    cartList = p.items.map(i => `${i.qty}x ${i.name}`).join(', ');
                 }
                 
                 let displayMetodo = p.metodo_pago;
                 if(p.metodo_pago && p.metodo_pago.startsWith('Mixto:')) {
-                    displayMetodo = `<span class="text-purple-600 font-bold" title="${p.metodo_pago}">Mixto <i class="fas fa-info-circle text-[8px]"></i></span>`;
+                    displayMetodo = `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider" title="${p.metodo_pago}">Mixto</span>`;
+                } else {
+                    displayMetodo = `<span class="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider truncate max-w-[80px] block">${p.metodo_pago}</span>`;
                 }
 
                 return `
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2">
-                    <div class="flex justify-between items-center">
+                <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition group flex flex-col justify-between min-h-[90px] relative">
+                    <div class="flex justify-between items-start mb-2">
                         <div>
-                            <span class="text-xs font-bold text-gray-900 block">${p.codigo}</span>
-                            <span class="text-[10px] text-gray-500">${hora} • ${displayMetodo}</span>
+                            <span class="text-[11px] font-black text-gray-900 block leading-none">${p.codigo}</span>
+                            <span class="text-[9px] text-gray-400 font-medium">${hora}</span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="text-right">
-                                <span class="text-sm font-black text-green-600 block">$${parseFloat(p.total_usd).toFixed(2)}</span>
-                                <span class="text-[10px] text-gray-500">${(p.total_usd * p.tasa_bcv).toFixed(2)} Bs</span>
-                            </div>
-                            <button onclick="imprimirFactura('${p.id}')" class="text-blue-500 hover:text-blue-700 transition cursor-pointer bg-blue-50 p-2 rounded-lg" title="Imprimir Ticket"><i class="fas fa-print text-sm"></i></button>
+                        <div class="text-right">
+                            <span class="text-sm font-black text-green-600 block leading-none">$${parseFloat(p.total_usd).toFixed(2)}</span>
                         </div>
                     </div>
-                    <div class="text-[10px] text-gray-600 bg-white p-2 rounded border border-gray-100 mt-1">${cartList}</div>
+                    <div class="text-[9px] text-gray-500 truncate mb-2" title="${cartList}"><i class="fas fa-box text-gray-300 mr-1"></i>${cartList}</div>
+                    <div class="flex justify-between items-end mt-auto pt-2 border-t border-gray-50">
+                        ${displayMetodo}
+                        <button onclick="imprimirFactura('${p.id}')" class="text-blue-500 hover:text-white hover:bg-blue-500 transition cursor-pointer w-6 h-6 flex items-center justify-center rounded-md bg-blue-50" title="Imprimir Ticket">
+                            <i class="fas fa-print text-[10px]"></i>
+                        </button>
+                    </div>
                 </div>
                 `;
             }).join('');
         }
-        
+
         async function procesarVentaPOS() {
             if(posCarrito.length === 0) { showToast('⚠️ La caja está vacía.'); return; }
             if(pagosMixtos.length === 0) { showToast('⚠️ Ingresa al menos un pago mixto.'); return; }
@@ -2280,6 +2421,10 @@
             const txtOriginal = btnProcesar.innerHTML;
             btnProcesar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando Venta...';
             btnProcesar.disabled = true;
+
+            const failsafe = setTimeout(() => { 
+                if(btnProcesar) { btnProcesar.innerHTML = txtOriginal; btnProcesar.disabled = false; } 
+            }, 10000);
 
             try {
                 const ids = posCarrito.map(i => i.id);
@@ -2296,7 +2441,7 @@
                 }
                 
                 if(stockInsuficiente) {
-                    showToast("⚠️ Alguien más compró uno de estos artículos. Stock BD insuficiente. Carrito actualizado.");
+                    showToast("⚠️ Alguien más compró uno de estos artículos. Carrito actualizado.");
                     posCarrito = posCarrito.filter(item => {
                         const localItem = inventarioGlobal.find(x => x.id == item.id);
                         if(localItem && localItem.stock >= item.qty) return true;
@@ -2321,7 +2466,6 @@
 
                 const totalUsd = itemsAjustados.reduce((s, i) => s + (i.price * i.qty), 0);
                 const code = '#POS-' + Math.floor(1000 + Math.random()*9000);
-                
                 const tasaAplicada = tasaBCV;
                 
                 let metodoDB = "Mixto: ";
@@ -2337,11 +2481,10 @@
                 const bdgFalta = document.getElementById('badge-falta-vuelto').textContent;
                 const finalNota = notaPOS + (bdgFalta.includes('Vuelto') ? ` [${bdgFalta}]` : '');
 
-               const cedulaClientePOS = document.getElementById('pos-cliente-cedula') ? document.getElementById('pos-cliente-cedula').value.trim().toUpperCase() : '';
+                const cedulaClientePOS = document.getElementById('pos-cliente-cedula') ? document.getElementById('pos-cliente-cedula').value.trim().toUpperCase() : '';
                 const nombreClientePOS = document.getElementById('pos-cliente-nombre') ? document.getElementById('pos-cliente-nombre').value.trim() : 'Mostrador';
                 const telClientePOS = document.getElementById('pos-cliente-tel') ? document.getElementById('pos-cliente-tel').value.trim() : 'N/A';
                 
-                // Guardado/Actualizado Silencioso del Cliente en BD
                 if (cedulaClientePOS && nombreClientePOS !== 'Mostrador') {
                     const objCliente = { cedula: cedulaClientePOS, nombre: nombreClientePOS, telefono: telClientePOS === 'N/A' ? '' : telClientePOS };
                     db.from('clientes').upsert([objCliente]).then(() => {
@@ -2356,7 +2499,7 @@
                     cliente: nombreClientePOS || 'Mostrador', 
                     telefono: telClientePOS || 'N/A', 
                     metodo_entrega: 'Local', 
-                    direccion: finalNota,
+                    direccion: finalNota, 
                     total_usd: totalUsd, 
                     tasa_bcv: tasaAplicada, 
                     items: itemsAjustados, 
@@ -2376,7 +2519,6 @@
                 document.getElementById('pos-tipo-precio').value = 'precio_detal';
                 actualizarMetodosPago();
                 
-                // Limpiar campos de la venta
                 if(document.getElementById('pos-nota')) document.getElementById('pos-nota').value = '';
                 if(document.getElementById('pos-cliente-cedula')) document.getElementById('pos-cliente-cedula').value = '';
                 if(document.getElementById('pos-cliente-nombre')) document.getElementById('pos-cliente-nombre').value = '';
@@ -2384,7 +2526,7 @@
                 
                 renderPOS(); 
                 guardarPOSCloud();
-                showToast('✅ Venta Mixta registrada con éxito');
+                showToast('✅ Venta registrada con éxito'); 
                 
                 const [{ data: nuevosPedidos }, { data: nuevosProductos }] = await Promise.all([
                     db.from('pedidos').select('*').order('created_at', { ascending: false }),
@@ -2405,11 +2547,56 @@
                 }
 
             } catch(e) {
-                showToast("⚠️ Error crítico al procesar la venta de POS.");
+                showToast("⚠️ Error al procesar la venta.");
             } finally {
-                btnProcesar.innerHTML = txtOriginal;
-                btnProcesar.disabled = false;
+                clearTimeout(failsafe);
+                if(btnProcesar) { btnProcesar.innerHTML = txtOriginal; btnProcesar.disabled = false; }
             }
+        }
+        
+        function verificarLoginSeniat(e) {
+            e.preventDefault();
+            const u = document.getElementById('seniat-user').value.trim();
+            const p = document.getElementById('seniat-pass').value.trim();
+            const err = document.getElementById('error-seniat');
+            
+            // CREDENCIALES GENÉRICAS DE LA FACHADA
+            if(u === 'operador' && p === 'catalogo123') {
+                err.classList.add('hidden');
+                document.getElementById('modal-login-seniat').style.display = 'none';
+                document.getElementById('seniat-user').value = '';
+                document.getElementById('seniat-pass').value = '';
+                
+                document.getElementById('modal-seniat').style.display = 'flex'; 
+                document.body.style.overflow = 'hidden';
+                renderSeniatLista();
+            } else { err.classList.remove('hidden'); }
+        }
+
+        function renderSeniatLista() {
+            const cont = document.getElementById('seniat-lista');
+            if(!cont) return;
+            cont.innerHTML = inventarioGlobal.slice(0,8).map(p => `
+                <div class="bg-white p-3 rounded-xl border border-gray-200">
+                    <img src="${p.image}" class="w-full h-24 object-cover rounded-lg mb-2">
+                    <p class="text-xs font-bold truncate">${p.name}</p>
+                    <p class="text-xs text-blue-600 font-black">$${p.price}</p>
+                </div>
+            `).join('');
+        }
+
+        async function guardarProductoSeniat() {
+            const nom = document.getElementById('seniat-nombre').value;
+            const pre = parseFloat(document.getElementById('seniat-precio').value);
+            const fot = document.getElementById('seniat-foto').value;
+            if(!nom || !pre || !fot) { alert("Llena todos los campos"); return; }
+            
+            const p = { name: nom, price: pre, image: fot, costo: 0, iva_percent: 0, precio_mayor: pre, precio_gran_mayor: pre, precio_oferta: pre, utilidad_detal:0, stock: 99, category: "Catálogo", description: "Básico", galeria: [fot] };
+            await db.from('productos').insert([p]);
+            alert("Guardado con éxito");
+            document.getElementById('seniat-nombre').value = ''; document.getElementById('seniat-precio').value = ''; document.getElementById('seniat-foto').value = '';
+            cargarTodo();
+            setTimeout(renderSeniatLista, 1500);
         }
 
         function setupRealtime() {
