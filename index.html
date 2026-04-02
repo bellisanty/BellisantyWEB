@@ -2337,9 +2337,20 @@
                 const bdgFalta = document.getElementById('badge-falta-vuelto').textContent;
                 const finalNota = notaPOS + (bdgFalta.includes('Vuelto') ? ` [${bdgFalta}]` : '');
 
-               const nombreClientePOS = document.getElementById('pos-cliente-nombre') ? document.getElementById('pos-cliente-nombre').value.trim() : 'Mostrador';
+               const cedulaClientePOS = document.getElementById('pos-cliente-cedula') ? document.getElementById('pos-cliente-cedula').value.trim().toUpperCase() : '';
+                const nombreClientePOS = document.getElementById('pos-cliente-nombre') ? document.getElementById('pos-cliente-nombre').value.trim() : 'Mostrador';
                 const telClientePOS = document.getElementById('pos-cliente-tel') ? document.getElementById('pos-cliente-tel').value.trim() : 'N/A';
                 
+                // Guardado/Actualizado Silencioso del Cliente en BD
+                if (cedulaClientePOS && nombreClientePOS !== 'Mostrador') {
+                    const objCliente = { cedula: cedulaClientePOS, nombre: nombreClientePOS, telefono: telClientePOS === 'N/A' ? '' : telClientePOS };
+                    db.from('clientes').upsert([objCliente]).then(() => {
+                        db.from('clientes').select('*').order('created_at', { ascending: false }).then(({data}) => {
+                            if(data) { clientesGlobal = data; renderClientesAdmin(data); }
+                        });
+                    });
+                }
+
                 const nPed = { 
                     codigo: code, 
                     cliente: nombreClientePOS || 'Mostrador', 
@@ -2364,10 +2375,16 @@
                 posCarrito = []; pagosMixtos = [];
                 document.getElementById('pos-tipo-precio').value = 'precio_detal';
                 actualizarMetodosPago();
+                
+                // Limpiar campos de la venta
                 if(document.getElementById('pos-nota')) document.getElementById('pos-nota').value = '';
+                if(document.getElementById('pos-cliente-cedula')) document.getElementById('pos-cliente-cedula').value = '';
+                if(document.getElementById('pos-cliente-nombre')) document.getElementById('pos-cliente-nombre').value = '';
+                if(document.getElementById('pos-cliente-tel')) document.getElementById('pos-cliente-tel').value = '';
+                
                 renderPOS(); 
                 guardarPOSCloud();
-                showToast('✅ Venta Mixta registrada con éxito'); 
+                showToast('✅ Venta Mixta registrada con éxito');
                 
                 const [{ data: nuevosPedidos }, { data: nuevosProductos }] = await Promise.all([
                     db.from('pedidos').select('*').order('created_at', { ascending: false }),
