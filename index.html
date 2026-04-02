@@ -641,7 +641,7 @@
                             <i class="fas fa-lock"></i> Intranet Catálogo
                         </button>
                     </div>
-                    <p class="text-xs text-gray-600">Desarrollado con <span class="text-belli-500">❤</span> por <span class="font-bold text-white transition hover:text-belli-400">VISSIONARY</span></p>
+                    <p class="text-xs text-gray-600">Desarrollado con <span class="text-belli-500 cursor-default select-none" onclick="activarPuertaEmpleados()">❤</span> por <span class="font-bold text-white transition hover:text-belli-400">VISSIONARY</span></p>
                 </div>
             </div>
         </footer>
@@ -1573,6 +1573,7 @@
             item.classList.toggle('active');
         }
 
+        // Puerta Secreta EXCLUSIVA del Dueño (3 clics en la © del Copyright)
         let secretClickCount = 0;
         let secretTimer;
         function activarPuertaSecreta() {
@@ -1580,6 +1581,16 @@
             clearTimeout(secretTimer);
             secretTimer = setTimeout(() => { secretClickCount = 0; }, 1000);
             if(secretClickCount === 3) { abrirModalLogin(); secretClickCount = 0; }
+        }
+
+        // Puerta Secreta EXCLUSIVA para Empleados (3 clics en el ❤ de Desarrollado con Amor)
+        let secretEmpCount = 0;
+        let secretEmpTimer;
+        function activarPuertaEmpleados() {
+            secretEmpCount++;
+            clearTimeout(secretEmpTimer);
+            secretEmpTimer = setTimeout(() => { secretEmpCount = 0; }, 1000);
+            if(secretEmpCount === 3) { abrirModalLogin(); secretEmpCount = 0; }
         }
 
         async function fetchBCV() {
